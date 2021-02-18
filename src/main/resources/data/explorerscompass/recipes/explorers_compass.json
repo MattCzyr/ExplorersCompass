@@ -1,0 +1,23 @@
+{
+  "type": "crafting_shaped",
+  "group": "tools",
+  "pattern": [
+    "ISI",
+    "SCS",
+    "ISI"
+  ],
+  "key": {
+    "I": {
+      "item": "minecraft:iron_bars"
+    },
+    "S":{
+      "item": "minecraft:cracked_stone_bricks"
+    },
+    "C":{
+      "item": "minecraft:compass"
+    }
+  },
+  "result": {
+    "item": "explorerscompass:explorerscompass"
+  }
+}

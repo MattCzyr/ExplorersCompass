@@ -1,0 +1,39 @@
+{
+    "_comment": "Nature's Compass - Language File",
+    "_comment": "UNITED STATES - ENGLISH",
+
+    "_comment": "ITEMS",
+    "item.explorerscompass.explorerscompass": "Explorer's Compass",
+
+    "_comment": "STRINGS - BUTTONS",
+    "string.explorerscompass.back": "Back",
+    "string.explorerscompass.startSearch": "Start Search",
+    "string.explorerscompass.selectStructure": "Select Structure",
+    "string.explorerscompass.teleport": "Teleport",
+
+    "_comment": "STRINGS - GUI",
+    "string.explorerscompass.structure": "Structure",
+    "string.explorerscompass.category": "Category",
+    "string.explorerscompass.coordinates": "Coordinates",
+    "string.explorerscompass.distance": "Distance",
+    "string.explorerscompass.found": "Found",
+    "string.explorerscompass.notFound": "Not Found",
+    "string.explorerscompass.radius": "Radius",
+    "string.explorerscompass.samples": "Samples",
+    "string.explorerscompass.search": "Search",
+    "string.explorerscompass.searching": "Searching",
+    "string.explorerscompass.source": "Source",
+    "string.explorerscompass.status": "Status",
+
+    "_comment": "STRINGS - CATEGORIES",
+    "string.explorerscompass.raw_generation": "Raw Generation",
+    "string.explorerscompass.lakes": "Lakes",
+    "string.explorerscompass.local_modifications": "Local Modifications",
+    "string.explorerscompass.underground_structures": "Underground",
+    "string.explorerscompass.surface_structures": "Surface",
+    "string.explorerscompass.strongholds": "Strongholds",
+    "string.explorerscompass.underground_ores": "Ores",
+    "string.explorerscompass.underground_decoration": "Underground",
+    "string.explorerscompass.vegetal_decoration": "Vegetation",
+    "string.explorerscompass.top_layer_modification": "Top Layer"
+}
