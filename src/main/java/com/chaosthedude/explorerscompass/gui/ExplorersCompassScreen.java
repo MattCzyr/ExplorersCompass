@@ -1,12 +1,15 @@
 package com.chaosthedude.explorerscompass.gui;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.chaosthedude.explorerscompass.ExplorersCompass;
 import com.chaosthedude.explorerscompass.items.ExplorersCompassItem;
 import com.chaosthedude.explorerscompass.network.CompassSearchPacket;
 import com.chaosthedude.explorerscompass.network.TeleportPacket;
+import com.chaosthedude.explorerscompass.sorting.ISorting;
+import com.chaosthedude.explorerscompass.sorting.NameSorting;
 import com.chaosthedude.explorerscompass.util.CompassState;
 import com.chaosthedude.explorerscompass.util.StructureUtils;
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -33,10 +36,12 @@ public class ExplorersCompassScreen extends Screen {
 	private ItemStack stack;
 	private ExplorersCompassItem explorersCompass;
 	private Button startSearchButton;
+	private Button sortByButton;
 	private Button teleportButton;
 	private Button cancelButton;
 	private TransparentTextField searchTextField;
 	private StructureSearchList selectionList;
+	private ISorting sortingCategory;
 
 	public ExplorersCompassScreen(World world, PlayerEntity player, ItemStack stack, ExplorersCompassItem explorersCompass, List<Structure<?>> allowedStructures) {
 		super(new StringTextComponent(I18n.format("string.explorersCompass.selectStructure")));
@@ -47,6 +52,7 @@ public class ExplorersCompassScreen extends Screen {
 		this.allowedStructures = allowedStructures;
 
 		structuresMatchingSearch = new ArrayList<Structure<?>>(allowedStructures);
+		sortingCategory = new NameSorting();
 	}
 
 	@Override
@@ -132,7 +138,10 @@ public class ExplorersCompassScreen extends Screen {
 	}
 
 	public List<Structure<?>> sortStructures() {
-		return structuresMatchingSearch;
+		final List<Structure<?>> structures = structuresMatchingSearch;
+		Collections.sort(structures, new NameSorting());
+		Collections.sort(structures, sortingCategory);
+		return structures;
 	}
 
 	private void setupButtons() {
@@ -144,6 +153,11 @@ public class ExplorersCompassScreen extends Screen {
 			if (selectionList.hasSelection()) {
 				selectionList.getSelected().searchForBiome();
 			}
+		}));
+		sortByButton = addButton(new TransparentButton(10, 90, 110, 20, new StringTextComponent(I18n.format("string.explorerscompass.sortBy") + ": " + sortingCategory.getLocalizedName()), (onPress) -> {
+			sortingCategory = sortingCategory.next();
+			sortByButton.setMessage(new StringTextComponent(I18n.format("string.explorerscompass.sortBy") + ": " + sortingCategory.getLocalizedName()));
+			selectionList.refreshList();
 		}));
 		teleportButton = addButton(new TransparentButton(width - 120, 10, 110, 20, new TranslationTextComponent("string.explorerscompass.teleport"), (onPress) -> {
 			teleport();

@@ -17,11 +17,13 @@
     "string.explorerscompass.coordinates": "Coordinates",
     "string.explorerscompass.distance": "Distance",
     "string.explorerscompass.found": "Found",
+    "string.explorerscompass.name": "Name",
     "string.explorerscompass.notFound": "Not Found",
     "string.explorerscompass.radius": "Radius",
     "string.explorerscompass.samples": "Samples",
     "string.explorerscompass.search": "Search",
     "string.explorerscompass.searching": "Searching",
+    "string.explorerscompass.sortBy": "Sort By",
     "string.explorerscompass.source": "Source",
     "string.explorerscompass.status": "Status",
 
