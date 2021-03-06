@@ -2,13 +2,13 @@
   "type": "crafting_shaped",
   "group": "tools",
   "pattern": [
-    "ISI",
+    "WSW",
     "SCS",
-    "ISI"
+    "WSW"
   ],
   "key": {
-    "I": {
-      "item": "minecraft:iron_bars"
+    "W": {
+      "item": "minecraft:cobweb"
     },
     "S":{
       "item": "minecraft:cracked_stone_bricks"
