@@ -37,5 +37,25 @@
     "string.explorerscompass.underground_ores": "Ores",
     "string.explorerscompass.underground_decoration": "Underground",
     "string.explorerscompass.vegetal_decoration": "Vegetation",
-    "string.explorerscompass.top_layer_modification": "Top Layer"
+    "string.explorerscompass.top_layer_modification": "Top Layer",
+
+    "_comment": "STRINGS - STRUCTURES",
+    "structure.minecraft.bastion_remnant": "Bastion Remnant",
+    "structure.minecraft.buried_treasure": "Buried Treasure",
+    "structure.minecraft.desert_pyramid": "Desert Pyramid",
+    "structure.minecraft.endcity": "End City",
+    "structure.minecraft.fortress": "Fortress",
+    "structure.minecraft.igloo": "Igloo",
+    "structure.minecraft.jungle_pyramid": "Jungle Pyramid",
+    "structure.minecraft.mansion": "Mansion",
+    "structure.minecraft.mineshaft": "Mineshaft",
+    "structure.minecraft.monument": "Monument",
+    "structure.minecraft.nether_fossil": "Nether Fossil",
+    "structure.minecraft.ocean_ruin": "Ocean Ruin",
+    "structure.minecraft.pillager_outpost": "Pillager Outpost",
+    "structure.minecraft.ruined_portal": "Ruined Portal",
+    "structure.minecraft.shipwreck": "Shipwreck",
+    "structure.minecraft.stronghold": "Stronghold",
+    "structure.minecraft.swamp_hut": "Swamp Hut",
+    "structure.minecraft.village": "Village"
 }
