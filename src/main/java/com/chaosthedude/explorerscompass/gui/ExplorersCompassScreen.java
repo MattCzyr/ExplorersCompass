@@ -154,7 +154,7 @@ public class ExplorersCompassScreen extends Screen {
 				selectionList.getSelected().searchForBiome();
 			}
 		}));
-		sortByButton = addButton(new TransparentButton(10, 90, 110, 20, new StringTextComponent(I18n.format("string.explorerscompass.sortBy") + ": " + sortingCategory.getLocalizedName()), (onPress) -> {
+		sortByButton = addButton(new TransparentButton(10, 65, 110, 20, new StringTextComponent(I18n.format("string.explorerscompass.sortBy") + ": " + sortingCategory.getLocalizedName()), (onPress) -> {
 			sortingCategory = sortingCategory.next();
 			sortByButton.setMessage(new StringTextComponent(I18n.format("string.explorerscompass.sortBy") + ": " + sortingCategory.getLocalizedName()));
 			selectionList.refreshList();
