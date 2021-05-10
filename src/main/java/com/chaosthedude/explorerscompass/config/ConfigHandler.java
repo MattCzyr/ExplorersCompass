@@ -31,10 +31,10 @@ public class ConfigHandler {
 			desc = "Allows a player to teleport to a located structure when in creative mode, opped, or in cheat mode.";
 			allowTeleport = builder.comment(desc).define("allowTeleport", true);
 
-			desc = "The maximum radius that will be searched for a structure. Raising this value will increase search accuracy but will potentially make the process more resource .";
+			desc = "The maximum radius that will be searched for a structure. Raising this value will increase search accuracy but will potentially make the process more resource intensive.";
 			maxRadius = builder.comment(desc).defineInRange("maxRadius", 2500, 0, 1000000);
 
-			desc = "A list of structures that the compass will not be able to search for. Specify by resource location or numeric ID. Ex: [\"minecraft:desert\", \"minecraft:savanna\"]";
+			desc = "A list of structures that the compass will not be able to search for. Specify by resource location. Ex: [\"minecraft:stronghold\", \"minecraft:endcity\"]";
 			structureBlacklist = builder.comment(desc).define("structureBlacklist", new ArrayList<String>());
 
 			desc = "The maximum number of samples to be taken when searching for a structure.";
