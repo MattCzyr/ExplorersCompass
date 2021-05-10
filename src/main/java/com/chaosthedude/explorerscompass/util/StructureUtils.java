@@ -36,7 +36,7 @@ public class StructureUtils {
 	public static List<Structure<?>> getAllowedStructures() {
 		final List<Structure<?>> structures = new ArrayList<Structure<?>>();
 		for (Structure<?> structure : ForgeRegistries.STRUCTURE_FEATURES) {
-			if (structure != null && !structureIsBlacklisted(structure)) {
+			if (structure != null && getStructureForKey(structure.getRegistryName()) != null && !structureIsBlacklisted(structure)) {
 				structures.add(structure);
 			}
 		}
@@ -61,9 +61,9 @@ public class StructureUtils {
 	public static String getStructureName(Structure<?> structure) {
 		String name = structure.getStructureName();
 		if (ConfigHandler.CLIENT.translateStructureNames.get()) {
-			name = I18n.format(Util.makeTranslationKey("structure", ForgeRegistries.STRUCTURE_FEATURES.getKey(structure)));
+			name = I18n.format(Util.makeTranslationKey("structure", getKeyForStructure(structure)));
 		}
-		if (name.equals(Util.makeTranslationKey("structure", ForgeRegistries.STRUCTURE_FEATURES.getKey(structure))) || !ConfigHandler.CLIENT.translateStructureNames.get()) {
+		if (name.equals(Util.makeTranslationKey("structure", getKeyForStructure(structure))) || !ConfigHandler.CLIENT.translateStructureNames.get()) {
 			name = structure.getStructureName();
 			name = WordUtils.capitalize(name.replace('_', ' '));
 		}
@@ -77,7 +77,10 @@ public class StructureUtils {
 
 	@OnlyIn(Dist.CLIENT)
 	public static String getStructureSource(Structure<?> structure) {
-		String registryEntry = ForgeRegistries.STRUCTURE_FEATURES.getKey(structure).toString();
+		if (getKeyForStructure(structure) == null) {
+			return "";
+		}
+		String registryEntry = getKeyForStructure(structure).toString();
 		String modid = registryEntry.substring(0, registryEntry.indexOf(":"));
 		if (modid.equals("minecraft")) {
 			return "Minecraft";
@@ -91,7 +94,7 @@ public class StructureUtils {
 
 	public static boolean structureIsBlacklisted(Structure<?> structure) {
 		final List<String> structureBlacklist = ConfigHandler.GENERAL.structureBlacklist.get();
-		final ResourceLocation structureResourceLocation = ForgeRegistries.STRUCTURE_FEATURES.getKey(structure);
+		final ResourceLocation structureResourceLocation = getKeyForStructure(structure);
 		return structureBlacklist.contains(String.valueOf(StructureUtils.getKeyForStructure(structure))) || (structureResourceLocation != null && structureBlacklist.contains(structureResourceLocation.toString()));
 	}
 
