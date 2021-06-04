@@ -3,6 +3,7 @@ package com.chaosthedude.explorerscompass.gui;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import com.chaosthedude.explorerscompass.ExplorersCompass;
 import com.chaosthedude.explorerscompass.items.ExplorersCompassItem;
@@ -19,6 +20,7 @@ import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
@@ -29,7 +31,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 @OnlyIn(Dist.CLIENT)
 public class ExplorersCompassScreen extends Screen {
 
-	private World world;
+	public World world;
 	private PlayerEntity player;
 	private List<Structure<?>> allowedStructures;
 	private List<Structure<?>> structuresMatchingSearch;
@@ -43,16 +45,17 @@ public class ExplorersCompassScreen extends Screen {
 	private StructureSearchList selectionList;
 	private ISorting sortingCategory;
 
-	public ExplorersCompassScreen(World world, PlayerEntity player, ItemStack stack, ExplorersCompassItem explorersCompass, List<Structure<?>> allowedStructures) {
+	public ExplorersCompassScreen(World world, PlayerEntity player, ItemStack stack, ExplorersCompassItem explorersCompass, List<ResourceLocation> allowedStructures) {
 		super(new StringTextComponent(I18n.format("string.explorersCompass.selectStructure")));
 		this.world = world;
 		this.player = player;
 		this.stack = stack;
 		this.explorersCompass = explorersCompass;
-		this.allowedStructures = allowedStructures;
+		this.allowedStructures = new ArrayList<Structure<?>>();
+		loadAllowedStructures(allowedStructures);
 
-		structuresMatchingSearch = new ArrayList<Structure<?>>(allowedStructures);
-		sortingCategory = new NameSorting();
+		structuresMatchingSearch = new ArrayList<Structure<?>>(this.allowedStructures);
+		sortingCategory = new NameSorting(this);
 	}
 
 	@Override
@@ -75,6 +78,15 @@ public class ExplorersCompassScreen extends Screen {
 	public void tick() {
 		searchTextField.tick();
 		teleportButton.active = explorersCompass.getState(stack) == CompassState.FOUND;
+		
+		// Check if the allowed structure list has synced
+		 if (allowedStructures.size() != ExplorersCompass.allowedStructures.size()) {
+		 	children.remove(selectionList);
+		 	loadAllowedStructures(ExplorersCompass.allowedStructures);
+		 	structuresMatchingSearch = new ArrayList<Structure<?>>(allowedStructures);
+		 	selectionList = new StructureSearchList(this, minecraft, width + 110, height, 40, height, 45);
+		 	children.add(selectionList);
+		 }
 	}
 
 	@Override
@@ -118,7 +130,7 @@ public class ExplorersCompassScreen extends Screen {
 	}
 
 	public void searchForStructure(Structure<?> structure) {
-		ExplorersCompass.network.sendToServer(new CompassSearchPacket(StructureUtils.getKeyForStructure(structure), player.getPosition()));
+		ExplorersCompass.network.sendToServer(new CompassSearchPacket(StructureUtils.getKeyForStructure(world, structure), player.getPosition()));
 		minecraft.displayGuiScreen(null);
 	}
 
@@ -130,7 +142,7 @@ public class ExplorersCompassScreen extends Screen {
 	public void processSearchTerm() {
 		structuresMatchingSearch = new ArrayList<Structure<?>>();
 		for (Structure<?> structure : allowedStructures) {
-			if (StructureUtils.getStructureName(structure).toLowerCase().contains(searchTextField.getText().toLowerCase())) {
+			if (StructureUtils.getStructureName(world, structure).toLowerCase().contains(searchTextField.getText().toLowerCase())) {
 				structuresMatchingSearch.add(structure);
 			}
 		}
@@ -139,7 +151,7 @@ public class ExplorersCompassScreen extends Screen {
 
 	public List<Structure<?>> sortStructures() {
 		final List<Structure<?>> structures = structuresMatchingSearch;
-		Collections.sort(structures, new NameSorting());
+		Collections.sort(structures, new NameSorting(this));
 		Collections.sort(structures, sortingCategory);
 		return structures;
 	}
@@ -172,5 +184,15 @@ public class ExplorersCompassScreen extends Screen {
 		searchTextField = new TransparentTextField(font, 130, 10, 140, 20, new TranslationTextComponent("string.explorerscompass.search"));
 		children.add(searchTextField);
 	}
+	
+	private void loadAllowedStructures(List<ResourceLocation> allowedStructureKeys) {
+ 		this.allowedStructures = new ArrayList<Structure<?>>();
+ 		for (ResourceLocation structureKey : allowedStructureKeys) {
+ 			Optional<Structure<?>> optionalStructure = StructureUtils.getStructureForKey(world, structureKey);
+ 			if (optionalStructure.isPresent()) {
+ 				this.allowedStructures.add(optionalStructure.get());
+ 			}
+ 		}
+ 	}
 
 }

@@ -1,5 +1,7 @@
 package com.chaosthedude.explorerscompass.items;
 
+import java.util.Optional;
+
 import com.chaosthedude.explorerscompass.ExplorersCompass;
 import com.chaosthedude.explorerscompass.gui.GuiWrapper;
 import com.chaosthedude.explorerscompass.network.RequestSyncPacket;
@@ -17,6 +19,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraft.world.gen.feature.structure.Structure;
 import net.minecraft.world.server.ServerWorld;
 
 public class ExplorersCompassItem extends Item {
@@ -55,7 +58,10 @@ public class ExplorersCompassItem extends Item {
 		setSearching(stack, structureKey, player);
 		setSearchRadius(stack, 0, player);
 		if (world instanceof ServerWorld) {
-			StructureUtils.searchForStructure((ServerWorld) world, player, stack, StructureUtils.getStructureForKey(structureKey), pos);
+			Optional<Structure<?>> optionalStructure = StructureUtils.getStructureForKey(world, structureKey);
+			if (optionalStructure.isPresent()) {
+				StructureUtils.searchForStructure((ServerWorld) world, player, stack, optionalStructure.get(), pos);
+			}
 		}
 	}
 

@@ -1,5 +1,6 @@
 package com.chaosthedude.explorerscompass;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -13,7 +14,6 @@ import com.chaosthedude.explorerscompass.network.RequestSyncPacket;
 import com.chaosthedude.explorerscompass.network.SyncPacket;
 import com.chaosthedude.explorerscompass.network.TeleportPacket;
 import com.chaosthedude.explorerscompass.util.CompassState;
-import com.chaosthedude.explorerscompass.util.StructureUtils;
 
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
@@ -25,7 +25,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.gen.feature.structure.Structure;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.MinecraftForge;
@@ -50,7 +49,7 @@ public class ExplorersCompass {
 	public static ExplorersCompassItem explorersCompass;
 
 	public static boolean canTeleport;
-	public static List<Structure<?>> allowedStructures;
+	public static List<ResourceLocation> allowedStructures;
 
 	public static ExplorersCompass instance;
 
@@ -77,7 +76,7 @@ public class ExplorersCompass {
 		// Client packet
 		network.registerMessage(3, SyncPacket.class, SyncPacket::toBytes, SyncPacket::new, SyncPacket::handle);
 
-		allowedStructures = StructureUtils.getAllowedStructures();
+		allowedStructures = new ArrayList<ResourceLocation>(); // StructureUtils.getAllowedStructures();
 	}
 	
 	@OnlyIn(Dist.CLIENT)

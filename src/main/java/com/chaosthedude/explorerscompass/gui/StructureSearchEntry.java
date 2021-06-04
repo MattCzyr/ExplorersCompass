@@ -33,8 +33,8 @@ public class StructureSearchEntry extends AbstractListEntry<StructureSearchEntry
 
 	@Override
 	public void render(MatrixStack matrixStack, int par1, int par2, int par3, int par4, int par5, int par6, int par7, boolean par8, float par9) {
-		mc.fontRenderer.func_243248_b(matrixStack, new StringTextComponent(StructureUtils.getStructureName(structure)), par3 + 1, par2 + 1, 0xffffff);
-		mc.fontRenderer.func_243248_b(matrixStack, new StringTextComponent(I18n.format("string.explorerscompass.source") + ": " + StructureUtils.getStructureSource(structure)), par3 + 1, par2 + mc.fontRenderer.FONT_HEIGHT + 3, 0x808080);
+		mc.fontRenderer.func_243248_b(matrixStack, new StringTextComponent(StructureUtils.getStructureName(guiExplorersCompass.world, structure)), par3 + 1, par2 + 1, 0xffffff);
+		mc.fontRenderer.func_243248_b(matrixStack, new StringTextComponent(I18n.format("string.explorerscompass.source") + ": " + StructureUtils.getStructureSource(guiExplorersCompass.world, structure)), par3 + 1, par2 + mc.fontRenderer.FONT_HEIGHT + 3, 0x808080);
 		mc.fontRenderer.func_243248_b(matrixStack, new StringTextComponent(I18n.format("string.explorerscompass.category") + ": " + I18n.format("string.explorerscompass." + structure.getDecorationStage().toString().toLowerCase())), par3 + 1, par2 + mc.fontRenderer.FONT_HEIGHT + 14, 0x808080);
 		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 	}

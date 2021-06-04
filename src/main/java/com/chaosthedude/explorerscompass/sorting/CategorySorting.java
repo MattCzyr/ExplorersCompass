@@ -1,9 +1,18 @@
 package com.chaosthedude.explorerscompass.sorting;
 
+import com.chaosthedude.explorerscompass.gui.ExplorersCompassScreen;
+
 import net.minecraft.client.resources.I18n;
 import net.minecraft.world.gen.feature.structure.Structure;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
-public class CategorySorting implements ISorting {
+@OnlyIn(Dist.CLIENT)
+public class CategorySorting extends AbstractSorting {
+	
+	public CategorySorting(ExplorersCompassScreen parentScreen) {
+		super(parentScreen);
+	}
 	
 	@Override
 	public int compare(Structure<?> structure1, Structure<?> structure2) {
@@ -17,7 +26,7 @@ public class CategorySorting implements ISorting {
 
 	@Override
 	public ISorting next() {
-		return new NameSorting();
+		return new NameSorting(parentScreen);
 	}
 
 	@Override
