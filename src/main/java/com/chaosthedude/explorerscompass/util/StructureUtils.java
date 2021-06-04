@@ -94,8 +94,30 @@ public class StructureUtils {
 
 	public static boolean structureIsBlacklisted(Structure<?> structure) {
 		final List<String> structureBlacklist = ConfigHandler.GENERAL.structureBlacklist.get();
-		final ResourceLocation structureResourceLocation = getKeyForStructure(structure);
-		return structureBlacklist.contains(String.valueOf(StructureUtils.getKeyForStructure(structure))) || (structureResourceLocation != null && structureBlacklist.contains(structureResourceLocation.toString()));
+		for (String structureKey : structureBlacklist) {
+			if (getKeyForStructure(structure).toString().matches(convertToRegex(structureKey))) {
+				return true;
+			}
+		}
+		return false;
 	}
+	
+	private static String convertToRegex(String glob) {
+ 		String regex = "^";
+ 		for (char i = 0; i < glob.length(); i++) {
+ 			char c = glob.charAt(i);
+ 			if (c == '*') {
+ 				regex += ".*";
+ 			} else if (c == '?') {
+ 				regex += ".";
+ 			} else if (c == '.') {
+ 				regex += "\\.";
+ 			} else {
+ 				regex += c;
+ 			}
+ 		}
+ 		regex += "$";
+ 		return regex;
+ 	}
 
 }

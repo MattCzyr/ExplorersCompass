@@ -34,7 +34,7 @@ public class ConfigHandler {
 			desc = "The maximum radius that will be searched for a structure. Raising this value will increase search accuracy but will potentially make the process more resource intensive.";
 			maxRadius = builder.comment(desc).defineInRange("maxRadius", 2500, 0, 1000000);
 
-			desc = "A list of structures that the compass will not be able to search for. Specify by resource location. Ex: [\"minecraft:stronghold\", \"minecraft:endcity\"]";
+			desc = "A list of structures that the compass will not be able to search for, specified by resource location. The wildcard character * can be used to match any number of characters, and ? can be used to match one character. Ex: [\"minecraft:stronghold\", \"minecraft:endcity\", \"minecraft:*village*\"]";
 			structureBlacklist = builder.comment(desc).define("structureBlacklist", new ArrayList<String>());
 
 			desc = "The maximum number of samples to be taken when searching for a structure.";
