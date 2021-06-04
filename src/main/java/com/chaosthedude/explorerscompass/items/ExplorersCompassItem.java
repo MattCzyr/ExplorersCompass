@@ -42,9 +42,18 @@ public class ExplorersCompassItem extends Item {
 
 		return new ActionResult<ItemStack>(ActionResultType.PASS, player.getHeldItem(hand));
 	}
+	
+	@Override
+ 	public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged) {
+ 		if (getState(oldStack) == getState(newStack)) {
+ 			return false;
+ 		}
+ 		return super.shouldCauseReequipAnimation(oldStack, newStack, slotChanged);
+ 	}
 
 	public void searchForStructure(World world, PlayerEntity player, ResourceLocation structureKey, BlockPos pos, ItemStack stack) {
 		setSearching(stack, structureKey, player);
+		setSearchRadius(stack, 0, player);
 		if (world instanceof ServerWorld) {
 			StructureUtils.searchForStructure((ServerWorld) world, player, stack, StructureUtils.getStructureForKey(structureKey), pos);
 		}

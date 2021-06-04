@@ -39,6 +39,9 @@ public class ClientEventHandler {
 
 					RenderUtils.drawConfiguredStringOnHUD(matrixStack, I18n.format("string.explorerscompass.structure"), 5, 5, 0xFFFFFF, 3);
 					RenderUtils.drawConfiguredStringOnHUD(matrixStack, StructureUtils.getStructureName(compass.getStructureKey(stack)), 5, 5, 0xAAAAAA, 4);
+					
+					RenderUtils.drawConfiguredStringOnHUD(matrixStack, I18n.format("string.explorerscompass.radius"), 5, 5, 0xFFFFFF, 6);
+ 					RenderUtils.drawConfiguredStringOnHUD(matrixStack, String.valueOf(compass.getSearchRadius(stack)), 5, 5, 0xAAAAAA, 7);
 				} else if (compass.getState(stack) == CompassState.FOUND) {
 					RenderUtils.drawConfiguredStringOnHUD(matrixStack, I18n.format("string.explorerscompass.status"), 5, 5, 0xFFFFFF, 0);
 					RenderUtils.drawConfiguredStringOnHUD(matrixStack, I18n.format("string.explorerscompass.found"), 5, 5, 0xAAAAAA, 1);

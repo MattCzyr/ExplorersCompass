@@ -4,7 +4,6 @@ import com.chaosthedude.explorerscompass.ExplorersCompass;
 import com.chaosthedude.explorerscompass.config.ConfigHandler;
 import com.chaosthedude.explorerscompass.items.ExplorersCompassItem;
 
-import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Direction;
@@ -40,6 +39,7 @@ public class StructureSearchWorker implements WorldWorkerManager.IWorker {
 	public SharedSeedRandom rand;
 	public int x;
 	public int z;
+	public int lastRadiusThreshold;
 
 	public StructureSearchWorker(ServerWorld world, PlayerEntity player, ItemStack stack, Structure<?> structure, BlockPos startPos) {
 		this.world = world;
@@ -59,6 +59,7 @@ public class StructureSearchWorker implements WorldWorkerManager.IWorker {
 				|| !world.getChunkProvider().getChunkGenerator().getBiomeProvider().hasStructure(structure);
 		structureKey = ForgeRegistries.STRUCTURE_FEATURES.getKey(structure);
 		rand = new SharedSeedRandom();
+		lastRadiusThreshold = 0;
 	}
 
 	public void start() {
@@ -195,6 +196,12 @@ public class StructureSearchWorker implements WorldWorkerManager.IWorker {
 				}
 				length = 0;
 			}
+			
+			int radius = getRadius();
+ 			if (radius > 250 && radius / 250 > lastRadiusThreshold) {
+ 				((ExplorersCompassItem) stack.getItem()).setSearchRadius(stack, roundRadius(radius, 250), player);
+ 				lastRadiusThreshold = radius / 250;
+ 			}
 		}
 		if (hasWork()) {
 			return true;
@@ -210,7 +217,7 @@ public class StructureSearchWorker implements WorldWorkerManager.IWorker {
 				((ExplorersCompassItem) stack.getItem()).setFound(stack, x, z, samples, player);
 			} else {
 				ExplorersCompass.LOGGER.info("Search failed: " + getRadius() + " radius, " + samples + " samples");
-				((ExplorersCompassItem) stack.getItem()).setNotFound(stack, player, getRadius(), samples);
+				((ExplorersCompassItem) stack.getItem()).setNotFound(stack, player, roundRadius(getRadius(), 250), samples);
 			}
 		} else {
 			ExplorersCompass.LOGGER.error("Invalid compass after search");
@@ -221,5 +228,9 @@ public class StructureSearchWorker implements WorldWorkerManager.IWorker {
 	private int getRadius() {
 		return StructureUtils.getDistanceToStructure(startPos, x, z);
 	}
+	
+	private int roundRadius(int radius, int roundTo) {
+ 		return ((int) radius / roundTo) * roundTo;
+ 	}
 
 }
