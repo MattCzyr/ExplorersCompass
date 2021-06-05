@@ -65,6 +65,9 @@ public class StructureUtils {
 		}
 		if (name.equals(Util.makeTranslationKey("structure", getKeyForStructure(structure))) || !ConfigHandler.CLIENT.translateStructureNames.get()) {
 			name = structure.getStructureName();
+			if (name.contains(":")) {
+				name = name.substring(name.indexOf(":") + 1);
+			}
 			name = WordUtils.capitalize(name.replace('_', ' '));
 		}
 		return name;
