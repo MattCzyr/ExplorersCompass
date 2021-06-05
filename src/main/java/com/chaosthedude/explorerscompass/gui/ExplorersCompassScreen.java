@@ -66,7 +66,7 @@ public class ExplorersCompassScreen extends Screen {
 		setupButtons();
 		setupTextFields();
 		if (selectionList == null) {
-			selectionList = new StructureSearchList(this, minecraft, width + 110, height, 40, height, 45);
+			selectionList = new StructureSearchList(this, minecraft, width + 110, height, 40, height, 36);
 		}
 		children.add(selectionList);
 	}

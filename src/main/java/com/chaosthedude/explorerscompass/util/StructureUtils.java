@@ -59,12 +59,12 @@ public class StructureUtils {
 
 	@OnlyIn(Dist.CLIENT)
 	public static String getStructureName(Structure<?> structure) {
-		String name = structure.getStructureName();
+		String name = getKeyForStructure(structure).toString();
 		if (ConfigHandler.CLIENT.translateStructureNames.get()) {
 			name = I18n.format(Util.makeTranslationKey("structure", getKeyForStructure(structure)));
 		}
 		if (name.equals(Util.makeTranslationKey("structure", getKeyForStructure(structure))) || !ConfigHandler.CLIENT.translateStructureNames.get()) {
-			name = structure.getStructureName();
+			name = getKeyForStructure(structure).toString();
 			if (name.contains(":")) {
 				name = name.substring(name.indexOf(":") + 1);
 			}
