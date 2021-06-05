@@ -2,7 +2,10 @@ package com.chaosthedude.explorerscompass.sorting;
 
 import net.minecraft.client.resources.I18n;
 import net.minecraft.world.gen.feature.structure.Structure;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
+@OnlyIn(Dist.CLIENT)
 public class CategorySorting implements ISorting {
 	
 	@Override
