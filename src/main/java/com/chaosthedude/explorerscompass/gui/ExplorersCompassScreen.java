@@ -169,7 +169,7 @@ public class ExplorersCompassScreen extends Screen {
 	}
 
 	private void setupTextFields() {
-		searchTextField = new TransparentTextField(font, 130, 10, 140, 20, new TranslationTextComponent("string.explorerscompass.search"));
+		searchTextField = new TransparentTextField(font, width / 2 - 82, 10, 140, 20, new TranslationTextComponent("string.explorerscompass.search"));
 		children.add(searchTextField);
 	}
 
