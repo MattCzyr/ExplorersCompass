@@ -135,6 +135,7 @@ public class StructureSearchWorker implements WorldWorkerManager.IWorker {
 			if (found) {
 				ExplorersCompass.LOGGER.info("Search succeeded: " + getRadius() + " radius, " + samples + " samples");
 				((ExplorersCompassItem) stack.getItem()).setFound(stack, x, z, samples, player);
+				((ExplorersCompassItem) stack.getItem()).setDisplayCoordinates(stack, ConfigHandler.GENERAL.displayCoordinates.get());
 			} else {
 				ExplorersCompass.LOGGER.info("Search failed: " + getRadius() + " radius, " + samples + " samples");
 				((ExplorersCompassItem) stack.getItem()).setNotFound(stack, player, roundRadius(getRadius(), 250), samples);

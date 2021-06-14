@@ -49,11 +49,13 @@ public class ClientEventHandler {
 					RenderUtils.drawConfiguredStringOnHUD(matrixStack, I18n.format("string.explorerscompass.structure"), 5, 5, 0xFFFFFF, 3);
 					RenderUtils.drawConfiguredStringOnHUD(matrixStack, StructureUtils.getStructureName(compass.getStructureKey(stack)), 5, 5, 0xAAAAAA, 4);
 
-					RenderUtils.drawConfiguredStringOnHUD(matrixStack, I18n.format("string.explorerscompass.coordinates"), 5, 5, 0xFFFFFF, 6);
-					RenderUtils.drawConfiguredStringOnHUD(matrixStack, compass.getFoundStructureX(stack) + ", " + compass.getFoundStructureZ(stack), 5, 5, 0xAAAAAA, 7);
+					if (compass.shouldDisplayCoordinates(stack)) {
+						RenderUtils.drawConfiguredStringOnHUD(matrixStack, I18n.format("string.explorerscompass.coordinates"), 5, 5, 0xFFFFFF, 6);
+						RenderUtils.drawConfiguredStringOnHUD(matrixStack, compass.getFoundStructureX(stack) + ", " + compass.getFoundStructureZ(stack), 5, 5, 0xAAAAAA, 7);
 
-					RenderUtils.drawConfiguredStringOnHUD(matrixStack, I18n.format("string.explorerscompass.distance"), 5, 5, 0xFFFFFF, 9);
-					RenderUtils.drawConfiguredStringOnHUD(matrixStack, String.valueOf(StructureUtils.getDistanceToStructure(player, compass.getFoundStructureX(stack), compass.getFoundStructureZ(stack))), 5, 5, 0xAAAAAA, 10);
+						RenderUtils.drawConfiguredStringOnHUD(matrixStack, I18n.format("string.explorerscompass.distance"), 5, 5, 0xFFFFFF, 9);
+						RenderUtils.drawConfiguredStringOnHUD(matrixStack, String.valueOf(StructureUtils.getDistanceToStructure(player, compass.getFoundStructureX(stack), compass.getFoundStructureZ(stack))), 5, 5, 0xAAAAAA, 10);
+					}
 				} else if (compass.getState(stack) == CompassState.NOT_FOUND) {
 					RenderUtils.drawConfiguredStringOnHUD(matrixStack, I18n.format("string.explorerscompass.status"), 5, 5, 0xFFFFFF, 0);
 					RenderUtils.drawConfiguredStringOnHUD(matrixStack, I18n.format("string.explorerscompass.notFound"), 5, 5, 0xAAAAAA, 1);

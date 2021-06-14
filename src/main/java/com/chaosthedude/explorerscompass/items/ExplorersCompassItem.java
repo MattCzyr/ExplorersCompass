@@ -132,6 +132,12 @@ public class ExplorersCompassItem extends Item {
 			stack.getTag().putInt("Samples", samples);
 		}
 	}
+	
+	public void setDisplayCoordinates(ItemStack stack, boolean displayPosition) {
+		if (ItemUtils.verifyNBT(stack)) {
+			stack.getTag().putBoolean("DisplayCoordinates", displayPosition);
+		}
+	}
 
 	public CompassState getState(ItemStack stack) {
 		if (ItemUtils.verifyNBT(stack)) {
@@ -183,6 +189,14 @@ public class ExplorersCompassItem extends Item {
 
 	public int getDistanceToBiome(PlayerEntity player, ItemStack stack) {
 		return StructureUtils.getDistanceToStructure(player, getFoundStructureX(stack), getFoundStructureZ(stack));
+	}
+	
+	public boolean shouldDisplayCoordinates(ItemStack stack) {
+		if (ItemUtils.verifyNBT(stack)) {
+			return stack.getTag().getBoolean("DisplayCoordinates");
+		}
+
+		return true;
 	}
 
 }

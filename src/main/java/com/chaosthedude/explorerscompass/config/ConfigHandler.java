@@ -20,6 +20,7 @@ public class ConfigHandler {
 
 	public static class General {
 		public final ForgeConfigSpec.BooleanValue allowTeleport;
+		public final ForgeConfigSpec.BooleanValue displayCoordinates;
 		public final ForgeConfigSpec.IntValue maxRadius;
 		public final ForgeConfigSpec.ConfigValue<List<String>> structureBlacklist;
 		public final ForgeConfigSpec.IntValue maxSamples;
@@ -30,6 +31,9 @@ public class ConfigHandler {
 
 			desc = "Allows a player to teleport to a located structure when in creative mode, opped, or in cheat mode.";
 			allowTeleport = builder.comment(desc).define("allowTeleport", true);
+			
+			desc = "Allows players to view the precise coordinates and distance of a located structure on the HUD, rather than relying on the direction the compass is pointing.";
+			displayCoordinates = builder.comment(desc).define("displayCoordinates", true);
 
 			desc = "The maximum radius that will be searched for a structure. Raising this value will increase search accuracy but will potentially make the process more resource intensive.";
 			maxRadius = builder.comment(desc).defineInRange("maxRadius", 5000, 0, 1000000);
