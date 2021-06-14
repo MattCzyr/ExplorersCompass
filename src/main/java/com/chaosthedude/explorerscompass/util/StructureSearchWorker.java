@@ -119,7 +119,9 @@ public class StructureSearchWorker implements WorldWorkerManager.IWorker {
 			
 			int radius = getRadius();
  			if (radius > 250 && radius / 250 > lastRadiusThreshold) {
- 				((ExplorersCompassItem) stack.getItem()).setSearchRadius(stack, roundRadius(radius, 250), player);
+ 				if (!stack.isEmpty() && stack.getItem() == ExplorersCompass.explorersCompass) {
+ 					((ExplorersCompassItem) stack.getItem()).setSearchRadius(stack, roundRadius(radius, 250), player);
+ 				}
  				lastRadiusThreshold = radius / 250;
  			}
 		}
