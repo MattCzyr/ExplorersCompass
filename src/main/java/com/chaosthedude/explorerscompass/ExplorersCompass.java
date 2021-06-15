@@ -1,6 +1,9 @@
 package com.chaosthedude.explorerscompass;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -13,7 +16,6 @@ import com.chaosthedude.explorerscompass.network.RequestSyncPacket;
 import com.chaosthedude.explorerscompass.network.SyncPacket;
 import com.chaosthedude.explorerscompass.network.TeleportPacket;
 import com.chaosthedude.explorerscompass.util.CompassState;
-import com.chaosthedude.explorerscompass.util.StructureUtils;
 
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
@@ -51,6 +53,7 @@ public class ExplorersCompass {
 
 	public static boolean canTeleport;
 	public static List<Structure<?>> allowedStructures;
+	public static Map<Structure<?>, List<ResourceLocation>> dimensionsForAllowedStructures;
 
 	public static ExplorersCompass instance;
 
@@ -77,7 +80,8 @@ public class ExplorersCompass {
 		// Client packet
 		network.registerMessage(3, SyncPacket.class, SyncPacket::toBytes, SyncPacket::new, SyncPacket::handle);
 
-		allowedStructures = StructureUtils.getAllowedStructures();
+		allowedStructures = new ArrayList<Structure<?>>();
+		dimensionsForAllowedStructures = new HashMap<Structure<?>, List<ResourceLocation>>();
 	}
 	
 	@OnlyIn(Dist.CLIENT)

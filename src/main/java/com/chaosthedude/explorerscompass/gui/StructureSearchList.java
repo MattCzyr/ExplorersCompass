@@ -78,6 +78,7 @@ public class StructureSearchList extends ExtendedList<StructureSearchEntry> {
 			addEntry(new StructureSearchEntry(this, structure));
 		}
 		selectStructure(null);
+		setScrollAmount(0);
 	}
 
 	public void selectStructure(StructureSearchEntry entry) {

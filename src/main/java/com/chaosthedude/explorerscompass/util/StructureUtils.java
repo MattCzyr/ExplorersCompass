@@ -1,7 +1,9 @@
 package com.chaosthedude.explorerscompass.util;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.apache.commons.lang3.text.WordUtils;
@@ -15,6 +17,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.structure.Structure;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.api.distmarker.Dist;
@@ -95,6 +98,35 @@ public class StructureUtils {
 		return modid;
 	}
 
+	public static List<ResourceLocation> getStructureDimensions(ServerWorld serverWorld, Structure<?> structure) {
+		final List<ResourceLocation> dimensions = new ArrayList<>();
+		for (ServerWorld world : serverWorld.getServer().getWorlds()) {
+				if (world.getChunkProvider().getChunkGenerator().getBiomeProvider().hasStructure(structure))
+					dimensions.add(world.getDimensionKey().getLocation());
+		}
+		return dimensions;
+	}
+
+	public static Map<Structure<?>, List<ResourceLocation>> getDimensionsForAllowedStructures(ServerWorld serverWorld) {
+		Map<Structure<?>, List<ResourceLocation>> dimensionsForAllowedStructures = new HashMap<Structure<?>, List<ResourceLocation>>();
+		for (Structure<?> structure : getAllowedStructures()) {
+			dimensionsForAllowedStructures.put(structure, getStructureDimensions(serverWorld, structure));
+		}
+		return dimensionsForAllowedStructures;
+	}
+
+	@OnlyIn(Dist.CLIENT)
+	public static String structureDimensionsToString(List<ResourceLocation> dimensions) {
+		String str = "";
+		if (dimensions != null && dimensions.size() > 0) {
+			str = getDimensionName(dimensions.get(0));
+			for (int i = 1; i < dimensions.size(); i++) {
+				str += ", " + getDimensionName(dimensions.get(i));
+			}
+		}
+		return str;
+	}
+
 	public static boolean structureIsBlacklisted(Structure<?> structure) {
 		final List<String> structureBlacklist = ConfigHandler.GENERAL.structureBlacklist.get();
 		for (String structureKey : structureBlacklist) {
@@ -104,7 +136,20 @@ public class StructureUtils {
 		}
 		return false;
 	}
-	
+
+	@OnlyIn(Dist.CLIENT)
+	private static String getDimensionName(ResourceLocation dimensionKey) {
+		String name = I18n.format(Util.makeTranslationKey("dimension", dimensionKey));
+		if (name.equals(Util.makeTranslationKey("dimension", dimensionKey))) {
+			name = dimensionKey.toString();
+			if (name.contains(":")) {
+				name = name.substring(name.indexOf(":") + 1);
+			}
+			name = WordUtils.capitalize(name.replace('_', ' '));
+		}
+		return name;
+	}
+
 	private static String convertToRegex(String glob) {
  		String regex = "^";
  		for (char i = 0; i < glob.length(); i++) {

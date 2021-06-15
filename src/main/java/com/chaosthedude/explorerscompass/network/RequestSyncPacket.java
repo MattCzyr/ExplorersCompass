@@ -24,7 +24,7 @@ public class RequestSyncPacket {
 	public void handle(Supplier<NetworkEvent.Context> ctx) {
 		ctx.get().enqueueWork(() -> {
 			final boolean canTeleport = ConfigHandler.GENERAL.allowTeleport.get() && PlayerUtils.canTeleport(ctx.get().getSender());
-			ExplorersCompass.network.sendTo(new SyncPacket(canTeleport, StructureUtils.getAllowedStructures()), ctx.get().getSender().connection.getNetworkManager(), NetworkDirection.PLAY_TO_CLIENT);
+			ExplorersCompass.network.sendTo(new SyncPacket(canTeleport, StructureUtils.getAllowedStructures(), StructureUtils.getDimensionsForAllowedStructures(ctx.get().getSender().getServerWorld())), ctx.get().getSender().connection.getNetworkManager(), NetworkDirection.PLAY_TO_CLIENT);
 		});
 		ctx.get().setPacketHandled(true);
 	}

@@ -1,5 +1,6 @@
 package com.chaosthedude.explorerscompass.gui;
 
+import com.chaosthedude.explorerscompass.ExplorersCompass;
 import com.chaosthedude.explorerscompass.util.StructureUtils;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -36,6 +37,7 @@ public class StructureSearchEntry extends AbstractListEntry<StructureSearchEntry
 		mc.fontRenderer.func_243248_b(matrixStack, new StringTextComponent(StructureUtils.getStructureName(structure)), par3 + 1, par2 + 1, 0xffffff);
 		mc.fontRenderer.func_243248_b(matrixStack, new StringTextComponent(I18n.format("string.explorerscompass.source") + ": " + StructureUtils.getStructureSource(structure)), par3 + 1, par2 + mc.fontRenderer.FONT_HEIGHT + 3, 0x808080);
 		mc.fontRenderer.func_243248_b(matrixStack, new StringTextComponent(I18n.format("string.explorerscompass.category") + ": " + I18n.format("string.explorerscompass." + structure.getDecorationStage().toString().toLowerCase())), par3 + 1, par2 + mc.fontRenderer.FONT_HEIGHT + 14, 0x808080);
+		mc.fontRenderer.func_243248_b(matrixStack, new StringTextComponent(I18n.format("string.explorerscompass.dimension") + ": " + StructureUtils.structureDimensionsToString(ExplorersCompass.dimensionsForAllowedStructures.get(structure))), par3 + 1, par2 + mc.fontRenderer.FONT_HEIGHT + 25, 0x808080);
 		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 	}
 

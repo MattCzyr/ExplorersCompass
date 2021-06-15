@@ -66,7 +66,7 @@ public class ExplorersCompassScreen extends Screen {
 		setupButtons();
 		setupTextFields();
 		if (selectionList == null) {
-			selectionList = new StructureSearchList(this, minecraft, width + 110, height, 40, height, 36);
+			selectionList = new StructureSearchList(this, minecraft, width + 110, height, 40, height, 45);
 		}
 		children.add(selectionList);
 	}
@@ -75,6 +75,15 @@ public class ExplorersCompassScreen extends Screen {
 	public void tick() {
 		searchTextField.tick();
 		teleportButton.active = explorersCompass.getState(stack) == CompassState.FOUND;
+		
+		// Check if the allowed structure list has synced
+		if (allowedStructures.size() != ExplorersCompass.allowedStructures.size()) {
+			children.remove(selectionList);
+			allowedStructures = ExplorersCompass.allowedStructures;
+			structuresMatchingSearch = new ArrayList<Structure<?>>(allowedStructures);
+			selectionList = new StructureSearchList(this, minecraft, width + 110, height, 40, height, 45);
+			children.add(selectionList);
+		}
 	}
 
 	@Override
