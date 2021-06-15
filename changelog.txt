@@ -1,4 +1,14 @@
 ------------------------------------------------------------------
+ VERSION: 1.1.0 - 1.16.5
+------------------------------------------------------------------
+1.16.5:
+ - Added a config option to determine whether players can view the coordinates and distance to a located structure on the HUD
+ - Added information about the dimensions a structure appears in to the compass GUI
+ - Added a category to sort by dimension in the compass GUI
+ - Fixed a crash that occurred infrequently while searching for a structure
+
+
+------------------------------------------------------------------
  VERSION: 1.0.0 - 1.16.5
 ------------------------------------------------------------------
 1.16.5:
