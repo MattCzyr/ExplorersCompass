@@ -192,7 +192,7 @@ public class ExplorersCompassItem extends Item {
 	}
 	
 	public boolean shouldDisplayCoordinates(ItemStack stack) {
-		if (ItemUtils.verifyNBT(stack)) {
+		if (ItemUtils.verifyNBT(stack) && stack.getTag().contains("DisplayCoordinates")) {
 			return stack.getTag().getBoolean("DisplayCoordinates");
 		}
 
