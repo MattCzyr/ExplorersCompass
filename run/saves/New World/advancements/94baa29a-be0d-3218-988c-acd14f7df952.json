@@ -1,0 +1,14 @@
+{
+  "minecraft:adventure/adventuring_time": {
+    "criteria": {
+      "minecraft:forest": "2021-07-12 22:23:20 -0400",
+      "minecraft:beach": "2021-07-12 22:24:02 -0400",
+      "minecraft:river": "2021-07-12 22:23:59 -0400",
+      "minecraft:stone_shore": "2021-07-12 22:24:03 -0400",
+      "minecraft:swamp": "2021-07-12 22:24:34 -0400",
+      "minecraft:plains": "2021-07-12 22:24:12 -0400"
+    },
+    "done": false
+  },
+  "DataVersion": 2586
+}

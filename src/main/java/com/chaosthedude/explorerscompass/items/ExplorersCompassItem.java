@@ -1,61 +1,66 @@
 package com.chaosthedude.explorerscompass.items;
 
+import java.util.List;
+import java.util.Map;
+
 import com.chaosthedude.explorerscompass.ExplorersCompass;
+import com.chaosthedude.explorerscompass.config.ExplorersCompassConfig;
 import com.chaosthedude.explorerscompass.gui.GuiWrapper;
-import com.chaosthedude.explorerscompass.network.RequestSyncPacket;
+import com.chaosthedude.explorerscompass.network.SyncPacket;
 import com.chaosthedude.explorerscompass.util.CompassState;
 import com.chaosthedude.explorerscompass.util.ItemUtils;
+import com.chaosthedude.explorerscompass.util.PlayerUtils;
 import com.chaosthedude.explorerscompass.util.StructureUtils;
 
+import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.ActionResultType;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Hand;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.world.gen.feature.StructureFeature;
 
 public class ExplorersCompassItem extends Item {
 
 	public static final String NAME = "explorerscompass";
 
 	public ExplorersCompassItem() {
-		super(new Properties().maxStackSize(1).group(ItemGroup.TOOLS));
-		setRegistryName(NAME);
+		super(new FabricItemSettings().maxCount(1).group(ItemGroup.TOOLS));
 	}
 
 	@Override
-	public ActionResult<ItemStack> onItemRightClick(World world, PlayerEntity player, Hand hand) {
-		if (!player.isCrouching()) {
-			if (world.isRemote) {
-				final ItemStack stack = ItemUtils.getHeldItem(player, ExplorersCompass.explorersCompass);
-				ExplorersCompass.network.sendToServer(new RequestSyncPacket());
+	public TypedActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
+		if (!player.isSneaking()) {
+			if (world.isClient) {
+				final ItemStack stack = ItemUtils.getHeldItem(player, ExplorersCompass.EXPLORERS_COMPASS_ITEM);
 				GuiWrapper.openGUI(world, player, stack);
+			} else {
+				final ServerWorld serverWorld = (ServerWorld) world;
+				final ServerPlayerEntity serverPlayer = (ServerPlayerEntity) player;
+				final boolean canTeleport = ExplorersCompassConfig.allowTeleport && PlayerUtils.canTeleport(player);
+				final List<StructureFeature<?>> allowedStructures = StructureUtils.getAllowedStructures();
+				final Map<StructureFeature<?>, List<Identifier>> dimensionsForAllowedStructures = StructureUtils.getDimensionsForAllowedStructures(serverWorld);
+				ServerPlayNetworking.send(serverPlayer, SyncPacket.ID, new SyncPacket(canTeleport, allowedStructures, dimensionsForAllowedStructures));
 			}
 		} else {
-			setState(player.getHeldItem(hand), null, CompassState.INACTIVE, player);
+			setState(player.getStackInHand(hand), null, CompassState.INACTIVE, player);
 		}
 
-		return new ActionResult<ItemStack>(ActionResultType.PASS, player.getHeldItem(hand));
+		return TypedActionResult.pass(player.getStackInHand(hand));
 	}
-	
-	@Override
- 	public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged) {
- 		if (getState(oldStack) == getState(newStack)) {
- 			return false;
- 		}
- 		return super.shouldCauseReequipAnimation(oldStack, newStack, slotChanged);
- 	}
 
-	public void searchForStructure(World world, PlayerEntity player, ResourceLocation structureKey, BlockPos pos, ItemStack stack) {
-		setSearching(stack, structureKey, player);
+	public void searchForStructure(World world, PlayerEntity player, Identifier structureID, BlockPos pos, ItemStack stack) {
+		setSearching(stack, structureID, player);
 		setSearchRadius(stack, 0, player);
 		if (world instanceof ServerWorld) {
-			StructureUtils.searchForStructure((ServerWorld) world, player, stack, StructureUtils.getStructureForKey(structureKey), pos);
+			StructureUtils.searchForStructure((ServerWorld) world, player, stack, StructureUtils.getStructureForID(structureID), pos);
 		}
 	}
 
@@ -67,9 +72,9 @@ public class ExplorersCompassItem extends Item {
 		return false;
 	}
 
-	public void setSearching(ItemStack stack, ResourceLocation structureKey, PlayerEntity player) {
+	public void setSearching(ItemStack stack, Identifier structureID, PlayerEntity player) {
 		if (ItemUtils.verifyNBT(stack)) {
-			stack.getTag().putString("StructureKey", structureKey.toString());
+			stack.getTag().putString("StructureID", structureID.toString());
 			stack.getTag().putInt("State", CompassState.SEARCHING.getID());
 		}
 	}
@@ -115,9 +120,9 @@ public class ExplorersCompassItem extends Item {
 		}
 	}
 
-	public void setStructureKey(ItemStack stack, ResourceLocation structureKey, PlayerEntity player) {
+	public void setStructureKey(ItemStack stack, Identifier structureID, PlayerEntity player) {
 		if (ItemUtils.verifyNBT(stack)) {
-			stack.getTag().putString("StructureKey", structureKey.toString());
+			stack.getTag().putString("StructureID", structureID.toString());
 		}
 	}
 
@@ -163,12 +168,12 @@ public class ExplorersCompassItem extends Item {
 		return 0;
 	}
 
-	public ResourceLocation getStructureKey(ItemStack stack) {
+	public Identifier getStructureID(ItemStack stack) {
 		if (ItemUtils.verifyNBT(stack)) {
-			return new ResourceLocation(stack.getTag().getString("StructureKey"));
+			return new Identifier(stack.getTag().getString("StructureID"));
 		}
 
-		return new ResourceLocation("");
+		return new Identifier("");
 	}
 
 	public int getSearchRadius(ItemStack stack) {

@@ -8,38 +8,38 @@ import java.util.Optional;
 
 import org.apache.commons.lang3.text.WordUtils;
 
-import com.chaosthedude.explorerscompass.config.ConfigHandler;
+import com.chaosthedude.explorerscompass.config.ExplorersCompassConfig;
+import com.chaosthedude.explorerscompass.workers.StructureSearchWorker;
 
-import net.minecraft.client.resources.I18n;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.ModContainer;
+import net.minecraft.client.resource.language.I18n;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.World;
-import net.minecraft.world.gen.feature.structure.Structure;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.ModContainer;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.util.registry.Registry;
+import net.minecraft.world.gen.feature.StructureFeature;
 
 public class StructureUtils {
 
-	public static ResourceLocation getKeyForStructure(Structure<?> structure) {
-		return ForgeRegistries.STRUCTURE_FEATURES.getKey(structure);
+	public static Identifier getIDForStructure(StructureFeature<?> structure) {
+		return Registry.STRUCTURE_FEATURE.getId(structure);
 	}
 
-	public static Structure<?> getStructureForKey(ResourceLocation key) {
-		return ForgeRegistries.STRUCTURE_FEATURES.getValue(key);
+	public static StructureFeature<?> getStructureForID(Identifier key) {
+		return Registry.STRUCTURE_FEATURE.get(key);
 	}
 
-	public static List<Structure<?>> getAllowedStructures() {
-		final List<Structure<?>> structures = new ArrayList<Structure<?>>();
-		for (Structure<?> structure : ForgeRegistries.STRUCTURE_FEATURES) {
-			if (structure != null && getStructureForKey(structure.getRegistryName()) != null && !structureIsBlacklisted(structure)) {
+	public static List<StructureFeature<?>> getAllowedStructures() {
+		final List<StructureFeature<?>> structures = new ArrayList<StructureFeature<?>>();
+		for (StructureFeature<?> structure : Registry.STRUCTURE_FEATURE) {
+			if (structure != null && getIDForStructure(structure) != null && !structureIsBlacklisted(structure)) {
 				structures.add(structure);
 			}
 		}
@@ -47,27 +47,27 @@ public class StructureUtils {
 		return structures;
 	}
 
-	public static void searchForStructure(ServerWorld world, PlayerEntity player, ItemStack stack, Structure<?> structure, BlockPos startPos) {
+	public static void searchForStructure(ServerWorld world, PlayerEntity player, ItemStack stack, StructureFeature<?> structure, BlockPos startPos) {
 		StructureSearchWorker worker = new StructureSearchWorker(world, player, stack, structure, startPos);
 		worker.start();
 	}
 
 	public static int getDistanceToStructure(PlayerEntity player, int biomeX, int biomeZ) {
-		return getDistanceToStructure(player.getPosition(), biomeX, biomeZ);
+		return getDistanceToStructure(player.getBlockPos(), biomeX, biomeZ);
 	}
 
 	public static int getDistanceToStructure(BlockPos startPos, int structureX, int structureZ) {
-		return (int) MathHelper.sqrt(startPos.distanceSq(new BlockPos(structureX, startPos.getY(), structureZ)));
+		return (int) MathHelper.sqrt(startPos.getSquaredDistance(new BlockPos(structureX, startPos.getY(), structureZ)));
 	}
 
-	@OnlyIn(Dist.CLIENT)
-	public static String getStructureName(Structure<?> structure) {
-		String name = getKeyForStructure(structure).toString();
-		if (ConfigHandler.CLIENT.translateStructureNames.get()) {
-			name = I18n.format(Util.makeTranslationKey("structure", getKeyForStructure(structure)));
+	@Environment(EnvType.CLIENT)
+	public static String getStructureName(StructureFeature<?> structure) {
+		String name = getIDForStructure(structure).toString();
+		if (ExplorersCompassConfig.translateStructureNames) {
+			name = I18n.translate(Util.createTranslationKey("structure", getIDForStructure(structure)));
 		}
-		if (name.equals(Util.makeTranslationKey("structure", getKeyForStructure(structure))) || !ConfigHandler.CLIENT.translateStructureNames.get()) {
-			name = getKeyForStructure(structure).toString();
+		if (name.equals(Util.createTranslationKey("structure", getIDForStructure(structure))) || !ExplorersCompassConfig.translateStructureNames) {
+			name = getIDForStructure(structure).toString();
 			if (name.contains(":")) {
 				name = name.substring(name.indexOf(":") + 1);
 			}
@@ -76,47 +76,47 @@ public class StructureUtils {
 		return name;
 	}
 
-	@OnlyIn(Dist.CLIENT)
-	public static String getStructureName(ResourceLocation key) {
-		return getStructureName(getStructureForKey(key));
+	@Environment(EnvType.CLIENT)
+	public static String getStructureName(Identifier key) {
+		return getStructureName(getStructureForID(key));
 	}
 
-	@OnlyIn(Dist.CLIENT)
-	public static String getStructureSource(Structure<?> structure) {
-		if (getKeyForStructure(structure) == null) {
+	@Environment(EnvType.CLIENT)
+	public static String getStructureSource(StructureFeature<?> structure) {
+		if (getIDForStructure(structure) == null) {
 			return "";
 		}
-		String registryEntry = getKeyForStructure(structure).toString();
+		String registryEntry = getIDForStructure(structure).toString();
 		String modid = registryEntry.substring(0, registryEntry.indexOf(":"));
 		if (modid.equals("minecraft")) {
 			return "Minecraft";
 		}
-		Optional<? extends ModContainer> sourceContainer = ModList.get().getModContainerById(modid);
+		Optional<? extends ModContainer> sourceContainer = FabricLoader.getInstance().getModContainer(modid);
 		if (sourceContainer.isPresent()) {
-			return sourceContainer.get().getModInfo().getDisplayName();
+			return sourceContainer.get().getMetadata().getName();
 		}
 		return modid;
 	}
 
-	public static List<ResourceLocation> getStructureDimensions(ServerWorld serverWorld, Structure<?> structure) {
-		final List<ResourceLocation> dimensions = new ArrayList<>();
+	public static List<Identifier> getStructureDimensions(ServerWorld serverWorld, StructureFeature<?> structure) {
+		final List<Identifier> dimensions = new ArrayList<>();
 		for (ServerWorld world : serverWorld.getServer().getWorlds()) {
-				if (world.getChunkProvider().getChunkGenerator().getBiomeProvider().hasStructure(structure))
-					dimensions.add(world.getDimensionKey().getLocation());
+				if (world.getChunkManager().getChunkGenerator().getBiomeSource().hasStructureFeature(structure))
+					dimensions.add(world.getRegistryKey().getValue());
 		}
 		return dimensions;
 	}
 
-	public static Map<Structure<?>, List<ResourceLocation>> getDimensionsForAllowedStructures(ServerWorld serverWorld) {
-		Map<Structure<?>, List<ResourceLocation>> dimensionsForAllowedStructures = new HashMap<Structure<?>, List<ResourceLocation>>();
-		for (Structure<?> structure : getAllowedStructures()) {
+	public static Map<StructureFeature<?>, List<Identifier>> getDimensionsForAllowedStructures(ServerWorld serverWorld) {
+		Map<StructureFeature<?>, List<Identifier>> dimensionsForAllowedStructures = new HashMap<StructureFeature<?>, List<Identifier>>();
+		for (StructureFeature<?> structure : getAllowedStructures()) {
 			dimensionsForAllowedStructures.put(structure, getStructureDimensions(serverWorld, structure));
 		}
 		return dimensionsForAllowedStructures;
 	}
 
-	@OnlyIn(Dist.CLIENT)
-	public static String structureDimensionsToString(List<ResourceLocation> dimensions) {
+	@Environment(EnvType.CLIENT)
+	public static String structureDimensionsToString(List<Identifier> dimensions) {
 		String str = "";
 		if (dimensions != null && dimensions.size() > 0) {
 			str = getDimensionName(dimensions.get(0));
@@ -127,20 +127,20 @@ public class StructureUtils {
 		return str;
 	}
 
-	public static boolean structureIsBlacklisted(Structure<?> structure) {
-		final List<String> structureBlacklist = ConfigHandler.GENERAL.structureBlacklist.get();
+	public static boolean structureIsBlacklisted(StructureFeature<?> structure) {
+		final List<String> structureBlacklist = ExplorersCompassConfig.structureBlacklist;
 		for (String structureKey : structureBlacklist) {
-			if (getKeyForStructure(structure).toString().matches(convertToRegex(structureKey))) {
+			if (getIDForStructure(structure).toString().matches(convertToRegex(structureKey))) {
 				return true;
 			}
 		}
 		return false;
 	}
 
-	@OnlyIn(Dist.CLIENT)
-	private static String getDimensionName(ResourceLocation dimensionKey) {
-		String name = I18n.format(Util.makeTranslationKey("dimension", dimensionKey));
-		if (name.equals(Util.makeTranslationKey("dimension", dimensionKey))) {
+	@Environment(EnvType.CLIENT)
+	private static String getDimensionName(Identifier dimensionKey) {
+		String name = I18n.translate(Util.createTranslationKey("dimension", dimensionKey));
+		if (name.equals(Util.createTranslationKey("dimension", dimensionKey))) {
 			name = dimensionKey.toString();
 			if (name.contains(":")) {
 				name = name.substring(name.indexOf(":") + 1);

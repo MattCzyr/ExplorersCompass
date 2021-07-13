@@ -6,52 +6,53 @@ import java.util.List;
 
 import com.chaosthedude.explorerscompass.ExplorersCompass;
 import com.chaosthedude.explorerscompass.items.ExplorersCompassItem;
-import com.chaosthedude.explorerscompass.network.CompassSearchPacket;
+import com.chaosthedude.explorerscompass.network.SearchPacket;
 import com.chaosthedude.explorerscompass.network.TeleportPacket;
 import com.chaosthedude.explorerscompass.sorting.ISorting;
 import com.chaosthedude.explorerscompass.sorting.NameSorting;
 import com.chaosthedude.explorerscompass.util.CompassState;
 import com.chaosthedude.explorerscompass.util.StructureUtils;
-import com.mojang.blaze3d.matrix.MatrixStack;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.button.Button;
-import net.minecraft.client.resources.I18n;
+import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.resource.language.I18n;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.world.World;
-import net.minecraft.world.gen.feature.structure.Structure;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.world.gen.feature.StructureFeature;
 
-@OnlyIn(Dist.CLIENT)
+@Environment(EnvType.CLIENT)
 public class ExplorersCompassScreen extends Screen {
 
 	private World world;
 	private PlayerEntity player;
-	private List<Structure<?>> allowedStructures;
-	private List<Structure<?>> structuresMatchingSearch;
+	private List<StructureFeature<?>> allowedStructures;
+	private List<StructureFeature<?>> structuresMatchingSearch;
 	private ItemStack stack;
 	private ExplorersCompassItem explorersCompass;
-	private Button startSearchButton;
-	private Button sortByButton;
-	private Button teleportButton;
-	private Button cancelButton;
+	private ButtonWidget startSearchButton;
+	private ButtonWidget sortByButton;
+	private ButtonWidget teleportButton;
+	private ButtonWidget cancelButton;
 	private TransparentTextField searchTextField;
 	private StructureSearchList selectionList;
 	private ISorting sortingCategory;
 
-	public ExplorersCompassScreen(World world, PlayerEntity player, ItemStack stack, ExplorersCompassItem explorersCompass, List<Structure<?>> allowedStructures) {
-		super(new StringTextComponent(I18n.format("string.explorersCompass.selectStructure")));
+	public ExplorersCompassScreen(World world, PlayerEntity player, ItemStack stack, ExplorersCompassItem explorersCompass, List<StructureFeature<?>> allowedStructures) {
+		super(new TranslatableText("string.explorersCompass.selectStructure"));
 		this.world = world;
 		this.player = player;
 		this.stack = stack;
 		this.explorersCompass = explorersCompass;
 		this.allowedStructures = allowedStructures;
 
-		structuresMatchingSearch = new ArrayList<Structure<?>>(allowedStructures);
+		structuresMatchingSearch = new ArrayList<StructureFeature<?>>(allowedStructures);
 		sortingCategory = new NameSorting();
 	}
 
@@ -62,11 +63,11 @@ public class ExplorersCompassScreen extends Screen {
 
 	@Override
 	protected void init() {
-		minecraft.keyboardListener.enableRepeatEvents(true);
+		client.keyboard.setRepeatEvents(true);
 		setupButtons();
 		setupTextFields();
 		if (selectionList == null) {
-			selectionList = new StructureSearchList(this, minecraft, width + 110, height, 40, height, 45);
+			selectionList = new StructureSearchList(this, client, width + 110, height, 40, height, 45);
 		}
 		children.add(selectionList);
 	}
@@ -80,8 +81,8 @@ public class ExplorersCompassScreen extends Screen {
 		if (allowedStructures.size() != ExplorersCompass.allowedStructures.size()) {
 			children.remove(selectionList);
 			allowedStructures = ExplorersCompass.allowedStructures;
-			structuresMatchingSearch = new ArrayList<Structure<?>>(allowedStructures);
-			selectionList = new StructureSearchList(this, minecraft, width + 110, height, 40, height, 45);
+			structuresMatchingSearch = new ArrayList<StructureFeature<?>>(allowedStructures);
+			selectionList = new StructureSearchList(this, client, width + 110, height, 40, height, 45);
 			children.add(selectionList);
 		}
 	}
@@ -91,7 +92,7 @@ public class ExplorersCompassScreen extends Screen {
 		renderBackground(stack);
 		selectionList.render(stack, mouseX, mouseY, partialTicks);
 		searchTextField.render(stack, mouseX, mouseY, partialTicks);
-		drawCenteredString(stack, font, I18n.format("string.explorerscompass.selectStructure"), 65, 15, 0xffffff);
+		drawCenteredText(stack, textRenderer, I18n.translate("string.explorerscompass.selectStructure"), 65, 15, 0xffffff);
 		super.render(stack, mouseX, mouseY, partialTicks);
 	}
 
@@ -118,7 +119,7 @@ public class ExplorersCompassScreen extends Screen {
 	@Override
 	public void onClose() {
 		super.onClose();
-		minecraft.keyboardListener.enableRepeatEvents(false);
+		client.keyboard.setRepeatEvents(false);
 	}
 
 	public void selectStructure(StructureSearchEntry entry) {
@@ -126,19 +127,19 @@ public class ExplorersCompassScreen extends Screen {
 		startSearchButton.active = enable;
 	}
 
-	public void searchForStructure(Structure<?> structure) {
-		ExplorersCompass.network.sendToServer(new CompassSearchPacket(StructureUtils.getKeyForStructure(structure), player.getPosition()));
-		minecraft.displayGuiScreen(null);
+	public void searchForStructure(StructureFeature<?> structure) {
+		ClientPlayNetworking.send(SearchPacket.ID, new SearchPacket(StructureUtils.getIDForStructure(structure), player.getBlockPos()));
+		client.openScreen(null);
 	}
 
 	public void teleport() {
-		ExplorersCompass.network.sendToServer(new TeleportPacket());
-		minecraft.displayGuiScreen(null);
+		ClientPlayNetworking.send(TeleportPacket.ID, new TeleportPacket());
+		client.openScreen(null);
 	}
 
 	public void processSearchTerm() {
-		structuresMatchingSearch = new ArrayList<Structure<?>>();
-		for (Structure<?> structure : allowedStructures) {
+		structuresMatchingSearch = new ArrayList<StructureFeature<?>>();
+		for (StructureFeature<?> structure : allowedStructures) {
 			if (StructureUtils.getStructureName(structure).toLowerCase().contains(searchTextField.getText().toLowerCase())) {
 				structuresMatchingSearch.add(structure);
 			}
@@ -146,8 +147,8 @@ public class ExplorersCompassScreen extends Screen {
 		selectionList.refreshList();
 	}
 
-	public List<Structure<?>> sortStructures() {
-		final List<Structure<?>> structures = structuresMatchingSearch;
+	public List<StructureFeature<?>> sortStructures() {
+		final List<StructureFeature<?>> structures = structuresMatchingSearch;
 		Collections.sort(structures, new NameSorting());
 		Collections.sort(structures, sortingCategory);
 		return structures;
@@ -155,20 +156,20 @@ public class ExplorersCompassScreen extends Screen {
 
 	private void setupButtons() {
 		buttons.clear();
-		cancelButton = addButton(new TransparentButton(10, height - 30, 110, 20, new TranslationTextComponent("gui.cancel"), (onPress) -> {
-			minecraft.displayGuiScreen(null);
+		cancelButton = addButton(new TransparentButton(10, height - 30, 110, 20, new TranslatableText("gui.cancel"), (onPress) -> {
+			client.openScreen(null);
 		}));
-		startSearchButton = addButton(new TransparentButton(10, 40, 110, 20, new TranslationTextComponent("string.explorerscompass.startSearch"), (onPress) -> {
+		startSearchButton = addButton(new TransparentButton(10, 40, 110, 20, new TranslatableText("string.explorerscompass.startSearch"), (onPress) -> {
 			if (selectionList.hasSelection()) {
 				selectionList.getSelected().searchForBiome();
 			}
 		}));
-		sortByButton = addButton(new TransparentButton(10, 65, 110, 20, new StringTextComponent(I18n.format("string.explorerscompass.sortBy") + ": " + sortingCategory.getLocalizedName()), (onPress) -> {
+		sortByButton = addButton(new TransparentButton(10, 65, 110, 20, new LiteralText(I18n.translate("string.explorerscompass.sortBy") + ": " + sortingCategory.getLocalizedName()), (onPress) -> {
 			sortingCategory = sortingCategory.next();
-			sortByButton.setMessage(new StringTextComponent(I18n.format("string.explorerscompass.sortBy") + ": " + sortingCategory.getLocalizedName()));
+			sortByButton.setMessage(new LiteralText(I18n.translate("string.explorerscompass.sortBy") + ": " + sortingCategory.getLocalizedName()));
 			selectionList.refreshList();
 		}));
-		teleportButton = addButton(new TransparentButton(width - 120, 10, 110, 20, new TranslationTextComponent("string.explorerscompass.teleport"), (onPress) -> {
+		teleportButton = addButton(new TransparentButton(width - 120, 10, 110, 20, new TranslatableText("string.explorerscompass.teleport"), (onPress) -> {
 			teleport();
 		}));
 
@@ -178,7 +179,7 @@ public class ExplorersCompassScreen extends Screen {
 	}
 
 	private void setupTextFields() {
-		searchTextField = new TransparentTextField(font, width / 2 - 82, 10, 140, 20, new TranslationTextComponent("string.explorerscompass.search"));
+		searchTextField = new TransparentTextField(textRenderer, width / 2 - 82, 10, 140, 20, new TranslatableText("string.explorerscompass.search"));
 		children.add(searchTextField);
 	}
 

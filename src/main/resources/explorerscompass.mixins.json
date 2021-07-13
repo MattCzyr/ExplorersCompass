@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "package": "com.chaosthedude.explorerscompass.mixins",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+    "MinecraftServerMixin"
+  ],
+  "client": [
+    "HeldItemRendererMixin",
+    "InGameHudMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

@@ -4,67 +4,58 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
 
 import com.chaosthedude.explorerscompass.ExplorersCompass;
 import com.chaosthedude.explorerscompass.util.StructureUtils;
 
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.gen.feature.structure.Structure;
-import net.minecraftforge.fml.network.NetworkEvent;
+import io.netty.buffer.Unpooled;
+import net.fabricmc.fabric.api.networking.v1.PacketSender;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.ClientPlayNetworkHandler;
+import net.minecraft.network.PacketByteBuf;
+import net.minecraft.util.Identifier;
+import net.minecraft.world.gen.feature.StructureFeature;
 
-public class SyncPacket {
+public class SyncPacket extends PacketByteBuf {
 
-	private boolean canTeleport;
-	private List<Structure<?>> allowedStructures;
-	private Map<Structure<?>, List<ResourceLocation>> dimensionsForAllowedStructures;
+	public static final Identifier ID = new Identifier(ExplorersCompass.MODID, "sync");
 
-	public SyncPacket() {}
-
-	public SyncPacket(boolean canTeleport, List<Structure<?>> allowedStructures, Map<Structure<?>, List<ResourceLocation>> dimensionsForAllowedStructures) {
-		this.canTeleport = canTeleport;
-		this.allowedStructures = allowedStructures;
-		this.dimensionsForAllowedStructures = dimensionsForAllowedStructures;
+	public SyncPacket(boolean canTeleport, List<StructureFeature<?>> allowedStructures, Map<StructureFeature<?>, List<Identifier>> dimensionsForAllowedStructures) {
+		super(Unpooled.buffer());
+		writeBoolean(canTeleport);
+		writeInt(allowedStructures.size());
+		for (StructureFeature<?> structure : allowedStructures) {
+			writeIdentifier(StructureUtils.getIDForStructure(structure));
+			List<Identifier> dimensions = dimensionsForAllowedStructures.get(structure);
+			writeInt(dimensions.size());
+			for (Identifier dimensionKey : dimensions) {
+				writeIdentifier(dimensionKey);
+			}
+		}
 	}
 
-	public SyncPacket(PacketBuffer buf) {
-		canTeleport = buf.readBoolean();
-		allowedStructures = new ArrayList<Structure<?>>();
-		dimensionsForAllowedStructures = new HashMap<Structure<?>, List<ResourceLocation>>();
-		int numStructures = buf.readInt();
+	public static void apply(MinecraftClient client, ClientPlayNetworkHandler handler, PacketByteBuf buf, PacketSender responseSender) {
+		final boolean canTeleport = buf.readBoolean();
+		final List<StructureFeature<?>> allowedStructures = new ArrayList<StructureFeature<?>>();
+		final Map<StructureFeature<?>, List<Identifier>> dimensionsForAllowedStructures = new HashMap<StructureFeature<?>, List<Identifier>>();
+		final int numStructures = buf.readInt();
+		
 		for (int i = 0; i < numStructures; i++) {
-			Structure<?> structure = StructureUtils.getStructureForKey(buf.readResourceLocation());
+			StructureFeature<?> structure = StructureUtils.getStructureForID(buf.readIdentifier());
 			allowedStructures.add(structure);
 			int numDimensions = buf.readInt();
-			List<ResourceLocation> dimensions = new ArrayList<ResourceLocation>();
+			List<Identifier> dimensions = new ArrayList<Identifier>();
 			for (int j = 0; j < numDimensions; j++) {
-				dimensions.add(buf.readResourceLocation());
+				dimensions.add(buf.readIdentifier());
 			}
 			dimensionsForAllowedStructures.put(structure, dimensions);
 		}
-	}
-
-	public void toBytes(PacketBuffer buf) {
-		buf.writeBoolean(canTeleport);
-		buf.writeInt(allowedStructures.size());
-		for (Structure<?> structure : allowedStructures) {
-			buf.writeResourceLocation(StructureUtils.getKeyForStructure(structure));
-			List<ResourceLocation> dimensions = dimensionsForAllowedStructures.get(structure);
-			buf.writeInt(dimensions.size());
-			for (ResourceLocation dimensionKey : dimensions) {
-				buf.writeResourceLocation(dimensionKey);
-			}
-		}
-	}
-
-	public void handle(Supplier<NetworkEvent.Context> ctx) {
-		ctx.get().enqueueWork(() -> {
+		
+		client.execute(() -> {
 			ExplorersCompass.canTeleport = canTeleport;
 			ExplorersCompass.allowedStructures = allowedStructures;
 			ExplorersCompass.dimensionsForAllowedStructures = dimensionsForAllowedStructures;
 		});
-		ctx.get().setPacketHandled(true);
 	}
 
 }

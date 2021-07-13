@@ -3,28 +3,28 @@ package com.chaosthedude.explorerscompass.gui;
 import java.util.Objects;
 
 import com.chaosthedude.explorerscompass.util.RenderUtils;
-import com.mojang.blaze3d.matrix.MatrixStack;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.widget.list.ExtendedList;
-import net.minecraft.world.gen.feature.structure.Structure;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.widget.EntryListWidget;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.world.gen.feature.StructureFeature;
 
-@OnlyIn(Dist.CLIENT)
-public class StructureSearchList extends ExtendedList<StructureSearchEntry> {
+@Environment(EnvType.CLIENT)
+public class StructureSearchList extends EntryListWidget<StructureSearchEntry> {
 
 	private final ExplorersCompassScreen guiExplorersCompass;
 
-	public StructureSearchList(ExplorersCompassScreen guiExplorersCompass, Minecraft mc, int width, int height, int top, int bottom, int slotHeight) {
+	public StructureSearchList(ExplorersCompassScreen guiExplorersCompass, MinecraftClient mc, int width, int height, int top, int bottom, int slotHeight) {
 		super(mc, width, height, top, bottom, slotHeight);
 		this.guiExplorersCompass = guiExplorersCompass;
 		refreshList();
 	}
 
 	@Override
-	protected int getScrollbarPosition() {
-		return super.getScrollbarPosition() + 20;
+	protected int getScrollbarPositionX() {
+		return super.getScrollbarPositionX() + 20;
 	}
 
 	@Override
@@ -33,31 +33,31 @@ public class StructureSearchList extends ExtendedList<StructureSearchEntry> {
 	}
 
 	@Override
-	protected boolean isSelectedItem(int slotIndex) {
-		return slotIndex >= 0 && slotIndex < getEventListeners().size() ? getEventListeners().get(slotIndex).equals(getSelected()) : false;
+	protected boolean isSelectedEntry(int slotIndex) {
+		return slotIndex >= 0 && slotIndex < children().size() ? children().get(slotIndex).equals(getSelected()) : false;
 	}
 
 	@Override
 	public void render(MatrixStack matrixStack, int par1, int par2, float par3) {
-		int i = getScrollbarPosition();
+		int i = getScrollbarPositionX();
 		int k = getRowLeft();
-		int l = y0 + 4 - (int) getScrollAmount();
+		int l = top + 4 - (int) getScrollAmount();
 
 		renderList(matrixStack, k, l, par1, par2, par3);
 	}
 
 	@Override
 	protected void renderList(MatrixStack matrixStack, int par1, int par2, int par3, int par4, float par5) {
-		int i = getItemCount();
+		int i = getEntryCount();
 		for (int j = 0; j < i; ++j) {
 			int k = getRowTop(j);
 			int l = getRowBottom(j);
-			if (l >= y0 && k <= y1) {
+			if (l >= top && k <= bottom) {
 				int j1 = this.itemHeight - 4;
 				StructureSearchEntry e = getEntry(j);
 				int k1 = getRowWidth();
-				if (/*renderSelection*/ true && isSelectedItem(j)) {
-					final int insideLeft = x0 + width / 2 - getRowWidth() / 2 + 2;
+				if (/*renderSelection*/ true && isSelectedEntry(j)) {
+					final int insideLeft = left + width / 2 - getRowWidth() / 2 + 2;
 					RenderUtils.drawRect(insideLeft - 4, k - 4, insideLeft + getRowWidth() + 4, k + itemHeight, 255 / 2 << 24);
 				}
 
@@ -74,7 +74,7 @@ public class StructureSearchList extends ExtendedList<StructureSearchEntry> {
 
 	public void refreshList() {
 		clearEntries();
-		for (Structure<?> structure : guiExplorersCompass.sortStructures()) {
+		for (StructureFeature<?> structure : guiExplorersCompass.sortStructures()) {
 			addEntry(new StructureSearchEntry(this, structure));
 		}
 		selectStructure(null);
