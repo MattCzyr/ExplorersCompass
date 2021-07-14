@@ -11,6 +11,7 @@ import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormats;
+import net.minecraft.client.render.VertexFormat.DrawMode;
 import net.minecraft.client.util.math.MatrixStack;
 
 @Environment(EnvType.CLIENT)
@@ -59,9 +60,9 @@ public class RenderUtils {
 		RenderSystem.enableBlend();
 		RenderSystem.disableTexture();
 		RenderSystem.blendFuncSeparate(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SrcFactor.ONE, GlStateManager.DstFactor.ZERO);
-		RenderSystem.color4f(red, green, blue, alpha);
+		RenderSystem.setShaderColor(red, green, blue, alpha);
 
-		buffer.begin(7, VertexFormats.POSITION);
+		buffer.begin(DrawMode.QUADS, VertexFormats.POSITION);
 		buffer.vertex((double) left, (double) bottom, 0.0D).next();
 		buffer.vertex((double) right, (double) bottom, 0.0D).next();
 		buffer.vertex((double) right, (double) top, 0.0D).next();

@@ -42,7 +42,7 @@ public class TeleportPacket extends PacketByteBuf {
 						final int y = findValidTeleportHeight(player.getEntityWorld(), x, z, player);
 
 						player.stopRiding();
-						((ServerPlayerEntity) player).networkHandler.requestTeleport(x, y, z, player.yaw, player.pitch, EnumSet.noneOf(PlayerPositionLookS2CPacket.Flag.class));
+						((ServerPlayerEntity) player).networkHandler.requestTeleport(x, y, z, player.getYaw(), player.getPitch(), EnumSet.noneOf(PlayerPositionLookS2CPacket.Flag.class));
 
 						if (!player.isFallFlying()) {
 							player.setVelocity(player.getVelocity().getX(), 0, player.getVelocity().getZ());

@@ -57,7 +57,7 @@ public class StructureUtils {
 	}
 
 	public static int getDistanceToStructure(BlockPos startPos, int structureX, int structureZ) {
-		return (int) MathHelper.sqrt(startPos.getSquaredDistance(new BlockPos(structureX, startPos.getY(), structureZ)));
+		return (int) MathHelper.sqrt((float) startPos.getSquaredDistance(new BlockPos(structureX, startPos.getY(), structureZ)));
 	}
 
 	@Environment(EnvType.CLIENT)

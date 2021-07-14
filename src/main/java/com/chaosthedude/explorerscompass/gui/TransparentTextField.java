@@ -10,6 +10,7 @@ import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.Tessellator;
+import net.minecraft.client.render.VertexFormat.DrawMode;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
@@ -196,11 +197,11 @@ public class TransparentTextField extends TextFieldWidget {
 
 		Tessellator tessellator = Tessellator.getInstance();
 		BufferBuilder bufferbuilder = tessellator.getBuffer();
-		RenderSystem.color4f(0.0F, 0.0F, 255.0F, 255.0F);
+		RenderSystem.setShaderColor(0.0F, 0.0F, 255.0F, 255.0F);
 		RenderSystem.disableTexture();
 		RenderSystem.enableColorLogicOp();
 		RenderSystem.logicOp(GlStateManager.LogicOp.OR_REVERSE);
-		bufferbuilder.begin(7, VertexFormats.POSITION);
+		bufferbuilder.begin(DrawMode.QUADS, VertexFormats.POSITION);
 		bufferbuilder.vertex((double) startX, (double) endY, 0.0D).next();
 		bufferbuilder.vertex((double) endX, (double) endY, 0.0D).next();
 		bufferbuilder.vertex((double) endX, (double) startY, 0.0D).next();

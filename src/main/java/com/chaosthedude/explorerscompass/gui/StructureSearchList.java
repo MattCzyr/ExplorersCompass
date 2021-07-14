@@ -7,18 +7,18 @@ import com.chaosthedude.explorerscompass.util.RenderUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.widget.EntryListWidget;
+import net.minecraft.client.gui.widget.AlwaysSelectedEntryListWidget;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.world.gen.feature.StructureFeature;
 
 @Environment(EnvType.CLIENT)
-public class StructureSearchList extends EntryListWidget<StructureSearchEntry> {
+public class StructureSearchList extends AlwaysSelectedEntryListWidget<StructureSearchEntry> {
 
-	private final ExplorersCompassScreen guiExplorersCompass;
+	private final ExplorersCompassScreen parentScreen;
 
-	public StructureSearchList(ExplorersCompassScreen guiExplorersCompass, MinecraftClient mc, int width, int height, int top, int bottom, int slotHeight) {
-		super(mc, width, height, top, bottom, slotHeight);
-		this.guiExplorersCompass = guiExplorersCompass;
+	public StructureSearchList(ExplorersCompassScreen parentScreen, MinecraftClient client, int width, int height, int top, int bottom, int slotHeight) {
+		super(client, width, height, top, bottom, slotHeight);
+		this.parentScreen = parentScreen;
 		refreshList();
 	}
 
@@ -34,7 +34,7 @@ public class StructureSearchList extends EntryListWidget<StructureSearchEntry> {
 
 	@Override
 	protected boolean isSelectedEntry(int slotIndex) {
-		return slotIndex >= 0 && slotIndex < children().size() ? children().get(slotIndex).equals(getSelected()) : false;
+		return slotIndex >= 0 && slotIndex < children().size() ? children().get(slotIndex).equals(getSelectedOrNull()) : false;
 	}
 
 	@Override
@@ -74,7 +74,7 @@ public class StructureSearchList extends EntryListWidget<StructureSearchEntry> {
 
 	public void refreshList() {
 		clearEntries();
-		for (StructureFeature<?> structure : guiExplorersCompass.sortStructures()) {
+		for (StructureFeature<?> structure : parentScreen.sortStructures()) {
 			addEntry(new StructureSearchEntry(this, structure));
 		}
 		selectStructure(null);
@@ -83,15 +83,15 @@ public class StructureSearchList extends EntryListWidget<StructureSearchEntry> {
 
 	public void selectStructure(StructureSearchEntry entry) {
 		setSelected(entry);
-		guiExplorersCompass.selectStructure(entry);
+		parentScreen.selectStructure(entry);
 	}
 
 	public boolean hasSelection() {
-		return getSelected() != null;
+		return getSelectedOrNull() != null;
 	}
 
-	public ExplorersCompassScreen getExplorersCompassGui() {
-		return guiExplorersCompass;
+	public ExplorersCompassScreen getParentScreen() {
+		return parentScreen;
 	}
 
 }

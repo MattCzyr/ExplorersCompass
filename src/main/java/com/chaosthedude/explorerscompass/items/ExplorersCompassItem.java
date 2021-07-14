@@ -74,79 +74,79 @@ public class ExplorersCompassItem extends Item {
 
 	public void setSearching(ItemStack stack, Identifier structureID, PlayerEntity player) {
 		if (ItemUtils.verifyNBT(stack)) {
-			stack.getTag().putString("StructureID", structureID.toString());
-			stack.getTag().putInt("State", CompassState.SEARCHING.getID());
+			stack.getNbt().putString("StructureID", structureID.toString());
+			stack.getNbt().putInt("State", CompassState.SEARCHING.getID());
 		}
 	}
 
 	public void setFound(ItemStack stack, int x, int z, int samples, PlayerEntity player) {
 		if (ItemUtils.verifyNBT(stack)) {
-			stack.getTag().putInt("State", CompassState.FOUND.getID());
-			stack.getTag().putInt("FoundX", x);
-			stack.getTag().putInt("FoundZ", z);
-			stack.getTag().putInt("Samples", samples);
+			stack.getNbt().putInt("State", CompassState.FOUND.getID());
+			stack.getNbt().putInt("FoundX", x);
+			stack.getNbt().putInt("FoundZ", z);
+			stack.getNbt().putInt("Samples", samples);
 		}
 	}
 
 	public void setNotFound(ItemStack stack, PlayerEntity player, int searchRadius, int samples) {
 		if (ItemUtils.verifyNBT(stack)) {
-			stack.getTag().putInt("State", CompassState.NOT_FOUND.getID());
-			stack.getTag().putInt("SearchRadius", searchRadius);
-			stack.getTag().putInt("Samples", samples);
+			stack.getNbt().putInt("State", CompassState.NOT_FOUND.getID());
+			stack.getNbt().putInt("SearchRadius", searchRadius);
+			stack.getNbt().putInt("Samples", samples);
 		}
 	}
 
 	public void setInactive(ItemStack stack, PlayerEntity player) {
 		if (ItemUtils.verifyNBT(stack)) {
-			stack.getTag().putInt("State", CompassState.INACTIVE.getID());
+			stack.getNbt().putInt("State", CompassState.INACTIVE.getID());
 		}
 	}
 
 	public void setState(ItemStack stack, BlockPos pos, CompassState state, PlayerEntity player) {
 		if (ItemUtils.verifyNBT(stack)) {
-			stack.getTag().putInt("State", state.getID());
+			stack.getNbt().putInt("State", state.getID());
 		}
 	}
 
 	public void setFoundStructureX(ItemStack stack, int x, PlayerEntity player) {
 		if (ItemUtils.verifyNBT(stack)) {
-			stack.getTag().putInt("FoundX", x);
+			stack.getNbt().putInt("FoundX", x);
 		}
 	}
 
 	public void setFoundStructureZ(ItemStack stack, int z, PlayerEntity player) {
 		if (ItemUtils.verifyNBT(stack)) {
-			stack.getTag().putInt("FoundZ", z);
+			stack.getNbt().putInt("FoundZ", z);
 		}
 	}
 
 	public void setStructureKey(ItemStack stack, Identifier structureID, PlayerEntity player) {
 		if (ItemUtils.verifyNBT(stack)) {
-			stack.getTag().putString("StructureID", structureID.toString());
+			stack.getNbt().putString("StructureID", structureID.toString());
 		}
 	}
 
 	public void setSearchRadius(ItemStack stack, int searchRadius, PlayerEntity player) {
 		if (ItemUtils.verifyNBT(stack)) {
-			stack.getTag().putInt("SearchRadius", searchRadius);
+			stack.getNbt().putInt("SearchRadius", searchRadius);
 		}
 	}
 
 	public void setSamples(ItemStack stack, int samples, PlayerEntity player) {
 		if (ItemUtils.verifyNBT(stack)) {
-			stack.getTag().putInt("Samples", samples);
+			stack.getNbt().putInt("Samples", samples);
 		}
 	}
 	
 	public void setDisplayCoordinates(ItemStack stack, boolean displayPosition) {
 		if (ItemUtils.verifyNBT(stack)) {
-			stack.getTag().putBoolean("DisplayCoordinates", displayPosition);
+			stack.getNbt().putBoolean("DisplayCoordinates", displayPosition);
 		}
 	}
 
 	public CompassState getState(ItemStack stack) {
 		if (ItemUtils.verifyNBT(stack)) {
-			return CompassState.fromID(stack.getTag().getInt("State"));
+			return CompassState.fromID(stack.getNbt().getInt("State"));
 		}
 
 		return null;
@@ -154,7 +154,7 @@ public class ExplorersCompassItem extends Item {
 
 	public int getFoundStructureX(ItemStack stack) {
 		if (ItemUtils.verifyNBT(stack)) {
-			return stack.getTag().getInt("FoundX");
+			return stack.getNbt().getInt("FoundX");
 		}
 
 		return 0;
@@ -162,7 +162,7 @@ public class ExplorersCompassItem extends Item {
 
 	public int getFoundStructureZ(ItemStack stack) {
 		if (ItemUtils.verifyNBT(stack)) {
-			return stack.getTag().getInt("FoundZ");
+			return stack.getNbt().getInt("FoundZ");
 		}
 
 		return 0;
@@ -170,7 +170,7 @@ public class ExplorersCompassItem extends Item {
 
 	public Identifier getStructureID(ItemStack stack) {
 		if (ItemUtils.verifyNBT(stack)) {
-			return new Identifier(stack.getTag().getString("StructureID"));
+			return new Identifier(stack.getNbt().getString("StructureID"));
 		}
 
 		return new Identifier("");
@@ -178,7 +178,7 @@ public class ExplorersCompassItem extends Item {
 
 	public int getSearchRadius(ItemStack stack) {
 		if (ItemUtils.verifyNBT(stack)) {
-			return stack.getTag().getInt("SearchRadius");
+			return stack.getNbt().getInt("SearchRadius");
 		}
 
 		return -1;
@@ -186,7 +186,7 @@ public class ExplorersCompassItem extends Item {
 
 	public int getSamples(ItemStack stack) {
 		if (ItemUtils.verifyNBT(stack)) {
-			return stack.getTag().getInt("Samples");
+			return stack.getNbt().getInt("Samples");
 		}
 
 		return -1;
@@ -197,8 +197,8 @@ public class ExplorersCompassItem extends Item {
 	}
 	
 	public boolean shouldDisplayCoordinates(ItemStack stack) {
-		if (ItemUtils.verifyNBT(stack) && stack.getTag().contains("DisplayCoordinates")) {
-			return stack.getTag().getBoolean("DisplayCoordinates");
+		if (ItemUtils.verifyNBT(stack) && stack.getNbt().contains("DisplayCoordinates")) {
+			return stack.getNbt().getBoolean("DisplayCoordinates");
 		}
 
 		return true;

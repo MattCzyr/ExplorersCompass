@@ -7,7 +7,7 @@ import com.chaosthedude.explorerscompass.util.CompassState;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.object.builder.v1.client.model.FabricModelPredicateProviderRegistry;
-import net.minecraft.client.item.ModelPredicateProvider;
+import net.minecraft.client.item.UnclampedModelPredicateProvider;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -23,13 +23,13 @@ public class ExplorersCompassClient implements ClientModInitializer {
 	public void onInitializeClient() {
 		ClientPlayNetworking.registerGlobalReceiver(SyncPacket.ID, SyncPacket::apply);
 		
-		FabricModelPredicateProviderRegistry.register(ExplorersCompass.EXPLORERS_COMPASS_ITEM, new Identifier("angle"), new ModelPredicateProvider() {
+		FabricModelPredicateProviderRegistry.register(ExplorersCompass.EXPLORERS_COMPASS_ITEM, new Identifier("angle"), new UnclampedModelPredicateProvider() {
 			private double rotation;
 			private double rota;
 			private long lastUpdateTick;
 
 			@Override
-			public float call(ItemStack stack, ClientWorld world, LivingEntity entityLiving) {
+			public float unclampedCall(ItemStack stack, ClientWorld world, LivingEntity entityLiving, int seed) {
 				if (entityLiving == null && !stack.isInFrame()) {
 					return 0.0F;
 				} else {
@@ -39,7 +39,7 @@ public class ExplorersCompassClient implements ClientModInitializer {
 						world = (ClientWorld) entity.world;
 					}
 
-					double rotation = entityExists ? (double) entity.yaw : getFrameRotation((ItemFrameEntity) entity);
+					double rotation = entityExists ? (double) entity.getYaw() : getFrameRotation((ItemFrameEntity) entity);
 					rotation = rotation % 360.0D;
 					double adjusted = Math.PI - ((rotation - 90.0D) * 0.01745329238474369D - getAngle(world, entity, stack));
 
