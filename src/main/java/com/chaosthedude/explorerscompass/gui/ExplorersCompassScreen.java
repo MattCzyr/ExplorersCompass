@@ -44,7 +44,7 @@ public class ExplorersCompassScreen extends Screen {
 	private ISorting sortingCategory;
 
 	public ExplorersCompassScreen(World world, PlayerEntity player, ItemStack stack, ExplorersCompassItem explorersCompass, List<Structure<?>> allowedStructures) {
-		super(new StringTextComponent(I18n.format("string.explorersCompass.selectStructure")));
+		super(new TranslationTextComponent("string.explorerscompass.selectStructure"));
 		this.world = world;
 		this.player = player;
 		this.stack = stack;
@@ -91,7 +91,7 @@ public class ExplorersCompassScreen extends Screen {
 		renderBackground(stack);
 		selectionList.render(stack, mouseX, mouseY, partialTicks);
 		searchTextField.render(stack, mouseX, mouseY, partialTicks);
-		drawCenteredString(stack, font, I18n.format("string.explorerscompass.selectStructure"), 65, 15, 0xffffff);
+		drawCenteredString(stack, font, title, 65, 15, 0xffffff);
 		super.render(stack, mouseX, mouseY, partialTicks);
 	}
 
@@ -155,18 +155,18 @@ public class ExplorersCompassScreen extends Screen {
 
 	private void setupButtons() {
 		buttons.clear();
-		cancelButton = addButton(new TransparentButton(10, height - 30, 110, 20, new TranslationTextComponent("gui.cancel"), (onPress) -> {
-			minecraft.displayGuiScreen(null);
-		}));
 		startSearchButton = addButton(new TransparentButton(10, 40, 110, 20, new TranslationTextComponent("string.explorerscompass.startSearch"), (onPress) -> {
 			if (selectionList.hasSelection()) {
 				selectionList.getSelected().searchForBiome();
 			}
 		}));
-		sortByButton = addButton(new TransparentButton(10, 65, 110, 20, new StringTextComponent(I18n.format("string.explorerscompass.sortBy") + ": " + sortingCategory.getLocalizedName()), (onPress) -> {
+		sortByButton = addButton(new TransparentButton(10, 65, 110, 20, new TranslationTextComponent("string.explorerscompass.sortBy").append(new StringTextComponent(": " + sortingCategory.getLocalizedName())), (onPress) -> {
 			sortingCategory = sortingCategory.next();
-			sortByButton.setMessage(new StringTextComponent(I18n.format("string.explorerscompass.sortBy") + ": " + sortingCategory.getLocalizedName()));
+			sortByButton.setMessage(new TranslationTextComponent("string.explorerscompass.sortBy").append(new StringTextComponent(": " + sortingCategory.getLocalizedName())));
 			selectionList.refreshList();
+		}));
+		cancelButton = addButton(new TransparentButton(10, height - 30, 110, 20, new TranslationTextComponent("gui.cancel"), (onPress) -> {
+			minecraft.displayGuiScreen(null);
 		}));
 		teleportButton = addButton(new TransparentButton(width - 120, 10, 110, 20, new TranslationTextComponent("string.explorerscompass.teleport"), (onPress) -> {
 			teleport();

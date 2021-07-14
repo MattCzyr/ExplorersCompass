@@ -14,11 +14,11 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 @OnlyIn(Dist.CLIENT)
 public class StructureSearchList extends ExtendedList<StructureSearchEntry> {
 
-	private final ExplorersCompassScreen guiExplorersCompass;
+	private final ExplorersCompassScreen parentScreen;
 
-	public StructureSearchList(ExplorersCompassScreen guiExplorersCompass, Minecraft mc, int width, int height, int top, int bottom, int slotHeight) {
+	public StructureSearchList(ExplorersCompassScreen parentScreen, Minecraft mc, int width, int height, int top, int bottom, int slotHeight) {
 		super(mc, width, height, top, bottom, slotHeight);
-		this.guiExplorersCompass = guiExplorersCompass;
+		this.parentScreen = parentScreen;
 		refreshList();
 	}
 
@@ -74,7 +74,7 @@ public class StructureSearchList extends ExtendedList<StructureSearchEntry> {
 
 	public void refreshList() {
 		clearEntries();
-		for (Structure<?> structure : guiExplorersCompass.sortStructures()) {
+		for (Structure<?> structure : parentScreen.sortStructures()) {
 			addEntry(new StructureSearchEntry(this, structure));
 		}
 		selectStructure(null);
@@ -83,15 +83,15 @@ public class StructureSearchList extends ExtendedList<StructureSearchEntry> {
 
 	public void selectStructure(StructureSearchEntry entry) {
 		setSelected(entry);
-		guiExplorersCompass.selectStructure(entry);
+		parentScreen.selectStructure(entry);
 	}
 
 	public boolean hasSelection() {
 		return getSelected() != null;
 	}
 
-	public ExplorersCompassScreen getExplorersCompassGui() {
-		return guiExplorersCompass;
+	public ExplorersCompassScreen getParentScreen() {
+		return parentScreen;
 	}
 
 }
