@@ -18,11 +18,9 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.StructureFeature;
@@ -45,7 +43,7 @@ public class ExplorersCompassScreen extends Screen {
 	private ISorting sortingCategory;
 
 	public ExplorersCompassScreen(World world, PlayerEntity player, ItemStack stack, ExplorersCompassItem explorersCompass, List<StructureFeature<?>> allowedStructures) {
-		super(new TranslatableText("string.explorersCompass.selectStructure"));
+		super(new TranslatableText("string.explorerscompass.selectStructure"));
 		this.world = world;
 		this.player = player;
 		this.stack = stack;
@@ -92,7 +90,7 @@ public class ExplorersCompassScreen extends Screen {
 		renderBackground(stack);
 		selectionList.render(stack, mouseX, mouseY, partialTicks);
 		searchTextField.render(stack, mouseX, mouseY, partialTicks);
-		drawCenteredText(stack, textRenderer, I18n.translate("string.explorerscompass.selectStructure"), 65, 15, 0xffffff);
+		drawCenteredText(stack, textRenderer, title, 65, 15, 0xffffff);
 		super.render(stack, mouseX, mouseY, partialTicks);
 	}
 
@@ -156,18 +154,18 @@ public class ExplorersCompassScreen extends Screen {
 
 	private void setupButtons() {
 		buttons.clear();
-		cancelButton = addButton(new TransparentButton(10, height - 30, 110, 20, new TranslatableText("gui.cancel"), (onPress) -> {
-			client.openScreen(null);
-		}));
 		startSearchButton = addButton(new TransparentButton(10, 40, 110, 20, new TranslatableText("string.explorerscompass.startSearch"), (onPress) -> {
 			if (selectionList.hasSelection()) {
 				selectionList.getSelected().searchForBiome();
 			}
 		}));
-		sortByButton = addButton(new TransparentButton(10, 65, 110, 20, new LiteralText(I18n.translate("string.explorerscompass.sortBy") + ": " + sortingCategory.getLocalizedName()), (onPress) -> {
+		sortByButton = addButton(new TransparentButton(10, 65, 110, 20, new TranslatableText("string.explorerscompass.sortBy").append(": " + sortingCategory.getLocalizedName()), (onPress) -> {
 			sortingCategory = sortingCategory.next();
-			sortByButton.setMessage(new LiteralText(I18n.translate("string.explorerscompass.sortBy") + ": " + sortingCategory.getLocalizedName()));
+			sortByButton.setMessage(new TranslatableText("string.explorerscompass.sortBy").append(": " + sortingCategory.getLocalizedName()));
 			selectionList.refreshList();
+		}));
+		cancelButton = addButton(new TransparentButton(10, height - 30, 110, 20, new TranslatableText("gui.cancel"), (onPress) -> {
+			client.openScreen(null);
 		}));
 		teleportButton = addButton(new TransparentButton(width - 120, 10, 110, 20, new TranslatableText("string.explorerscompass.teleport"), (onPress) -> {
 			teleport();
