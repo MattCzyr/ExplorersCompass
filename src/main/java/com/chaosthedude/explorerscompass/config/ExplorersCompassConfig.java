@@ -61,7 +61,7 @@ public class ExplorersCompassConfig {
 	public static void save() {
 		try {
 			Writer writer = Files.newBufferedWriter(getFilePath());
-			Data data = new Data(new Data.Common(allowTeleport, displayCoordinates, maxSamples, maxRadius, structureBlacklist), new Data.Client(displayWithChatOpen, translateStructureNames, overlayLineOffset, overlaySide));
+			Data data = new Data(new Data.Common(allowTeleport, displayCoordinates, maxRadius, maxSamples, structureBlacklist), new Data.Client(displayWithChatOpen, translateStructureNames, overlayLineOffset, overlaySide));
 			gson.toJson(data, writer);
 			writer.close();
 		} catch (IOException e) {
@@ -105,8 +105,8 @@ public class ExplorersCompassConfig {
 			private Common() {
 				allowTeleport = true;
 				displayCoordinates = true;
-				maxSamples = 50000;
 				maxRadius = 5000;
+				maxSamples = 50000;
 				structureBlacklist = new ArrayList<String>();
 			}
 			
