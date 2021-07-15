@@ -75,7 +75,7 @@ public class StructureSearchWorker implements WorldWorkerManager.IWorker {
 
 	@Override
 	public boolean hasWork() {
-		return !finished && getRadius() <= ConfigHandler.GENERAL.maxRadius.get() && samples <= ConfigHandler.GENERAL.maxSamples.get();
+		return !finished && getRadius() < ConfigHandler.GENERAL.maxRadius.get() && samples < ConfigHandler.GENERAL.maxSamples.get();
 	}
 
 	@Override
