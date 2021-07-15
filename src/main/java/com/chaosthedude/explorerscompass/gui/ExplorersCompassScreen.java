@@ -18,11 +18,9 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.StructureFeature;
@@ -161,9 +159,9 @@ public class ExplorersCompassScreen extends Screen {
 				selectionList.getSelectedOrNull().searchForBiome();
 			}
 		}));
-		sortByButton = addDrawableChild(new TransparentButton(10, 65, 110, 20, new LiteralText(I18n.translate("string.explorerscompass.sortBy") + ": " + sortingCategory.getLocalizedName()), (onPress) -> {
+		sortByButton = addDrawableChild(new TransparentButton(10, 65, 110, 20, new TranslatableText("string.explorerscompass.sortBy").append(": " + sortingCategory.getLocalizedName()), (onPress) -> {
 			sortingCategory = sortingCategory.next();
-			sortByButton.setMessage(new LiteralText(I18n.translate("string.explorerscompass.sortBy") + ": " + sortingCategory.getLocalizedName()));
+			sortByButton.setMessage(new TranslatableText("string.explorerscompass.sortBy").append(": " + sortingCategory.getLocalizedName()));
 			selectionList.refreshList();
 		}));
 		cancelButton = addDrawableChild(new TransparentButton(10, height - 30, 110, 20, new TranslatableText("gui.cancel"), (onPress) -> {
