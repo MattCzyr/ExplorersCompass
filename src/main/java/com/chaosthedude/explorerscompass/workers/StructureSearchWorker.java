@@ -25,6 +25,7 @@ public class StructureSearchWorker implements WorldWorkerManager.IWorker {
 	public ServerWorld world;
 	public StructureFeature<?> structure;
 	public Identifier structureKey;
+	public StructureConfig structureConfig;
 	public BlockPos startPos;
 	public int samples;
 	public int nextLength;
@@ -54,11 +55,13 @@ public class StructureSearchWorker implements WorldWorkerManager.IWorker {
 		length = 0;
 		samples = 0;
 		direction = Direction.UP;
-		finished = !world.getServer().getSaveProperties().getGeneratorOptions().shouldGenerateStructures()
-				|| !world.getChunkManager().getChunkGenerator().getBiomeSource().hasStructureFeature(structure);
 		structureKey = StructureUtils.getIDForStructure(structure);
 		rand = new ChunkRandom();
 		lastRadiusThreshold = 0;
+		structureConfig = world.getChunkManager().getChunkGenerator().getStructuresConfig().getForType(structure);
+		finished = !world.getServer().getSaveProperties().getGeneratorOptions().shouldGenerateStructures()
+				|| !world.getChunkManager().getChunkGenerator().getBiomeSource().hasStructureFeature(structure)
+				|| structureConfig == null;
 	}
 
 	public void start() {
@@ -93,8 +96,7 @@ public class StructureSearchWorker implements WorldWorkerManager.IWorker {
 			x = chunkX << 4;
 			z = chunkZ << 4;
 
-			StructureConfig separationSettings = world.getChunkManager().getChunkGenerator().getStructuresConfig().getForType(structure);
-			ChunkPos chunkPos = structure.getStartChunk(separationSettings, world.getSeed(), rand, chunkX, chunkZ);
+			ChunkPos chunkPos = structure.getStartChunk(structureConfig, world.getSeed(), rand, chunkX, chunkZ);
 			Chunk chunk = world.getChunk(chunkPos.x, chunkPos.z, ChunkStatus.STRUCTURE_STARTS);
 			StructureStart<?> structureStart = world.getStructureAccessor().getStructureStart(ChunkSectionPos.from(chunk.getPos(), 0), structure, chunk);
 			if (structureStart != null && structureStart.hasChildren()) {
