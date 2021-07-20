@@ -62,6 +62,9 @@ public class StructureUtils {
 
 	@Environment(EnvType.CLIENT)
 	public static String getStructureName(StructureFeature<?> structure) {
+		if (getIDForStructure(structure) == null) {
+			return "";
+		}
 		String name = getIDForStructure(structure).toString();
 		if (ExplorersCompassConfig.translateStructureNames) {
 			name = I18n.translate(Util.createTranslationKey("structure", getIDForStructure(structure)));
