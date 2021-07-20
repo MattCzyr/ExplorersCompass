@@ -38,7 +38,7 @@ public class StructureUtils {
 	public static List<Structure<?>> getAllowedStructures() {
 		final List<Structure<?>> structures = new ArrayList<Structure<?>>();
 		for (Structure<?> structure : ForgeRegistries.STRUCTURE_FEATURES) {
-			if (structure != null && getStructureForKey(structure.getRegistryName()) != null && !structureIsBlacklisted(structure)) {
+			if (structure != null && getStructureForKey(structure.getRegistryName()) != null && getKeyForStructure(structure) != null && !structureIsBlacklisted(structure)) {
 				structures.add(structure);
 			}
 		}
@@ -61,6 +61,9 @@ public class StructureUtils {
 
 	@OnlyIn(Dist.CLIENT)
 	public static String getStructureName(Structure<?> structure) {
+		if (getKeyForStructure(structure) == null) {
+			return "";
+		}
 		String name = getKeyForStructure(structure).toString();
 		if (ConfigHandler.CLIENT.translateStructureNames.get()) {
 			name = I18n.format(Util.makeTranslationKey("structure", getKeyForStructure(structure)));
