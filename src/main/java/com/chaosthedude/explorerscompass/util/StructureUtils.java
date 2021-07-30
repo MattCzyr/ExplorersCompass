@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import net.minecraft.world.gen.ChunkGenerator;
 import org.apache.commons.lang3.text.WordUtils;
 
 import com.chaosthedude.explorerscompass.config.ConfigHandler;
@@ -103,8 +104,9 @@ public class StructureUtils {
 	public static List<ResourceLocation> getStructureDimensions(ServerWorld serverWorld, Structure<?> structure) {
 		final List<ResourceLocation> dimensions = new ArrayList<>();
 		for (ServerWorld world : serverWorld.getServer().getWorlds()) {
-				if (world.getChunkProvider().getChunkGenerator().getBiomeProvider().hasStructure(structure))
-					dimensions.add(world.getDimensionKey().getLocation());
+			ChunkGenerator chunkGenerator = world.getChunkProvider().getChunkGenerator();
+			if (chunkGenerator.func_235957_b_().func_236197_a_(structure) != null && chunkGenerator.getBiomeProvider().hasStructure(structure))
+				dimensions.add(world.getDimensionKey().getLocation());
 		}
 		return dimensions;
 	}
