@@ -24,6 +24,7 @@ import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.Registry;
+import net.minecraft.world.gen.chunk.ChunkGenerator;
 import net.minecraft.world.gen.feature.StructureFeature;
 
 public class StructureUtils {
@@ -104,8 +105,10 @@ public class StructureUtils {
 	public static List<Identifier> getStructureDimensions(ServerWorld serverWorld, StructureFeature<?> structure) {
 		final List<Identifier> dimensions = new ArrayList<>();
 		for (ServerWorld world : serverWorld.getServer().getWorlds()) {
-				if (world.getChunkManager().getChunkGenerator().getBiomeSource().hasStructureFeature(structure))
-					dimensions.add(world.getRegistryKey().getValue());
+			ChunkGenerator chunkGenerator = serverWorld.getChunkManager().getChunkGenerator();
+			if (chunkGenerator.getStructuresConfig().getForType(structure) != null && chunkGenerator.getBiomeSource().hasStructureFeature(structure)) {
+				dimensions.add(world.getRegistryKey().getValue());
+			}
 		}
 		return dimensions;
 	}
