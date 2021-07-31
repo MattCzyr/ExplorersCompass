@@ -1,13 +1,19 @@
 package com.chaosthedude.explorerscompass.items;
 
+import java.util.List;
+import java.util.Map;
+
 import com.chaosthedude.explorerscompass.ExplorersCompass;
+import com.chaosthedude.explorerscompass.config.ConfigHandler;
 import com.chaosthedude.explorerscompass.gui.GuiWrapper;
-import com.chaosthedude.explorerscompass.network.RequestSyncPacket;
+import com.chaosthedude.explorerscompass.network.SyncPacket;
 import com.chaosthedude.explorerscompass.util.CompassState;
 import com.chaosthedude.explorerscompass.util.ItemUtils;
+import com.chaosthedude.explorerscompass.util.PlayerUtils;
 import com.chaosthedude.explorerscompass.util.StructureUtils;
 
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
@@ -17,7 +23,9 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraft.world.gen.feature.structure.Structure;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.fml.network.NetworkDirection;
 
 public class ExplorersCompassItem extends Item {
 
@@ -33,8 +41,14 @@ public class ExplorersCompassItem extends Item {
 		if (!player.isCrouching()) {
 			if (world.isRemote) {
 				final ItemStack stack = ItemUtils.getHeldItem(player, ExplorersCompass.explorersCompass);
-				ExplorersCompass.network.sendToServer(new RequestSyncPacket());
 				GuiWrapper.openGUI(world, player, stack);
+			} else {
+				final ServerWorld serverWorld = (ServerWorld) world;
+				final ServerPlayerEntity serverPlayer = (ServerPlayerEntity) player;
+				final boolean canTeleport = ConfigHandler.GENERAL.allowTeleport.get() && PlayerUtils.canTeleport(player);
+				final List<Structure<?>> allowedStructures = StructureUtils.getAllowedStructures();
+				Map<Structure<?>, List<ResourceLocation>> dimensionsForAllowedStructures = StructureUtils.getDimensionsForAllowedStructures(serverWorld);
+				ExplorersCompass.network.sendTo(new SyncPacket(canTeleport, allowedStructures, dimensionsForAllowedStructures), serverPlayer.connection.getNetworkManager(), NetworkDirection.PLAY_TO_CLIENT);
 			}
 		} else {
 			setState(player.getHeldItem(hand), null, CompassState.INACTIVE, player);

@@ -12,7 +12,6 @@ import com.chaosthedude.explorerscompass.client.ClientEventHandler;
 import com.chaosthedude.explorerscompass.config.ConfigHandler;
 import com.chaosthedude.explorerscompass.items.ExplorersCompassItem;
 import com.chaosthedude.explorerscompass.network.CompassSearchPacket;
-import com.chaosthedude.explorerscompass.network.RequestSyncPacket;
 import com.chaosthedude.explorerscompass.network.SyncPacket;
 import com.chaosthedude.explorerscompass.network.TeleportPacket;
 import com.chaosthedude.explorerscompass.util.CompassState;
@@ -71,10 +70,9 @@ public class ExplorersCompass {
 		// Server packets
 		network.registerMessage(0, CompassSearchPacket.class, CompassSearchPacket::toBytes, CompassSearchPacket::new, CompassSearchPacket::handle);
 		network.registerMessage(1, TeleportPacket.class, TeleportPacket::toBytes, TeleportPacket::new, TeleportPacket::handle);
-		network.registerMessage(2, RequestSyncPacket.class, RequestSyncPacket::toBytes, RequestSyncPacket::new, RequestSyncPacket::handle);
 
 		// Client packet
-		network.registerMessage(3, SyncPacket.class, SyncPacket::toBytes, SyncPacket::new, SyncPacket::handle);
+		network.registerMessage(2, SyncPacket.class, SyncPacket::toBytes, SyncPacket::new, SyncPacket::handle);
 
 		allowedStructures = new ArrayList<Structure<?>>();
 		dimensionsForAllowedStructures = new HashMap<Structure<?>, List<ResourceLocation>>();
