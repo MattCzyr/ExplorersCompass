@@ -55,13 +55,9 @@ public class ExplorersCompass {
 	public static List<Structure<?>> allowedStructures;
 	public static Map<Structure<?>, List<ResourceLocation>> dimensionsForAllowedStructures;
 
-	public static ExplorersCompass instance;
-
 	public ExplorersCompass() {
-		instance = this;
-
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::preInit);
-		DistExecutor.runWhenOn(Dist.CLIENT, () -> () -> {
+		DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
 			FMLJavaModLoadingContext.get().getModEventBus().addListener(this::clientInit);
 		});
 		
