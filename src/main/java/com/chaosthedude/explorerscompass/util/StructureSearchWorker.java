@@ -4,46 +4,46 @@ import com.chaosthedude.explorerscompass.ExplorersCompass;
 import com.chaosthedude.explorerscompass.config.ConfigHandler;
 import com.chaosthedude.explorerscompass.items.ExplorersCompassItem;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Direction;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.SharedSeedRandom;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.SectionPos;
-import net.minecraft.world.chunk.ChunkStatus;
-import net.minecraft.world.chunk.IChunk;
-import net.minecraft.world.gen.feature.structure.Structure;
-import net.minecraft.world.gen.feature.structure.StructureStart;
-import net.minecraft.world.gen.settings.StructureSeparationSettings;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.SectionPos;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.levelgen.WorldgenRandom;
+import net.minecraft.world.level.levelgen.feature.StructureFeature;
+import net.minecraft.world.level.levelgen.feature.configurations.StructureFeatureConfiguration;
+import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraftforge.common.WorldWorkerManager;
 import net.minecraftforge.registries.ForgeRegistries;
 
 public class StructureSearchWorker implements WorldWorkerManager.IWorker {
 
-	public ServerWorld world;
-	public Structure<?> structure;
+	public ServerLevel level;
+	public StructureFeature<?> structure;
 	public ResourceLocation structureKey;
-	public StructureSeparationSettings separationSettings;
+	public StructureFeatureConfiguration structureConfig;
 	public BlockPos startPos;
 	public int samples;
 	public int nextLength;
 	public Direction direction;
 	public ItemStack stack;
-	public PlayerEntity player;
+	public Player player;
 	public int chunkX;
 	public int chunkZ;
 	public int length;
 	public boolean finished;
-	public SharedSeedRandom rand;
+	public WorldgenRandom rand;
 	public int x;
 	public int z;
 	public int lastRadiusThreshold;
 
-	public StructureSearchWorker(ServerWorld world, PlayerEntity player, ItemStack stack, Structure<?> structure, BlockPos startPos) {
-		this.world = world;
+	public StructureSearchWorker(ServerLevel world, Player player, ItemStack stack, StructureFeature<?> structure, BlockPos startPos) {
+		this.level = world;
 		this.player = player;
 		this.stack = stack;
 		this.structure = structure;
@@ -57,12 +57,12 @@ public class StructureSearchWorker implements WorldWorkerManager.IWorker {
 		samples = 0;
 		direction = Direction.UP;
 		structureKey = ForgeRegistries.STRUCTURE_FEATURES.getKey(structure);
-		rand = new SharedSeedRandom();
+		rand = new WorldgenRandom();
 		lastRadiusThreshold = 0;
-		separationSettings = world.getChunkProvider().getChunkGenerator().func_235957_b_().func_236197_a_(structure);
-		finished = !world.getServer().getServerConfiguration().getDimensionGeneratorSettings().doesGenerateFeatures()
-				|| !world.getChunkProvider().getChunkGenerator().getBiomeProvider().hasStructure(structure)
-				|| separationSettings == null;
+		structureConfig = world.getChunkSource().getGenerator().getSettings().getConfig(structure);
+		finished = !world.getServer().getWorldData().worldGenSettings().generateFeatures()
+				|| !world.getChunkSource().getGenerator().getBiomeSource().canGenerateStructure(structure)
+				|| structureConfig == null;
 	}
 
 	public void start() {
@@ -97,12 +97,12 @@ public class StructureSearchWorker implements WorldWorkerManager.IWorker {
 			x = chunkX << 4;
 			z = chunkZ << 4;
 
-			ChunkPos chunkPos = structure.getChunkPosForStructure(separationSettings, world.getSeed(), rand, chunkX, chunkZ);
-			IChunk chunk = world.getChunk(chunkPos.x, chunkPos.z, ChunkStatus.STRUCTURE_STARTS);
-			StructureStart<?> structureStart = world.func_241112_a_().getStructureStart(SectionPos.from(chunk.getPos(), 0), structure, chunk);
+			ChunkPos chunkPos = structure.getPotentialFeatureChunk(structureConfig, level.getSeed(), rand, chunkX, chunkZ);
+			ChunkAccess chunk = level.getChunk(chunkPos.x, chunkPos.z, ChunkStatus.STRUCTURE_STARTS);
+			StructureStart<?> structureStart = level.structureFeatureManager().getStartForFeature(SectionPos.bottomOf(chunk), structure, chunk);
 			if (structureStart != null && structureStart.isValid()) {
-				x = structureStart.getPos().getX();
-				z = structureStart.getPos().getZ();
+				x = structureStart.getLocatePos().getX();
+				z = structureStart.getLocatePos().getZ();
 				finish(true);
 				return true;
 			}
@@ -112,7 +112,7 @@ public class StructureSearchWorker implements WorldWorkerManager.IWorker {
 			if (length >= nextLength) {
 				if (direction != Direction.UP) {
 					nextLength++;
-					direction = direction.rotateY();
+					direction = direction.getClockWise();
 				} else {
 					direction = Direction.NORTH;
 				}

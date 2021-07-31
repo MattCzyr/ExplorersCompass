@@ -3,16 +3,16 @@ package com.chaosthedude.explorerscompass.gui;
 import java.util.Objects;
 
 import com.chaosthedude.explorerscompass.util.RenderUtils;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.widget.list.ExtendedList;
-import net.minecraft.world.gen.feature.structure.Structure;
+import net.minecraft.client.gui.components.ObjectSelectionList;
+import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
-public class StructureSearchList extends ExtendedList<StructureSearchEntry> {
+public class StructureSearchList extends ObjectSelectionList<StructureSearchEntry> {
 
 	private final ExplorersCompassScreen parentScreen;
 
@@ -34,20 +34,20 @@ public class StructureSearchList extends ExtendedList<StructureSearchEntry> {
 
 	@Override
 	protected boolean isSelectedItem(int slotIndex) {
-		return slotIndex >= 0 && slotIndex < getEventListeners().size() ? getEventListeners().get(slotIndex).equals(getSelected()) : false;
+		return slotIndex >= 0 && slotIndex < children().size() ? children().get(slotIndex).equals(getSelected()) : false;
 	}
 
 	@Override
-	public void render(MatrixStack matrixStack, int par1, int par2, float par3) {
+	public void render(PoseStack poseStack, int par1, int par2, float par3) {
 		int i = getScrollbarPosition();
 		int k = getRowLeft();
 		int l = y0 + 4 - (int) getScrollAmount();
 
-		renderList(matrixStack, k, l, par1, par2, par3);
+		renderList(poseStack, k, l, par1, par2, par3);
 	}
 
 	@Override
-	protected void renderList(MatrixStack matrixStack, int par1, int par2, int par3, int par4, float par5) {
+	protected void renderList(PoseStack poseStack, int par1, int par2, int par3, int par4, float par5) {
 		int i = getItemCount();
 		for (int j = 0; j < i; ++j) {
 			int k = getRowTop(j);
@@ -62,7 +62,7 @@ public class StructureSearchList extends ExtendedList<StructureSearchEntry> {
 				}
 
 				int j2 = getRowLeft();
-				e.render(matrixStack, j, k, j2, k1, j1, par3, par4, isMouseOver((double) par3, (double) par4) && Objects .equals(getEntryAtPosition((double) par3, (double) par4), e), par5);
+				e.render(poseStack, j, k, j2, k1, j1, par3, par4, isMouseOver((double) par3, (double) par4) && Objects .equals(getEntryAtPosition((double) par3, (double) par4), e), par5);
 			}
 		}
 
@@ -74,7 +74,7 @@ public class StructureSearchList extends ExtendedList<StructureSearchEntry> {
 
 	public void refreshList() {
 		clearEntries();
-		for (Structure<?> structure : parentScreen.sortStructures()) {
+		for (StructureFeature<?> structure : parentScreen.sortStructures()) {
 			addEntry(new StructureSearchEntry(this, structure));
 		}
 		selectStructure(null);

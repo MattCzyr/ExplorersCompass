@@ -2,17 +2,17 @@ package com.chaosthedude.explorerscompass.sorting;
 
 import java.util.Comparator;
 
-import net.minecraft.world.gen.feature.structure.Structure;
+import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
-public interface ISorting extends Comparator<Structure<?>> {
+public interface ISorting extends Comparator<StructureFeature<?>> {
 
 	@Override
-	public int compare(Structure<?> structure1, Structure<?> structure2);
+	public int compare(StructureFeature<?> structure1, StructureFeature<?> structure2);
 
-	public Object getValue(Structure<?> structure);
+	public Object getValue(StructureFeature<?> structure);
 
 	public ISorting next();
 

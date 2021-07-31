@@ -3,8 +3,8 @@ package com.chaosthedude.explorerscompass.sorting;
 import com.chaosthedude.explorerscompass.ExplorersCompass;
 import com.chaosthedude.explorerscompass.util.StructureUtils;
 
-import net.minecraft.client.resources.I18n;
-import net.minecraft.world.gen.feature.structure.Structure;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -12,12 +12,12 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class DimensionSorting implements ISorting {
 	
 	@Override
-	public int compare(Structure<?> structure1, Structure<?> structure2) {
+	public int compare(StructureFeature<?> structure1, StructureFeature<?> structure2) {
 		return StructureUtils.structureDimensionsToString(ExplorersCompass.dimensionsForAllowedStructures.get(structure1)).compareTo(StructureUtils.structureDimensionsToString(ExplorersCompass.dimensionsForAllowedStructures.get(structure2)));
 	}
 
 	@Override
-	public Object getValue(Structure<?> structure) {
+	public Object getValue(StructureFeature<?> structure) {
 		return StructureUtils.structureDimensionsToString(ExplorersCompass.dimensionsForAllowedStructures.get(structure));
 	}
 
@@ -28,7 +28,7 @@ public class DimensionSorting implements ISorting {
 
 	@Override
 	public String getLocalizedName() {
-		return I18n.format("string.explorerscompass.dimension");
+		return I18n.get("string.explorerscompass.dimension");
 	}
 
 }
