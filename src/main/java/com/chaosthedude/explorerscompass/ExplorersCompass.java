@@ -73,7 +73,7 @@ public class ExplorersCompass {
 		network.registerMessage(1, TeleportPacket.class, TeleportPacket::toBytes, TeleportPacket::new, TeleportPacket::handle);
 
 		// Client packet
-		network.registerMessage(3, SyncPacket.class, SyncPacket::toBytes, SyncPacket::new, SyncPacket::handle);
+		network.registerMessage(2, SyncPacket.class, SyncPacket::toBytes, SyncPacket::new, SyncPacket::handle);
 
 		allowedStructures = new ArrayList<StructureFeature<?>>();
 		dimensionsForAllowedStructures = new HashMap<StructureFeature<?>, List<ResourceLocation>>();
