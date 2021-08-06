@@ -105,7 +105,7 @@ public class StructureUtils {
 	public static List<Identifier> getStructureDimensions(ServerWorld serverWorld, StructureFeature<?> structure) {
 		final List<Identifier> dimensions = new ArrayList<>();
 		for (ServerWorld world : serverWorld.getServer().getWorlds()) {
-			ChunkGenerator chunkGenerator = serverWorld.getChunkManager().getChunkGenerator();
+			ChunkGenerator chunkGenerator = world.getChunkManager().getChunkGenerator();
 			if (chunkGenerator.getStructuresConfig().getForType(structure) != null && chunkGenerator.getBiomeSource().hasStructureFeature(structure)) {
 				dimensions.add(world.getRegistryKey().getValue());
 			}
