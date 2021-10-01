@@ -40,7 +40,7 @@ public class StructureUtils {
 	public static List<StructureFeature<?>> getAllowedStructures() {
 		final List<StructureFeature<?>> structures = new ArrayList<StructureFeature<?>>();
 		for (StructureFeature<?> structure : Registry.STRUCTURE_FEATURE) {
-			if (structure != null && getIDForStructure(structure) != null && !structureIsBlacklisted(structure)) {
+			if (structure != null && getIDForStructure(structure) != null && !getIDForStructure(structure).getNamespace().isEmpty() && !getIDForStructure(structure).getPath().isEmpty() &&  !structureIsBlacklisted(structure)) {
 				structures.add(structure);
 			}
 		}
