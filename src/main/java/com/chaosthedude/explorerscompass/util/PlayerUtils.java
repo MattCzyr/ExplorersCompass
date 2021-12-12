@@ -6,17 +6,14 @@ import net.minecraft.server.players.ServerOpListEntry;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.level.storage.ServerLevelData;
-import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.fmllegacy.LogicalSidedProvider;
 
 public class PlayerUtils {
 
-	public static boolean canTeleport(Player player) {
-		return cheatModeEnabled(player) || isOp(player);
+	public static boolean canTeleport(MinecraftServer server, Player player) {
+		return cheatModeEnabled(server, player) || isOp(player);
 	}
 
-	public static boolean cheatModeEnabled(Player player) {
-		final MinecraftServer server = LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);
+	public static boolean cheatModeEnabled(MinecraftServer server, Player player) {
 		if (server != null && server.isSingleplayer()) {
 			LevelData levelData = server.getLevel(player.level.dimension()).getLevelData();
 			if (levelData instanceof ServerLevelData) {

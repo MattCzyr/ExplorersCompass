@@ -5,20 +5,27 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.text.WordUtils;
 
 import com.chaosthedude.explorerscompass.config.ConfigHandler;
+import com.google.common.collect.ImmutableMultimap;
 
 import net.minecraft.Util;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -105,8 +112,20 @@ public class StructureUtils {
 		final List<ResourceLocation> dimensions = new ArrayList<>();
 		for (ServerLevel level : serverLevel.getServer().getAllLevels()) {
 			ChunkGenerator chunkGenerator = level.getChunkSource().getGenerator();
-			if (chunkGenerator.getSettings().getConfig(structure) != null && chunkGenerator.getBiomeSource().canGenerateStructure(structure))
-				dimensions.add(level.dimension().getRegistryName());
+			ImmutableMultimap<ConfiguredStructureFeature<?, ?>, ResourceKey<Biome>> multimap = chunkGenerator.getSettings().structures(structure);
+			if (chunkGenerator.getSettings().getConfig(structure) != null && !multimap.isEmpty()) {
+				Registry<Biome> registry = serverLevel.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY);
+	            Set<ResourceKey<Biome>> set = chunkGenerator.getBiomeSource().possibleBiomes().stream().flatMap((biome) -> {
+	               return registry.getResourceKey(biome).stream();
+	            }).collect(Collectors.toSet());
+	            if (!multimap.values().stream().noneMatch(set::contains)) {
+	            	dimensions.add(level.dimension().location());
+	            }
+			}
+		}
+		// Fix empty dimensions for stronghold
+		if (structure == StructureFeature.STRONGHOLD && dimensions.isEmpty()) {
+			dimensions.add(new ResourceLocation("minecraft:overworld"));
 		}
 		return dimensions;
 	}

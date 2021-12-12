@@ -25,7 +25,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
-import net.minecraftforge.fmllegacy.network.NetworkDirection;
+import net.minecraftforge.network.NetworkDirection;
 
 public class ExplorersCompassItem extends Item {
 
@@ -45,7 +45,7 @@ public class ExplorersCompassItem extends Item {
 			} else {
 				final ServerLevel serverLevel = (ServerLevel) level;
 				final ServerPlayer serverPlayer = (ServerPlayer) player;
-				final boolean canTeleport = ConfigHandler.GENERAL.allowTeleport.get() && PlayerUtils.canTeleport(player);
+				final boolean canTeleport = ConfigHandler.GENERAL.allowTeleport.get() && PlayerUtils.canTeleport(player.getServer(), player);
 				final List<StructureFeature<?>> allowedStructures = StructureUtils.getAllowedStructures();
 				Map<StructureFeature<?>, List<ResourceLocation>> dimensionsForAllowedStructures = StructureUtils.getDimensionsForAllowedStructures(serverLevel);
 				ExplorersCompass.network.sendTo(new SyncPacket(canTeleport, allowedStructures, dimensionsForAllowedStructures), serverPlayer.connection.getConnection(), NetworkDirection.PLAY_TO_CLIENT);

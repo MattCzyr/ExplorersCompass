@@ -37,7 +37,6 @@ public class StructureSearchWorker implements WorldWorkerManager.IWorker {
 	public int chunkZ;
 	public int length;
 	public boolean finished;
-	public WorldgenRandom rand;
 	public int x;
 	public int z;
 	public int lastRadiusThreshold;
@@ -57,11 +56,10 @@ public class StructureSearchWorker implements WorldWorkerManager.IWorker {
 		samples = 0;
 		direction = Direction.UP;
 		structureKey = ForgeRegistries.STRUCTURE_FEATURES.getKey(structure);
-		rand = new WorldgenRandom();
 		lastRadiusThreshold = 0;
 		structureConfig = world.getChunkSource().getGenerator().getSettings().getConfig(structure);
 		finished = !world.getServer().getWorldData().worldGenSettings().generateFeatures()
-				|| !world.getChunkSource().getGenerator().getBiomeSource().canGenerateStructure(structure)
+				|| world.getChunkSource().getGenerator().getSettings().structures(structure).isEmpty()
 				|| structureConfig == null;
 	}
 
@@ -97,12 +95,12 @@ public class StructureSearchWorker implements WorldWorkerManager.IWorker {
 			x = chunkX << 4;
 			z = chunkZ << 4;
 
-			ChunkPos chunkPos = structure.getPotentialFeatureChunk(structureConfig, level.getSeed(), rand, chunkX, chunkZ);
+			ChunkPos chunkPos = structure.getPotentialFeatureChunk(structureConfig, level.getSeed(), chunkX, chunkZ);
 			ChunkAccess chunk = level.getChunk(chunkPos.x, chunkPos.z, ChunkStatus.STRUCTURE_STARTS);
 			StructureStart<?> structureStart = level.structureFeatureManager().getStartForFeature(SectionPos.bottomOf(chunk), structure, chunk);
 			if (structureStart != null && structureStart.isValid()) {
-				x = structureStart.getLocatePos().getX();
-				z = structureStart.getLocatePos().getZ();
+				x = getLocatePos(structureStart.getChunkPos()).getX();
+				z = getLocatePos(structureStart.getChunkPos()).getZ();
 				finish(true);
 				return true;
 			}
@@ -157,5 +155,9 @@ public class StructureSearchWorker implements WorldWorkerManager.IWorker {
 	private int roundRadius(int radius, int roundTo) {
  		return ((int) radius / roundTo) * roundTo;
  	}
+	
+	private BlockPos getLocatePos(ChunkPos p_191115_) {
+		return new BlockPos(p_191115_.getMinBlockX(), 0, p_191115_.getMinBlockZ());
+	}
 
 }

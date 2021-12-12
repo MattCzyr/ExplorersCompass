@@ -63,10 +63,6 @@ public class ExplorersCompassScreen extends Screen {
 	protected void init() {
 		minecraft.keyboardHandler.setSendRepeatsToGui(true);
 		setupWidgets();
-		if (selectionList == null) {
-			selectionList = new StructureSearchList(this, minecraft, width + 110, height, 40, height, 45);
-		}
-		addRenderableWidget(selectionList);
 	}
 
 	@Override
@@ -87,8 +83,6 @@ public class ExplorersCompassScreen extends Screen {
 	@Override
 	public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
 		renderBackground(stack);
-		selectionList.render(stack, mouseX, mouseY, partialTicks);
-		searchTextField.render(stack, mouseX, mouseY, partialTicks);
 		drawCenteredString(stack, font, title, 65, 15, 0xffffff);
 		super.render(stack, mouseX, mouseY, partialTicks);
 	}
@@ -176,6 +170,11 @@ public class ExplorersCompassScreen extends Screen {
 		
 		searchTextField = new TransparentTextField(font, width / 2 - 82, 10, 140, 20, new TranslatableComponent("string.explorerscompass.search"));
 		addRenderableWidget(searchTextField);
+		
+		if (selectionList == null) {
+			selectionList = new StructureSearchList(this, minecraft, width + 110, height, 40, height, 45);
+		}
+		addRenderableWidget(selectionList);
 	}
 
 }
