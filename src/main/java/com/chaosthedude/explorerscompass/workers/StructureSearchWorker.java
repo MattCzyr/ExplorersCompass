@@ -16,7 +16,6 @@ import net.minecraft.util.math.ChunkSectionPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkStatus;
-import net.minecraft.world.gen.ChunkRandom;
 import net.minecraft.world.gen.chunk.StructureConfig;
 import net.minecraft.world.gen.feature.StructureFeature;
 
@@ -36,7 +35,6 @@ public class StructureSearchWorker implements WorldWorkerManager.IWorker {
 	public int chunkZ;
 	public int length;
 	public boolean finished;
-	public ChunkRandom rand;
 	public int x;
 	public int z;
 	public int lastRadiusThreshold;
@@ -56,11 +54,10 @@ public class StructureSearchWorker implements WorldWorkerManager.IWorker {
 		samples = 0;
 		direction = Direction.UP;
 		structureKey = StructureUtils.getIDForStructure(structure);
-		rand = new ChunkRandom();
 		lastRadiusThreshold = 0;
 		structureConfig = world.getChunkManager().getChunkGenerator().getStructuresConfig().getForType(structure);
 		finished = !world.getServer().getSaveProperties().getGeneratorOptions().shouldGenerateStructures()
-				|| !world.getChunkManager().getChunkGenerator().getBiomeSource().hasStructureFeature(structure)
+				|| world.getChunkManager().getChunkGenerator().getStructuresConfig().getConfiguredStructureFeature(structure).isEmpty()
 				|| structureConfig == null;
 	}
 
@@ -96,12 +93,12 @@ public class StructureSearchWorker implements WorldWorkerManager.IWorker {
 			x = chunkX << 4;
 			z = chunkZ << 4;
 
-			ChunkPos chunkPos = structure.getStartChunk(structureConfig, world.getSeed(), rand, chunkX, chunkZ);
+			ChunkPos chunkPos = structure.getStartChunk(structureConfig, world.getSeed(), chunkX, chunkZ);
 			Chunk chunk = world.getChunk(chunkPos.x, chunkPos.z, ChunkStatus.STRUCTURE_STARTS);
 			StructureStart<?> structureStart = world.getStructureAccessor().getStructureStart(ChunkSectionPos.from(chunk.getPos(), 0), structure, chunk);
 			if (structureStart != null && structureStart.hasChildren()) {
-				x = structureStart.getBlockPos().getX();
-				z = structureStart.getBlockPos().getZ();
+				x = getLocatePos(structureStart.getPos()).getX();
+				z = getLocatePos(structureStart.getPos()).getZ();
 				finish(true);
 				return true;
 			}
@@ -156,5 +153,9 @@ public class StructureSearchWorker implements WorldWorkerManager.IWorker {
 	private int roundRadius(int radius, int roundTo) {
  		return ((int) radius / roundTo) * roundTo;
  	}
+	
+	private BlockPos getLocatePos(ChunkPos chunkPos) {
+		return new BlockPos(chunkPos.getStartX(), 0, chunkPos.getStartZ());
+	}
 
 }
