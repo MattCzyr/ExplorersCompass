@@ -14,7 +14,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkStatus;
-import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.StructureFeatureConfiguration;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
@@ -59,8 +58,8 @@ public class StructureSearchWorker implements WorldWorkerManager.IWorker {
 		lastRadiusThreshold = 0;
 		structureConfig = world.getChunkSource().getGenerator().getSettings().getConfig(structure);
 		finished = !world.getServer().getWorldData().worldGenSettings().generateFeatures()
-				|| world.getChunkSource().getGenerator().getSettings().structures(structure).isEmpty()
-				|| structureConfig == null;
+				|| (structure != StructureFeature.STRONGHOLD && (world.getChunkSource().getGenerator().getSettings().structures(structure).isEmpty()
+				|| structureConfig == null));
 	}
 
 	public void start() {
