@@ -57,8 +57,8 @@ public class StructureSearchWorker implements WorldWorkerManager.IWorker {
 		lastRadiusThreshold = 0;
 		structureConfig = world.getChunkManager().getChunkGenerator().getStructuresConfig().getForType(structure);
 		finished = !world.getServer().getSaveProperties().getGeneratorOptions().shouldGenerateStructures()
-				|| world.getChunkManager().getChunkGenerator().getStructuresConfig().getConfiguredStructureFeature(structure).isEmpty()
-				|| structureConfig == null;
+				|| (structure != StructureFeature.STRONGHOLD && (world.getChunkManager().getChunkGenerator().getStructuresConfig().getConfiguredStructureFeature(structure).isEmpty()
+				|| structureConfig == null));
 	}
 
 	public void start() {
