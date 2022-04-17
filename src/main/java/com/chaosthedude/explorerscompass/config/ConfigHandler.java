@@ -42,7 +42,7 @@ public class ConfigHandler {
 			structureBlacklist = builder.comment(desc).define("structureBlacklist", new ArrayList<String>());
 
 			desc = "The maximum number of samples to be taken when searching for a structure.";
-			maxSamples = builder.comment(desc).defineInRange("maxSamples", 50000, 0, 1000000);
+			maxSamples = builder.comment(desc).defineInRange("maxSamples", 100000, 0, 100000000);
 
 			builder.pop();
 		}
