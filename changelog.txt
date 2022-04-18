@@ -1,4 +1,16 @@
 ------------------------------------------------------------------
+ FORGE VERSION: 1.1.3 - 1.18.1
+------------------------------------------------------------------
+1.18.1:
+ - Added Russian translations
+ - Added Japanese translations
+ - Added traditional Chinese translations
+ - Increased the maximum configurable value for samples
+ - Improved teleport functionality to place the player as close to ground level as possible
+ - Fixed a bug that caused searching for a stronghold to always return not found
+ - Fixed another crash that occurred infrequently when opening the compass GUI
+
+------------------------------------------------------------------
  FORGE VERSION: 1.1.2 - 1.18.1, 1.18, 1.17.1, 1.16.5
 ------------------------------------------------------------------
 1.18.1:
