@@ -42,13 +42,13 @@ public class SyncPacket extends PacketByteBuf {
 		
 		for (int i = 0; i < numStructures; i++) {
 			StructureFeature<?> structure = StructureUtils.getStructureForID(buf.readIdentifier());
+			int numDimensions = buf.readInt();
+			List<Identifier> dimensions = new ArrayList<Identifier>();
+			for (int j = 0; j < numDimensions; j++) {
+				dimensions.add(buf.readIdentifier());
+			}
 			if (structure != null) {
 				allowedStructures.add(structure);
-				int numDimensions = buf.readInt();
-				List<Identifier> dimensions = new ArrayList<Identifier>();
-				for (int j = 0; j < numDimensions; j++) {
-					dimensions.add(buf.readIdentifier());
-				}
 				dimensionsForAllowedStructures.put(structure, dimensions);
 			}
 		}
