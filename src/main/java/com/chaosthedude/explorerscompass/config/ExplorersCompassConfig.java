@@ -23,7 +23,7 @@ public class ExplorersCompassConfig {
 	public static boolean allowTeleport = true;
 	public static boolean displayCoordinates = true;
 	public static int maxRadius = 5000;
-	public static int maxSamples = 50000;
+	public static int maxSamples = 100000;
 	public static List<String> structureBlacklist = new ArrayList<String>();
 	
 	public static boolean displayWithChatOpen = true;
@@ -106,7 +106,7 @@ public class ExplorersCompassConfig {
 				allowTeleport = true;
 				displayCoordinates = true;
 				maxRadius = 5000;
-				maxSamples = 50000;
+				maxSamples = 100000;
 				structureBlacklist = new ArrayList<String>();
 			}
 			
