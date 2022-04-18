@@ -35,13 +35,15 @@ public class SyncPacket {
 		int numStructures = buf.readInt();
 		for (int i = 0; i < numStructures; i++) {
 			StructureFeature<?> structure = StructureUtils.getStructureForKey(buf.readResourceLocation());
-			allowedStructures.add(structure);
 			int numDimensions = buf.readInt();
 			List<ResourceLocation> dimensions = new ArrayList<ResourceLocation>();
 			for (int j = 0; j < numDimensions; j++) {
 				dimensions.add(buf.readResourceLocation());
 			}
-			dimensionsForAllowedStructures.put(structure, dimensions);
+			if (structure != null) {
+				allowedStructures.add(structure);
+				dimensionsForAllowedStructures.put(structure, dimensions);
+			}
 		}
 	}
 
