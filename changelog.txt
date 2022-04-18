@@ -10,6 +10,16 @@
  - Fixed a bug that caused searching for a stronghold to always return not found
  - Fixed another crash that occurred infrequently when opening the compass GUI
 
+
+------------------------------------------------------------------
+ FABRIC VERSION: 2.0.2 - 1.18.1, 1.18
+------------------------------------------------------------------
+1.18.1:
+ - Initial release for Fabric 1.18.1
+1.18:
+ - Initial release for Fabric 1.18
+
+
 ------------------------------------------------------------------
  FORGE VERSION: 1.1.2 - 1.18.1, 1.18, 1.17.1, 1.16.5
 ------------------------------------------------------------------
