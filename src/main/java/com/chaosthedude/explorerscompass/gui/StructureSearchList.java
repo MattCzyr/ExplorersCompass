@@ -7,7 +7,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.ObjectSelectionList;
-import net.minecraft.world.level.levelgen.feature.StructureFeature;
+import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -39,42 +39,34 @@ public class StructureSearchList extends ObjectSelectionList<StructureSearchEntr
 
 	@Override
 	public void render(PoseStack poseStack, int par1, int par2, float par3) {
-		int i = getScrollbarPosition();
-		int k = getRowLeft();
-		int l = y0 + 4 - (int) getScrollAmount();
-
-		renderList(poseStack, k, l, par1, par2, par3);
+		renderList(poseStack, getRowLeft(), y0 + 4 - (int) getScrollAmount(), par1, par2, par3);
 	}
 
 	@Override
 	protected void renderList(PoseStack poseStack, int par1, int par2, int par3, int par4, float par5) {
-		int i = getItemCount();
-		for (int j = 0; j < i; ++j) {
-			int k = getRowTop(j);
-			int l = getRowBottom(j);
-			if (l >= y0 && k <= y1) {
-				int j1 = this.itemHeight - 4;
-				StructureSearchEntry e = getEntry(j);
-				int k1 = getRowWidth();
+		for (int j = 0; j < getItemCount(); ++j) {
+			int rowTop = getRowTop(j);
+			int rowBottom = getRowBottom(j);
+			if (rowBottom >= y0 && rowTop <= y1) {
+				int j1 = itemHeight - 4;
+				StructureSearchEntry entry = getEntry(j);
 				if (/*renderSelection*/ true && isSelectedItem(j)) {
 					final int insideLeft = x0 + width / 2 - getRowWidth() / 2 + 2;
-					RenderUtils.drawRect(insideLeft - 4, k - 4, insideLeft + getRowWidth() + 4, k + itemHeight, 255 / 2 << 24);
+					RenderUtils.drawRect(insideLeft - 4, rowTop - 4, insideLeft + getRowWidth() + 4, rowTop + itemHeight, 255 / 2 << 24);
 				}
-
-				int j2 = getRowLeft();
-				e.render(poseStack, j, k, j2, k1, j1, par3, par4, isMouseOver((double) par3, (double) par4) && Objects .equals(getEntryAtPosition((double) par3, (double) par4), e), par5);
+				entry.render(poseStack, j, rowTop, getRowLeft(), getRowWidth(), j1, par3, par4, isMouseOver((double) par3, (double) par4) && Objects .equals(getEntryAtPosition((double) par3, (double) par4), entry), par5);
 			}
 		}
 
 	}
 
-	private int getRowBottom(int p_getRowBottom_1_) {
-		return this.getRowTop(p_getRowBottom_1_) + this.itemHeight;
+	private int getRowBottom(int index) {
+		return getRowTop(index) + itemHeight;
 	}
 
 	public void refreshList() {
 		clearEntries();
-		for (StructureFeature<?> structure : parentScreen.sortStructures()) {
+		for (ConfiguredStructureFeature<?, ?> structure : parentScreen.sortStructures()) {
 			addEntry(new StructureSearchEntry(this, structure));
 		}
 		selectStructure(null);

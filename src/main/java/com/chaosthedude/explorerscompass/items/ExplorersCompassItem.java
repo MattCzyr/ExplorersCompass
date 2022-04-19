@@ -1,7 +1,7 @@
 package com.chaosthedude.explorerscompass.items;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import com.chaosthedude.explorerscompass.ExplorersCompass;
 import com.chaosthedude.explorerscompass.config.ConfigHandler;
@@ -11,6 +11,7 @@ import com.chaosthedude.explorerscompass.util.CompassState;
 import com.chaosthedude.explorerscompass.util.ItemUtils;
 import com.chaosthedude.explorerscompass.util.PlayerUtils;
 import com.chaosthedude.explorerscompass.util.StructureUtils;
+import com.google.common.collect.ListMultimap;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
@@ -24,7 +25,7 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.levelgen.feature.StructureFeature;
+import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
 import net.minecraftforge.network.NetworkDirection;
 
 public class ExplorersCompassItem extends Item {
@@ -46,9 +47,9 @@ public class ExplorersCompassItem extends Item {
 				final ServerLevel serverLevel = (ServerLevel) level;
 				final ServerPlayer serverPlayer = (ServerPlayer) player;
 				final boolean canTeleport = ConfigHandler.GENERAL.allowTeleport.get() && PlayerUtils.canTeleport(player.getServer(), player);
-				final List<StructureFeature<?>> allowedStructures = StructureUtils.getAllowedStructures();
-				Map<StructureFeature<?>, List<ResourceLocation>> dimensionsForAllowedStructures = StructureUtils.getDimensionsForAllowedStructures(serverLevel);
-				ExplorersCompass.network.sendTo(new SyncPacket(canTeleport, allowedStructures, dimensionsForAllowedStructures), serverPlayer.connection.getConnection(), NetworkDirection.PLAY_TO_CLIENT);
+				final List<ResourceLocation> allowedStructures = StructureUtils.getAllowedConfiguredStructures(level);
+				ListMultimap<ResourceLocation, ResourceLocation> dimensionsForAllowedConfiguredStructures = StructureUtils.getDimensionsForAllowedConfiguredStructures(serverLevel);
+				ExplorersCompass.network.sendTo(new SyncPacket(canTeleport, allowedStructures, dimensionsForAllowedConfiguredStructures), serverPlayer.connection.getConnection(), NetworkDirection.PLAY_TO_CLIENT);
 			}
 		} else {
 			setState(player.getItemInHand(hand), null, CompassState.INACTIVE, player);
@@ -64,11 +65,15 @@ public class ExplorersCompassItem extends Item {
  		return super.shouldCauseReequipAnimation(oldStack, newStack, slotChanged);
  	}
 
-	public void searchForStructure(Level world, Player player, ResourceLocation structureKey, BlockPos pos, ItemStack stack) {
-		setSearching(stack, structureKey, player);
+	public void searchForStructure(Level level, Player player, ResourceLocation categoryKey, List<ResourceLocation> structureKeys, BlockPos pos, ItemStack stack) {
+		setSearching(stack, categoryKey, player);
 		setSearchRadius(stack, 0, player);
-		if (world instanceof ServerLevel) {
-			StructureUtils.searchForStructure((ServerLevel) world, player, stack, StructureUtils.getStructureForKey(structureKey), pos);
+		if (level instanceof ServerLevel) {
+			List<ConfiguredStructureFeature<?, ?>> configuredStructures = new ArrayList<ConfiguredStructureFeature<?, ?>>();
+			for (ResourceLocation key : structureKeys) {
+				configuredStructures.add(StructureUtils.getConfiguredStructureForKey(level, key));
+			}
+			StructureUtils.searchForStructure((ServerLevel) level, player, stack, configuredStructures, pos);
 		}
 	}
 
@@ -87,9 +92,10 @@ public class ExplorersCompassItem extends Item {
 		}
 	}
 
-	public void setFound(ItemStack stack, int x, int z, int samples, Player player) {
+	public void setFound(ItemStack stack, ResourceLocation structureKey, int x, int z, int samples, Player player) {
 		if (ItemUtils.verifyNBT(stack)) {
 			stack.getTag().putInt("State", CompassState.FOUND.getID());
+			stack.getTag().putString("StructureKey", structureKey.toString());
 			stack.getTag().putInt("FoundX", x);
 			stack.getTag().putInt("FoundZ", z);
 			stack.getTag().putInt("Samples", samples);
@@ -201,7 +207,7 @@ public class ExplorersCompassItem extends Item {
 	}
 
 	public int getDistanceToBiome(Player player, ItemStack stack) {
-		return StructureUtils.getDistanceToStructure(player, getFoundStructureX(stack), getFoundStructureZ(stack));
+		return StructureUtils.getHorizontalDistanceToLocation(player, getFoundStructureX(stack), getFoundStructureZ(stack));
 	}
 	
 	public boolean shouldDisplayCoordinates(ItemStack stack) {

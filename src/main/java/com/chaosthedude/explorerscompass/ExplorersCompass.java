@@ -1,9 +1,7 @@
 package com.chaosthedude.explorerscompass;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -15,6 +13,8 @@ import com.chaosthedude.explorerscompass.network.CompassSearchPacket;
 import com.chaosthedude.explorerscompass.network.SyncPacket;
 import com.chaosthedude.explorerscompass.network.TeleportPacket;
 import com.chaosthedude.explorerscompass.util.CompassState;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
 
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.item.ClampedItemPropertyFunction;
@@ -27,7 +27,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.MinecraftForge;
@@ -52,8 +51,8 @@ public class ExplorersCompass {
 	public static ExplorersCompassItem explorersCompass;
 
 	public static boolean canTeleport;
-	public static List<StructureFeature<?>> allowedStructures;
-	public static Map<StructureFeature<?>, List<ResourceLocation>> dimensionsForAllowedStructures;
+	public static List<ResourceLocation> allowedConfiguredStructureKeys;
+	public static ListMultimap<ResourceLocation, ResourceLocation> dimensionKeysForAllowedConfiguredStructureKeys;
 
 	public ExplorersCompass() {
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::preInit);
@@ -75,8 +74,8 @@ public class ExplorersCompass {
 		// Client packet
 		network.registerMessage(2, SyncPacket.class, SyncPacket::toBytes, SyncPacket::new, SyncPacket::handle);
 
-		allowedStructures = new ArrayList<StructureFeature<?>>();
-		dimensionsForAllowedStructures = new HashMap<StructureFeature<?>, List<ResourceLocation>>();
+		allowedConfiguredStructureKeys = new ArrayList<ResourceLocation>();
+		dimensionKeysForAllowedConfiguredStructureKeys = ArrayListMultimap.create();
 	}
 	
 	@OnlyIn(Dist.CLIENT)
