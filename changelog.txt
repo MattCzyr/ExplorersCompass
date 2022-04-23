@@ -1,4 +1,27 @@
 ------------------------------------------------------------------
+ FABRIC VERSION: 2.1.0 - 1.18.2
+------------------------------------------------------------------
+1.18.2:
+ - Initial release for Fabric 1.18.2
+ - Added a feature to allow searching for a group of related structures all at once
+
+
+------------------------------------------------------------------
+ FORGE VERSION: 1.2.1 - 1.18.2
+------------------------------------------------------------------
+1.18.2:
+ - Fixed a client crash that occurred after opening the compass GUI on a server
+
+
+------------------------------------------------------------------
+ FORGE VERSION: 1.2.0 - 1.18.2
+------------------------------------------------------------------
+1.18.2:
+ - Initial release for Forge 1.18.2
+ - Added a feature to allow searching for a group of related structures all at once
+
+
+------------------------------------------------------------------
  FABRIC VERSION: 2.0.3 - 1.18.1
 ------------------------------------------------------------------
 1.18.1:
