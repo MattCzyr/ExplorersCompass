@@ -6,24 +6,24 @@ import com.chaosthedude.explorerscompass.util.StructureUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.resource.language.I18n;
-import net.minecraft.world.gen.feature.StructureFeature;
+import net.minecraft.util.Identifier;
 
 @Environment(EnvType.CLIENT)
 public class DimensionSorting implements ISorting {
 	
 	@Override
-	public int compare(StructureFeature<?> structure1, StructureFeature<?> structure2) {
-		return StructureUtils.structureDimensionsToString(ExplorersCompass.dimensionsForAllowedStructures.get(structure1)).compareTo(StructureUtils.structureDimensionsToString(ExplorersCompass.dimensionsForAllowedStructures.get(structure2)));
+	public int compare(Identifier id1, Identifier id2) {
+		return StructureUtils.structureDimensionsToString(ExplorersCompass.allowedConfiguredStructureIDsToDimensionIDs.get(id1)).compareTo(StructureUtils.structureDimensionsToString(ExplorersCompass.allowedConfiguredStructureIDsToDimensionIDs.get(id2)));
 	}
 
 	@Override
-	public Object getValue(StructureFeature<?> structure) {
-		return StructureUtils.structureDimensionsToString(ExplorersCompass.dimensionsForAllowedStructures.get(structure));
+	public Object getValue(Identifier id) {
+		return StructureUtils.structureDimensionsToString(ExplorersCompass.allowedConfiguredStructureIDsToDimensionIDs.get(id));
 	}
 
 	@Override
 	public ISorting next() {
-		return new CategorySorting();
+		return new GroupSorting();
 	}
 
 	@Override

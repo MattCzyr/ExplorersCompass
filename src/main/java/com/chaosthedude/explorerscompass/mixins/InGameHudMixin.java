@@ -61,7 +61,7 @@ public class InGameHudMixin {
 						RenderUtils.drawConfiguredStringOnHUD(matrixStack, compass.getFoundStructureX(stack) + ", " + compass.getFoundStructureZ(stack), client.textRenderer, 5, 5, 0xAAAAAA, 7);
 
 						RenderUtils.drawConfiguredStringOnHUD(matrixStack, I18n.translate("string.explorerscompass.distance"), client.textRenderer, 5, 5, 0xFFFFFF, 9);
-						RenderUtils.drawConfiguredStringOnHUD(matrixStack, String.valueOf(StructureUtils.getDistanceToStructure(player, compass.getFoundStructureX(stack), compass.getFoundStructureZ(stack))), client.textRenderer, 5, 5, 0xAAAAAA, 10);
+						RenderUtils.drawConfiguredStringOnHUD(matrixStack, String.valueOf(StructureUtils.getHorizontalDistanceToLocation(player, compass.getFoundStructureX(stack), compass.getFoundStructureZ(stack))), client.textRenderer, 5, 5, 0xAAAAAA, 10);
 					}
 				} else if (compass.getState(stack) == CompassState.NOT_FOUND) {
 					RenderUtils.drawConfiguredStringOnHUD(matrixStack, I18n.translate("string.explorerscompass.status"), client.textRenderer, 5, 5, 0xFFFFFF, 0);

@@ -22,19 +22,20 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.TranslatableText;
+import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
-import net.minecraft.world.gen.feature.StructureFeature;
 
 @Environment(EnvType.CLIENT)
 public class ExplorersCompassScreen extends Screen {
 
 	private World world;
 	private PlayerEntity player;
-	private List<StructureFeature<?>> allowedStructures;
-	private List<StructureFeature<?>> structuresMatchingSearch;
+	private List<Identifier> allowedStructureIDs;
+	private List<Identifier> structureIDsMatchingSearch;
 	private ItemStack stack;
 	private ExplorersCompassItem explorersCompass;
-	private ButtonWidget startSearchButton;
+	private ButtonWidget searchButton;
+	private ButtonWidget searchForGroupButton;
 	private ButtonWidget sortByButton;
 	private ButtonWidget teleportButton;
 	private ButtonWidget cancelButton;
@@ -42,15 +43,15 @@ public class ExplorersCompassScreen extends Screen {
 	private StructureSearchList selectionList;
 	private ISorting sortingCategory;
 
-	public ExplorersCompassScreen(World world, PlayerEntity player, ItemStack stack, ExplorersCompassItem explorersCompass, List<StructureFeature<?>> allowedStructures) {
+	public ExplorersCompassScreen(World world, PlayerEntity player, ItemStack stack, ExplorersCompassItem explorersCompass, List<Identifier> allowedStructureIDs) {
 		super(new TranslatableText("string.explorerscompass.selectStructure"));
 		this.world = world;
 		this.player = player;
 		this.stack = stack;
 		this.explorersCompass = explorersCompass;
-		this.allowedStructures = allowedStructures;
-
-		structuresMatchingSearch = new ArrayList<StructureFeature<?>>(allowedStructures);
+		
+		this.allowedStructureIDs = new ArrayList<Identifier>(allowedStructureIDs);
+		structureIDsMatchingSearch = new ArrayList<Identifier>(allowedStructureIDs);
 		sortingCategory = new NameSorting();
 	}
 
@@ -77,22 +78,22 @@ public class ExplorersCompassScreen extends Screen {
 		teleportButton.active = explorersCompass.getState(stack) == CompassState.FOUND;
 		
 		// Check if the allowed structure list has synced
-		if (allowedStructures.size() != ExplorersCompass.allowedStructures.size()) {
+		if (allowedStructureIDs.size() != ExplorersCompass.allowedConfiguredStructureIDs.size()) {
 			remove(selectionList);
-			allowedStructures = ExplorersCompass.allowedStructures;
-			structuresMatchingSearch = new ArrayList<StructureFeature<?>>(allowedStructures);
+			allowedStructureIDs = ExplorersCompass.allowedConfiguredStructureIDs;
+			structureIDsMatchingSearch = new ArrayList<Identifier>(allowedStructureIDs);
 			selectionList = new StructureSearchList(this, client, width + 110, height, 40, height, 45);
 			addDrawableChild(selectionList);
 		}
 	}
 
 	@Override
-	public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
-		renderBackground(stack);
-		selectionList.render(stack, mouseX, mouseY, partialTicks);
-		searchTextField.render(stack, mouseX, mouseY, partialTicks);
-		drawCenteredText(stack, textRenderer, title, 65, 15, 0xffffff);
-		super.render(stack, mouseX, mouseY, partialTicks);
+	public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+		renderBackground(matrixStack);
+		selectionList.render(matrixStack, mouseX, mouseY, partialTicks);
+		searchTextField.render(matrixStack, mouseX, mouseY, partialTicks);
+		drawCenteredText(matrixStack, textRenderer, title, 65, 15, 0xffffff);
+		super.render(matrixStack, mouseX, mouseY, partialTicks);
 	}
 
 	@Override
@@ -116,18 +117,24 @@ public class ExplorersCompassScreen extends Screen {
 	}
 
 	@Override
-	public void onClose() {
-		super.onClose();
+	public void close() {
+		super.close();
 		client.keyboard.setRepeatEvents(false);
 	}
 
 	public void selectStructure(StructureSearchEntry entry) {
 		boolean enable = entry != null;
-		startSearchButton.active = enable;
+		searchButton.active = enable;
+		searchForGroupButton.active = enable;
 	}
 
-	public void searchForStructure(StructureFeature<?> structure) {
-		ClientPlayNetworking.send(SearchPacket.ID, new SearchPacket(StructureUtils.getIDForStructure(structure), player.getBlockPos()));
+	public void searchForStructure(Identifier structureID) {
+		ClientPlayNetworking.send(SearchPacket.ID, new SearchPacket(structureID, List.of(structureID), player.getBlockPos()));
+		client.setScreen(null);
+	}
+	
+	public void searchForStructureGroup(Identifier structureID) {
+		ClientPlayNetworking.send(SearchPacket.ID, new SearchPacket(structureID, ExplorersCompass.structureIDsToConfiguredStructureIDs.get(structureID), player.getBlockPos()));
 		client.setScreen(null);
 	}
 
@@ -137,29 +144,34 @@ public class ExplorersCompassScreen extends Screen {
 	}
 
 	public void processSearchTerm() {
-		structuresMatchingSearch = new ArrayList<StructureFeature<?>>();
-		for (StructureFeature<?> structure : allowedStructures) {
+		structureIDsMatchingSearch = new ArrayList<Identifier>();
+		for (Identifier structure : allowedStructureIDs) {
 			if (StructureUtils.getStructureName(structure).toLowerCase().contains(searchTextField.getText().toLowerCase())) {
-				structuresMatchingSearch.add(structure);
+				structureIDsMatchingSearch.add(structure);
 			}
 		}
 		selectionList.refreshList();
 	}
 
-	public List<StructureFeature<?>> sortStructures() {
-		final List<StructureFeature<?>> structures = structuresMatchingSearch;
+	public List<Identifier> sortStructures() {
+		final List<Identifier> structures = structureIDsMatchingSearch;
 		Collections.sort(structures, new NameSorting());
 		Collections.sort(structures, sortingCategory);
 		return structures;
 	}
 
 	private void setupButtons() {
-		startSearchButton = addDrawableChild(new TransparentButton(10, 40, 110, 20, new TranslatableText("string.explorerscompass.startSearch"), (onPress) -> {
+		searchButton = addDrawableChild(new TransparentButton(10, 40, 110, 20, new TranslatableText("string.explorerscompass.search"), (onPress) -> {
 			if (selectionList.hasSelection()) {
-				selectionList.getSelectedOrNull().searchForBiome();
+				selectionList.getSelectedOrNull().searchForStructure();
 			}
 		}));
-		sortByButton = addDrawableChild(new TransparentButton(10, 65, 110, 20, new TranslatableText("string.explorerscompass.sortBy").append(": " + sortingCategory.getLocalizedName()), (onPress) -> {
+		searchForGroupButton = addDrawableChild(new TransparentButton(10, 65, 110, 20, new TranslatableText("string.explorerscompass.searchForGroup"), (onPress) -> {
+			if (selectionList.hasSelection()) {
+				selectionList.getSelectedOrNull().searchForStructureGroup();
+			}
+		}));
+		sortByButton = addDrawableChild(new TransparentButton(10, 90, 110, 20, new TranslatableText("string.explorerscompass.sortBy").append(": " + sortingCategory.getLocalizedName()), (onPress) -> {
 			sortingCategory = sortingCategory.next();
 			sortByButton.setMessage(new TranslatableText("string.explorerscompass.sortBy").append(": " + sortingCategory.getLocalizedName()));
 			selectionList.refreshList();
@@ -171,7 +183,8 @@ public class ExplorersCompassScreen extends Screen {
 			teleport();
 		}));
 
-		startSearchButton.active = false;
+		searchButton.active = false;
+		searchForGroupButton.active = false;
 
 		teleportButton.visible = ExplorersCompass.canTeleport;
 	}

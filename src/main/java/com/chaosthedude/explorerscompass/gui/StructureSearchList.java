@@ -9,7 +9,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.widget.AlwaysSelectedEntryListWidget;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.world.gen.feature.StructureFeature;
+import net.minecraft.util.Identifier;
 
 @Environment(EnvType.CLIENT)
 public class StructureSearchList extends AlwaysSelectedEntryListWidget<StructureSearchEntry> {
@@ -68,14 +68,14 @@ public class StructureSearchList extends AlwaysSelectedEntryListWidget<Structure
 
 	}
 
-	private int getRowBottom(int p_getRowBottom_1_) {
-		return this.getRowTop(p_getRowBottom_1_) + this.itemHeight;
+	private int getRowBottom(int index) {
+		return getRowTop(index) + itemHeight;
 	}
 
 	public void refreshList() {
 		clearEntries();
-		for (StructureFeature<?> structure : parentScreen.sortStructures()) {
-			addEntry(new StructureSearchEntry(this, structure));
+		for (Identifier id : parentScreen.sortStructures()) {
+			addEntry(new StructureSearchEntry(this, id));
 		}
 		selectStructure(null);
 		setScrollAmount(0);

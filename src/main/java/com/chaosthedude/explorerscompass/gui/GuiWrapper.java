@@ -11,7 +11,7 @@ import net.minecraft.world.World;
 public class GuiWrapper {
 	
 	public static void openGUI(World world, PlayerEntity player, ItemStack stack) {
-		MinecraftClient.getInstance().setScreen(new ExplorersCompassScreen(world, player, stack, (ExplorersCompassItem) stack.getItem(), ExplorersCompass.allowedStructures));
+		MinecraftClient.getInstance().setScreen(new ExplorersCompassScreen(world, player, stack, (ExplorersCompassItem) stack.getItem(), ExplorersCompass.allowedConfiguredStructureIDs));
 	}
 
 }

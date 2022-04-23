@@ -12,12 +12,13 @@ import com.chaosthedude.explorerscompass.config.ExplorersCompassConfig;
 import com.chaosthedude.explorerscompass.items.ExplorersCompassItem;
 import com.chaosthedude.explorerscompass.network.SearchPacket;
 import com.chaosthedude.explorerscompass.network.TeleportPacket;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
-import net.minecraft.world.gen.feature.StructureFeature;
 
 public class ExplorersCompass implements ModInitializer {
 
@@ -28,8 +29,10 @@ public class ExplorersCompass implements ModInitializer {
 	public static final ExplorersCompassItem EXPLORERS_COMPASS_ITEM = new ExplorersCompassItem();
 
 	public static boolean canTeleport;
-	public static List<StructureFeature<?>> allowedStructures;
-	public static Map<StructureFeature<?>, List<Identifier>> dimensionsForAllowedStructures;
+	public static List<Identifier> allowedConfiguredStructureIDs;
+	public static ListMultimap<Identifier, Identifier> allowedConfiguredStructureIDsToDimensionIDs;
+	public static Map<Identifier, Identifier> configuredStructureIDsToStructureIDs;
+	public static ListMultimap<Identifier, Identifier> structureIDsToConfiguredStructureIDs;
 
 	@Override
 	public void onInitialize() {
@@ -40,8 +43,10 @@ public class ExplorersCompass implements ModInitializer {
 		ServerPlayNetworking.registerGlobalReceiver(SearchPacket.ID, SearchPacket::apply);
 		ServerPlayNetworking.registerGlobalReceiver(TeleportPacket.ID, TeleportPacket::apply);
 		
-		allowedStructures = new ArrayList<StructureFeature<?>>();
-		dimensionsForAllowedStructures = new HashMap<StructureFeature<?>, List<Identifier>>();
+		allowedConfiguredStructureIDs = new ArrayList<Identifier>();
+		allowedConfiguredStructureIDsToDimensionIDs = ArrayListMultimap.create();
+		configuredStructureIDsToStructureIDs = new HashMap<Identifier, Identifier>();
+		structureIDsToConfiguredStructureIDs = ArrayListMultimap.create();
 	}
 
 }

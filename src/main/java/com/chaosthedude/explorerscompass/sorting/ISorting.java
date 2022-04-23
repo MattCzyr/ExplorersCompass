@@ -4,15 +4,15 @@ import java.util.Comparator;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.world.gen.feature.StructureFeature;
+import net.minecraft.util.Identifier;
 
 @Environment(EnvType.CLIENT)
-public interface ISorting extends Comparator<StructureFeature<?>> {
+public interface ISorting extends Comparator<Identifier> {
 
 	@Override
-	public int compare(StructureFeature<?> structure1, StructureFeature<?> structure2);
+	public int compare(Identifier id1, Identifier id2);
 
-	public Object getValue(StructureFeature<?> structure);
+	public Object getValue(Identifier id);
 
 	public ISorting next();
 

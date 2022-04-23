@@ -5,19 +5,19 @@ import com.chaosthedude.explorerscompass.util.StructureUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.resource.language.I18n;
-import net.minecraft.world.gen.feature.StructureFeature;
+import net.minecraft.util.Identifier;
 
 @Environment(EnvType.CLIENT)
 public class SourceSorting implements ISorting {
 	
 	@Override
-	public int compare(StructureFeature<?> structure1, StructureFeature<?> structure2) {
-		return StructureUtils.getStructureSource(structure1).compareTo(StructureUtils.getStructureSource(structure2));
+	public int compare(Identifier id1, Identifier id2) {
+		return StructureUtils.getStructureSource(id1).compareTo(StructureUtils.getStructureSource(id2));
 	}
 
 	@Override
-	public Object getValue(StructureFeature<?> structure) {
-		return StructureUtils.getStructureSource(structure);
+	public Object getValue(Identifier id) {
+		return StructureUtils.getStructureSource(id);
 	}
 
 	@Override

@@ -1,5 +1,7 @@
 package com.chaosthedude.explorerscompass.workers;
 
+import java.util.List;
+
 import com.chaosthedude.explorerscompass.ExplorersCompass;
 import com.chaosthedude.explorerscompass.config.ExplorersCompassConfig;
 import com.chaosthedude.explorerscompass.items.ExplorersCompassItem;
@@ -9,22 +11,19 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.structure.StructureStart;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.ChunkSectionPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.world.StructurePresence;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkStatus;
-import net.minecraft.world.gen.chunk.StructureConfig;
-import net.minecraft.world.gen.feature.StructureFeature;
+import net.minecraft.world.gen.feature.ConfiguredStructureFeature;
 
 public class StructureSearchWorker implements WorldWorkerManager.IWorker {
 
 	public ServerWorld world;
-	public StructureFeature<?> structure;
-	public Identifier structureKey;
-	public StructureConfig structureConfig;
+	public List<ConfiguredStructureFeature<?, ?>> configuredStructures;
 	public BlockPos startPos;
 	public int samples;
 	public int nextLength;
@@ -39,11 +38,11 @@ public class StructureSearchWorker implements WorldWorkerManager.IWorker {
 	public int z;
 	public int lastRadiusThreshold;
 
-	public StructureSearchWorker(ServerWorld world, PlayerEntity player, ItemStack stack, StructureFeature<?> structure, BlockPos startPos) {
+	public StructureSearchWorker(ServerWorld world, PlayerEntity player, ItemStack stack, List<ConfiguredStructureFeature<?, ?>> configuredStructures, BlockPos startPos) {
 		this.world = world;
 		this.player = player;
 		this.stack = stack;
-		this.structure = structure;
+		this.configuredStructures = configuredStructures;
 		this.startPos = startPos;
 		chunkX = startPos.getX() >> 4;
 		chunkZ = startPos.getZ() >> 4;
@@ -53,12 +52,8 @@ public class StructureSearchWorker implements WorldWorkerManager.IWorker {
 		length = 0;
 		samples = 0;
 		direction = Direction.UP;
-		structureKey = StructureUtils.getIDForStructure(structure);
 		lastRadiusThreshold = 0;
-		structureConfig = world.getChunkManager().getChunkGenerator().getStructuresConfig().getForType(structure);
-		finished = !world.getServer().getSaveProperties().getGeneratorOptions().shouldGenerateStructures()
-				|| (structure != StructureFeature.STRONGHOLD && (world.getChunkManager().getChunkGenerator().getStructuresConfig().getConfiguredStructureFeature(structure).isEmpty()
-				|| structureConfig == null));
+		finished = !world.getServer().getSaveProperties().getGeneratorOptions().shouldGenerateStructures();
 	}
 
 	public void start() {
@@ -67,7 +62,7 @@ public class StructureSearchWorker implements WorldWorkerManager.IWorker {
 				ExplorersCompass.LOGGER.info("Starting search: " + ExplorersCompassConfig.maxRadius + " max radius, " + ExplorersCompassConfig.maxSamples + " max samples");
 				WorldWorkerManager.addWorker(this);
 			} else {
-				finish(false);
+				finish(null);
 			}
 		}
 	}
@@ -93,14 +88,22 @@ public class StructureSearchWorker implements WorldWorkerManager.IWorker {
 			x = chunkX << 4;
 			z = chunkZ << 4;
 
-			ChunkPos chunkPos = structure.getStartChunk(structureConfig, world.getSeed(), chunkX, chunkZ);
-			Chunk chunk = world.getChunk(chunkPos.x, chunkPos.z, ChunkStatus.STRUCTURE_STARTS);
-			StructureStart<?> structureStart = world.getStructureAccessor().getStructureStart(ChunkSectionPos.from(chunk.getPos(), 0), structure, chunk);
-			if (structureStart != null && structureStart.hasChildren()) {
-				x = getLocatePos(structureStart.getPos()).getX();
-				z = getLocatePos(structureStart.getPos()).getZ();
-				finish(true);
-				return true;
+			for (ConfiguredStructureFeature<?, ?> configuredStructure : configuredStructures) {
+				StructurePresence checkResult = world.getStructureAccessor().getStructurePresence(new ChunkPos(chunkX, chunkZ), configuredStructure, false);
+				if (checkResult != StructurePresence.START_NOT_PRESENT) {
+					if (checkResult == StructurePresence.START_PRESENT) {
+						finish(configuredStructure);
+						return true;
+					}
+					Chunk chunk = world.getChunk(chunkX, chunkZ, ChunkStatus.STRUCTURE_STARTS);
+					StructureStart structureStart = world.getStructureAccessor().getStructureStart(ChunkSectionPos.from(chunk), configuredStructure, chunk);
+					if (structureStart != null && structureStart.hasChildren()) {
+						x = getLocatePos(structureStart.getPos()).getX();
+						z = getLocatePos(structureStart.getPos()).getZ();
+						finish(configuredStructure);
+						return true;
+					}
+				}
 			}
 
 			samples++;
@@ -126,15 +129,15 @@ public class StructureSearchWorker implements WorldWorkerManager.IWorker {
 		if (hasWork()) {
 			return true;
 		}
-		finish(false);
+		finish(null);
 		return false;
 	}
 
-	private void finish(boolean found) {
+	private void finish(ConfiguredStructureFeature<?, ?> configuredStructure) {
 		if (!stack.isEmpty() && stack.getItem() == ExplorersCompass.EXPLORERS_COMPASS_ITEM) {
-			if (found) {
+			if (configuredStructure != null) {
 				ExplorersCompass.LOGGER.info("Search succeeded: " + getRadius() + " radius, " + samples + " samples");
-				((ExplorersCompassItem) stack.getItem()).setFound(stack, x, z, samples, player);
+				((ExplorersCompassItem) stack.getItem()).setFound(stack, StructureUtils.getIDForConfiguredStructure(world, configuredStructure), x, z, samples, player);
 				((ExplorersCompassItem) stack.getItem()).setDisplayCoordinates(stack, ExplorersCompassConfig.displayCoordinates);
 			} else {
 				ExplorersCompass.LOGGER.info("Search failed: " + getRadius() + " radius, " + samples + " samples");
@@ -147,7 +150,7 @@ public class StructureSearchWorker implements WorldWorkerManager.IWorker {
 	}
 
 	private int getRadius() {
-		return StructureUtils.getDistanceToStructure(startPos, x, z);
+		return StructureUtils.getHorizontalDistanceToLocation(startPos, x, z);
 	}
 	
 	private int roundRadius(int radius, int roundTo) {
