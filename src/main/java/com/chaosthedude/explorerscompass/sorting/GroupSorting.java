@@ -9,7 +9,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
-public class CategorySorting implements ISorting {
+public class GroupSorting implements ISorting {
 	
 	private static final Minecraft mc = Minecraft.getInstance();
 	

@@ -24,7 +24,7 @@ public class DimensionSorting implements ISorting {
 
 	@Override
 	public ISorting next() {
-		return new CategorySorting();
+		return new GroupSorting();
 	}
 
 	@Override
