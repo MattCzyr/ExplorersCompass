@@ -12,8 +12,8 @@ import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -22,23 +22,23 @@ public class StructureSearchEntry extends ObjectSelectionList.Entry<StructureSea
 
 	private final Minecraft mc;
 	private final ExplorersCompassScreen parentScreen;
-	private final ConfiguredStructureFeature<?, ?> configuredStructure;
+	private final ResourceLocation configuredStructureKey;
 	private final StructureSearchList structuresList;
 	private long lastClickTime;
 
-	public StructureSearchEntry(StructureSearchList structuresList, ConfiguredStructureFeature<?, ?> configuredStructure) {
+	public StructureSearchEntry(StructureSearchList structuresList, ResourceLocation configuredStructureKey) {
 		this.structuresList = structuresList;
-		this.configuredStructure = configuredStructure;
+		this.configuredStructureKey = configuredStructureKey;
 		parentScreen = structuresList.getParentScreen();
 		mc = Minecraft.getInstance();
 	}
 
 	@Override
 	public void render(PoseStack poseStack, int par1, int par2, int par3, int par4, int par5, int par6, int par7, boolean par8, float par9) {
-		mc.font.draw(poseStack, new TextComponent(StructureUtils.getConfiguredStructureName(mc.level, configuredStructure)), par3 + 1, par2 + 1, 0xffffff);
-		mc.font.draw(poseStack, new TranslatableComponent(("string.explorerscompass.source")).append(new TextComponent(": " + StructureUtils.getConfiguredStructureSource(mc.level, configuredStructure))), par3 + 1, par2 + mc.font.lineHeight + 3, 0x808080);
-		mc.font.draw(poseStack, new TranslatableComponent(("string.explorerscompass.group")).append(new TextComponent(": ")).append(new TranslatableComponent(StructureUtils.getStructureName(mc.level, configuredStructure.feature))), par3 + 1, par2 + mc.font.lineHeight + 14, 0x808080);
-		mc.font.draw(poseStack, new TranslatableComponent(("string.explorerscompass.dimension")).append(new TextComponent(": " + StructureUtils.dimensionKeysToString(ExplorersCompass.dimensionKeysForAllowedConfiguredStructureKeys.get(StructureUtils.getKeyForConfiguredStructure(mc.level, configuredStructure))))), par3 + 1, par2 + mc.font.lineHeight + 25, 0x808080);
+		mc.font.draw(poseStack, new TextComponent(StructureUtils.getPrettyStructureName(configuredStructureKey)), par3 + 1, par2 + 1, 0xffffff);
+		mc.font.draw(poseStack, new TranslatableComponent(("string.explorerscompass.source")).append(new TextComponent(": " + StructureUtils.getPrettyStructureSource(configuredStructureKey))), par3 + 1, par2 + mc.font.lineHeight + 3, 0x808080);
+		mc.font.draw(poseStack, new TranslatableComponent(("string.explorerscompass.group")).append(new TextComponent(": ")).append(new TranslatableComponent(StructureUtils.getPrettyStructureName(ExplorersCompass.configuredStructureKeysToStructureKeys.get(configuredStructureKey)))), par3 + 1, par2 + mc.font.lineHeight + 14, 0x808080);
+		mc.font.draw(poseStack, new TranslatableComponent(("string.explorerscompass.dimension")).append(new TextComponent(": " + StructureUtils.dimensionKeysToString(ExplorersCompass.dimensionKeysForAllowedConfiguredStructureKeys.get(configuredStructureKey)))), par3 + 1, par2 + mc.font.lineHeight + 25, 0x808080);
 		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 	}
 
@@ -59,17 +59,17 @@ public class StructureSearchEntry extends ObjectSelectionList.Entry<StructureSea
 	
 	@Override
 	public Component getNarration() {
-		return new TextComponent(StructureUtils.getConfiguredStructureName(mc.level, configuredStructure));
+		return new TextComponent(StructureUtils.getPrettyStructureName(configuredStructureKey));
 	}
 
 	public void searchForStructure() {
 		mc.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
-		parentScreen.searchForStructure(configuredStructure);
+		parentScreen.searchForStructure(configuredStructureKey);
 	}
 	
 	public void searchForGroup() {
 		mc.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
-		parentScreen.searchForGroup(configuredStructure.feature);
+		parentScreen.searchForGroup(ExplorersCompass.configuredStructureKeysToStructureKeys.get(configuredStructureKey));
 	}
 
 }

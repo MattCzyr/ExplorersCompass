@@ -22,8 +22,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
-import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -32,8 +30,8 @@ public class ExplorersCompassScreen extends Screen {
 
 	private Level level;
 	private Player player;
-	private List<ConfiguredStructureFeature<?, ?>> allowedConfiguredStructures;
-	private List<ConfiguredStructureFeature<?, ?>> configuredStructuresMatchingSearch;
+	private List<ResourceLocation> allowedConfiguredStructures;
+	private List<ResourceLocation> configuredStructuresMatchingSearch;
 	private ItemStack stack;
 	private ExplorersCompassItem explorersCompass;
 	private Button searchButton;
@@ -51,9 +49,9 @@ public class ExplorersCompassScreen extends Screen {
 		this.player = player;
 		this.stack = stack;
 		this.explorersCompass = explorersCompass;
-		loadAllowedConfiguredStructures(allowedConfiguredStructures);
-
-		configuredStructuresMatchingSearch = new ArrayList<ConfiguredStructureFeature<?, ?>>(this.allowedConfiguredStructures);
+		
+		this.allowedConfiguredStructures = new ArrayList<ResourceLocation>(allowedConfiguredStructures);
+		configuredStructuresMatchingSearch = new ArrayList<ResourceLocation>(this.allowedConfiguredStructures);
 		sortingCategory = new NameSorting();
 	}
 
@@ -76,8 +74,8 @@ public class ExplorersCompassScreen extends Screen {
 		// Check if the allowed structure list has synced
 		if (allowedConfiguredStructures.size() != ExplorersCompass.allowedConfiguredStructureKeys.size()) {
 			removeWidget(selectionList);
-			loadAllowedConfiguredStructures(ExplorersCompass.allowedConfiguredStructureKeys);
-			configuredStructuresMatchingSearch = new ArrayList<ConfiguredStructureFeature<?, ?>>(allowedConfiguredStructures);
+			allowedConfiguredStructures = new ArrayList<ResourceLocation>(ExplorersCompass.allowedConfiguredStructureKeys);
+			configuredStructuresMatchingSearch = new ArrayList<ResourceLocation>(allowedConfiguredStructures);
 			selectionList = new StructureSearchList(this, minecraft, width + 110, height, 40, height, 45);
 			addRenderableWidget(selectionList);
 		}
@@ -122,14 +120,13 @@ public class ExplorersCompassScreen extends Screen {
 		searchGroupButton.active = enable;
 	}
 
-	public void searchForStructure(ConfiguredStructureFeature<?, ?> structure) {
-		ResourceLocation key = StructureUtils.getKeyForConfiguredStructure(level, structure);
+	public void searchForStructure(ResourceLocation key) {
 		ExplorersCompass.network.sendToServer(new CompassSearchPacket(key, List.of(key), player.blockPosition()));
 		minecraft.setScreen(null);
 	}
 	
-	public void searchForGroup(StructureFeature<?> structure) {
-		ExplorersCompass.network.sendToServer(new CompassSearchPacket(StructureUtils.getKeyForStructure(level, structure), StructureUtils.getConfiguredStructureKeys(level, StructureUtils.getKeyForStructure(level, structure)), player.blockPosition()));
+	public void searchForGroup(ResourceLocation key) {
+		ExplorersCompass.network.sendToServer(new CompassSearchPacket(key, ExplorersCompass.structureKeysToConfiguredStructureKeys.get(key), player.blockPosition()));
 		minecraft.setScreen(null);
 	}
 
@@ -139,27 +136,20 @@ public class ExplorersCompassScreen extends Screen {
 	}
 
 	public void processSearchTerm() {
-		configuredStructuresMatchingSearch = new ArrayList<ConfiguredStructureFeature<?, ?>>();
-		for (ConfiguredStructureFeature<?, ?> configuredStructure : allowedConfiguredStructures) {
-			if (StructureUtils.getConfiguredStructureName(level, configuredStructure).toLowerCase().contains(searchTextField.getValue().toLowerCase())) {
-				configuredStructuresMatchingSearch.add(configuredStructure);
+		configuredStructuresMatchingSearch = new ArrayList<ResourceLocation>();
+		for (ResourceLocation key : allowedConfiguredStructures) {
+			if (StructureUtils.getPrettyStructureName(key).toLowerCase().contains(searchTextField.getValue().toLowerCase())) {
+				configuredStructuresMatchingSearch.add(key);
 			}
 		}
 		selectionList.refreshList();
 	}
 
-	public List<ConfiguredStructureFeature<?, ?>> sortStructures() {
-		final List<ConfiguredStructureFeature<?, ?>> structures = configuredStructuresMatchingSearch;
+	public List<ResourceLocation> sortStructures() {
+		final List<ResourceLocation> structures = configuredStructuresMatchingSearch;
 		Collections.sort(structures, new NameSorting());
 		Collections.sort(structures, sortingCategory);
 		return structures;
-	}
-	
-	private void loadAllowedConfiguredStructures(List<ResourceLocation> allowedConfiguredStructureKeys) {
-		allowedConfiguredStructures = new ArrayList<ConfiguredStructureFeature<?, ?>>();
-		for (ResourceLocation structureKey : allowedConfiguredStructureKeys) {
-			allowedConfiguredStructures.add(StructureUtils.getConfiguredStructureForKey(level, structureKey));
-		}
 	}
 
 	private void setupWidgets() {

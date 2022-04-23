@@ -1,8 +1,10 @@
 package com.chaosthedude.explorerscompass.util;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -34,43 +36,31 @@ import net.minecraftforge.fml.ModList;
 
 public class StructureUtils {
 	
-	private static ListMultimap<ResourceLocation, ResourceLocation> structureKeysToConfiguredStructureKeys;
-	private static ListMultimap<StructureFeature<?>, ConfiguredStructureFeature<?, ?>> structuresToConfiguredStructures;
-	
-	public static List<ResourceLocation> getConfiguredStructureKeys(Level level, ResourceLocation structureKey) {
-		if (structureKeysToConfiguredStructureKeys == null) {
-			loadStructureMaps(level);
-		}
-		return structureKeysToConfiguredStructureKeys.get(structureKey);
-	}
-	
-	public static List<ConfiguredStructureFeature<?, ?>> getConfiguredStructures(Level level, StructureFeature<?> structure) {
-		if (structuresToConfiguredStructures == null) {
-			loadStructureMaps(level);
-		}
-		return structuresToConfiguredStructures.get(structure);
-	}
-	
-	private static void loadStructureMaps(Level level) {
-		structureKeysToConfiguredStructureKeys = ArrayListMultimap.create();
-		structuresToConfiguredStructures = ArrayListMultimap.create();
+	public static ListMultimap<ResourceLocation, ResourceLocation> getStructureKeysToConfiguredStructureKeys(ServerLevel level) {
+		ListMultimap<ResourceLocation, ResourceLocation> structureKeysToConfiguredStructureKeys = ArrayListMultimap.create();
 		for (ConfiguredStructureFeature<?, ?> configuredStructure : getConfiguredStructureRegistry(level)) {
-			if (configuredStructure != null && getKeyForConfiguredStructure(level, configuredStructure) != null) {
-				structureKeysToConfiguredStructureKeys.put(getKeyForStructure(level, configuredStructure.feature), getKeyForConfiguredStructure(level, configuredStructure));
-				structuresToConfiguredStructures.put(configuredStructure.feature, configuredStructure);
-			}
+			structureKeysToConfiguredStructureKeys.put(getKeyForStructure(level, configuredStructure.feature), getKeyForConfiguredStructure(level, configuredStructure));
 		}
+		return structureKeysToConfiguredStructureKeys;
 	}
 	
-	public static Registry<ConfiguredStructureFeature<?, ?>> getConfiguredStructureRegistry(Level level) {
+	public static Map<ResourceLocation, ResourceLocation> getConfiguredStructureKeysToStructureKeys(ServerLevel level) {
+		Map<ResourceLocation, ResourceLocation> configuredStructureKeysToStructureKeys = new HashMap<ResourceLocation, ResourceLocation>();
+		for (ConfiguredStructureFeature<?, ?> configuredStructure : getConfiguredStructureRegistry(level)) {
+			configuredStructureKeysToStructureKeys.put(getKeyForConfiguredStructure(level, configuredStructure), getKeyForStructure(level, configuredStructure.feature));
+		}
+		return configuredStructureKeysToStructureKeys;
+	}
+	
+	public static Registry<ConfiguredStructureFeature<?, ?>> getConfiguredStructureRegistry(ServerLevel level) {
 		return level.registryAccess().ownedRegistryOrThrow(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY);
 	}
 
-	public static ResourceLocation getKeyForConfiguredStructure(Level level, ConfiguredStructureFeature<?, ?> structure) {
+	public static ResourceLocation getKeyForConfiguredStructure(ServerLevel level, ConfiguredStructureFeature<?, ?> structure) {
 		return getConfiguredStructureRegistry(level).getKey(structure);
 	}
 
-	public static ConfiguredStructureFeature<?, ?> getConfiguredStructureForKey(Level level, ResourceLocation key) {
+	public static ConfiguredStructureFeature<?, ?> getConfiguredStructureForKey(ServerLevel level, ResourceLocation key) {
 		return getConfiguredStructureRegistry(level).get(key);
 	}
 	
@@ -78,18 +68,17 @@ public class StructureUtils {
 		return structure.getRegistryName();
 	}
 
-	public static List<ResourceLocation> getAllowedConfiguredStructures(Level level) {
+	public static List<ResourceLocation> getAllowedConfiguredStructureKeys(ServerLevel level) {
 		final List<ResourceLocation> structures = new ArrayList<ResourceLocation>();
 		for (ConfiguredStructureFeature<?, ?> structure : getConfiguredStructureRegistry(level)) {
 			if (structure != null && getKeyForConfiguredStructure(level, structure) != null && !configuredStructureIsBlacklisted(level, structure)) {
 				structures.add(getKeyForConfiguredStructure(level, structure));
 			}
 		}
-
 		return structures;
 	}
 	
-	public static boolean configuredStructureIsBlacklisted(Level level, ConfiguredStructureFeature<?, ?> structure) {
+	public static boolean configuredStructureIsBlacklisted(ServerLevel level, ConfiguredStructureFeature<?, ?> structure) {
 		final List<String> structureBlacklist = ConfigHandler.GENERAL.structureBlacklist.get();
 		for (String structureKey : structureBlacklist) {
 			if (getKeyForConfiguredStructure(level, structure).toString().matches(convertToRegex(structureKey))) {
@@ -104,66 +93,7 @@ public class StructureUtils {
 		worker.start();
 	}
 
-	public static int getHorizontalDistanceToLocation(Player player, int x, int z) {
-		return getHorizontalDistanceToLocation(player.blockPosition(), x, z);
-	}
-
-	public static int getHorizontalDistanceToLocation(BlockPos startPos, int x, int z) {
-		return (int) Mth.sqrt((float) startPos.distSqr(new BlockPos(x, startPos.getY(), z)));
-	}
-
-	@OnlyIn(Dist.CLIENT)
-	public static String getConfiguredStructureName(Level level, ConfiguredStructureFeature<?, ?> configuredStructure) {
-		ResourceLocation key = getKeyForConfiguredStructure(level, configuredStructure);
-		if (key == null) {
-			return "";
-		}
-		return getGenericStructureName(level, key);
-	}
-	
-	@OnlyIn(Dist.CLIENT)
-	public static String getStructureName(Level level, StructureFeature<?> structure) {
-		ResourceLocation key = getKeyForStructure(level, structure);
-		if (key == null) {
-			return "";
-		}
-		return getGenericStructureName(level, key);
-	}
-
-	@OnlyIn(Dist.CLIENT)
-	public static String getGenericStructureName(Level level, ResourceLocation key) {
-		String name = key.toString();
-		if (ConfigHandler.CLIENT.translateStructureNames.get()) {
-			name = I18n.get(Util.makeDescriptionId("structure", key));
-		}
-		if (name.equals(Util.makeDescriptionId("structure", key)) || !ConfigHandler.CLIENT.translateStructureNames.get()) {
-			name = key.toString();
-			if (name.contains(":")) {
-				name = name.substring(name.indexOf(":") + 1);
-			}
-			name = WordUtils.capitalize(name.replace('_', ' '));
-		}
-		return name;
-	}
-
-	@OnlyIn(Dist.CLIENT)
-	public static String getConfiguredStructureSource(Level level, ConfiguredStructureFeature<?, ?> structure) {
-		if (getKeyForConfiguredStructure(level, structure) == null) {
-			return "";
-		}
-		String registryEntry = getKeyForConfiguredStructure(level, structure).toString();
-		String modid = registryEntry.substring(0, registryEntry.indexOf(":"));
-		if (modid.equals("minecraft")) {
-			return "Minecraft";
-		}
-		Optional<? extends ModContainer> sourceContainer = ModList.get().getModContainerById(modid);
-		if (sourceContainer.isPresent()) {
-			return sourceContainer.get().getModInfo().getDisplayName();
-		}
-		return modid;
-	}
-
-	public static List<ResourceLocation> getConfiguredStructureDimensions(ServerLevel serverLevel, ConfiguredStructureFeature<?, ?> structure) {
+	public static List<ResourceLocation> getGeneratingDimensionKeys(ServerLevel serverLevel, ConfiguredStructureFeature<?, ?> structure) {
 		final List<ResourceLocation> dimensions = new ArrayList<ResourceLocation>();
 		for (ServerLevel level : serverLevel.getServer().getAllLevels()) {
 			ChunkGenerator chunkGenerator = level.getChunkSource().getGenerator();
@@ -179,13 +109,54 @@ public class StructureUtils {
 		return dimensions;
 	}
 
-	public static ListMultimap<ResourceLocation, ResourceLocation> getDimensionsForAllowedConfiguredStructures(ServerLevel serverLevel) {
+	public static ListMultimap<ResourceLocation, ResourceLocation> getGeneratingDimensionsForAllowedConfiguredStructures(ServerLevel serverLevel) {
 		ListMultimap<ResourceLocation, ResourceLocation> dimensionsForAllowedConfiguredStructures = ArrayListMultimap.create();
-		for (ResourceLocation structureKey : getAllowedConfiguredStructures(serverLevel)) {
+		for (ResourceLocation structureKey : getAllowedConfiguredStructureKeys(serverLevel)) {
 			ConfiguredStructureFeature<?, ?> structure = getConfiguredStructureForKey(serverLevel, structureKey);
-			dimensionsForAllowedConfiguredStructures.putAll(structureKey, getConfiguredStructureDimensions(serverLevel, structure));
+			dimensionsForAllowedConfiguredStructures.putAll(structureKey, getGeneratingDimensionKeys(serverLevel, structure));
 		}
 		return dimensionsForAllowedConfiguredStructures;
+	}
+	
+	public static int getHorizontalDistanceToLocation(Player player, int x, int z) {
+		return getHorizontalDistanceToLocation(player.blockPosition(), x, z);
+	}
+
+	public static int getHorizontalDistanceToLocation(BlockPos startPos, int x, int z) {
+		return (int) Mth.sqrt((float) startPos.distSqr(new BlockPos(x, startPos.getY(), z)));
+	}
+	
+	@OnlyIn(Dist.CLIENT)
+	public static String getPrettyStructureName(ResourceLocation key) {
+		String name = key.toString();
+		if (ConfigHandler.CLIENT.translateStructureNames.get()) {
+			name = I18n.get(Util.makeDescriptionId("structure", key));
+		}
+		if (name.equals(Util.makeDescriptionId("structure", key)) || !ConfigHandler.CLIENT.translateStructureNames.get()) {
+			name = key.toString();
+			if (name.contains(":")) {
+				name = name.substring(name.indexOf(":") + 1);
+			}
+			name = WordUtils.capitalize(name.replace('_', ' '));
+		}
+		return name;
+	}
+
+	@OnlyIn(Dist.CLIENT)
+	public static String getPrettyStructureSource(ResourceLocation key) {
+		if (key == null) {
+			return "";
+		}
+		String registryEntry = key.toString();
+		String modid = registryEntry.substring(0, registryEntry.indexOf(":"));
+		if (modid.equals("minecraft")) {
+			return "Minecraft";
+		}
+		Optional<? extends ModContainer> sourceContainer = ModList.get().getModContainerById(modid);
+		if (sourceContainer.isPresent()) {
+			return sourceContainer.get().getModInfo().getDisplayName();
+		}
+		return modid;
 	}
 
 	@OnlyIn(Dist.CLIENT)

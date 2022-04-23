@@ -1,7 +1,9 @@
 package com.chaosthedude.explorerscompass;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -53,7 +55,9 @@ public class ExplorersCompass {
 	public static boolean canTeleport;
 	public static List<ResourceLocation> allowedConfiguredStructureKeys;
 	public static ListMultimap<ResourceLocation, ResourceLocation> dimensionKeysForAllowedConfiguredStructureKeys;
-
+	public static Map<ResourceLocation, ResourceLocation> configuredStructureKeysToStructureKeys;
+	public static ListMultimap<ResourceLocation, ResourceLocation> structureKeysToConfiguredStructureKeys;
+	
 	public ExplorersCompass() {
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::preInit);
 		DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
@@ -76,6 +80,8 @@ public class ExplorersCompass {
 
 		allowedConfiguredStructureKeys = new ArrayList<ResourceLocation>();
 		dimensionKeysForAllowedConfiguredStructureKeys = ArrayListMultimap.create();
+		configuredStructureKeysToStructureKeys = new HashMap<ResourceLocation, ResourceLocation>();
+		structureKeysToConfiguredStructureKeys = ArrayListMultimap.create();
 	}
 	
 	@OnlyIn(Dist.CLIENT)

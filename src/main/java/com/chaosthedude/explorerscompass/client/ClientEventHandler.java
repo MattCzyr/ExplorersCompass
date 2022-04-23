@@ -38,7 +38,7 @@ public class ClientEventHandler {
 					RenderUtils.drawConfiguredStringOnHUD(poseStack, I18n.get("string.explorerscompass.searching"), 5, 5, 0xAAAAAA, 1);
 
 					RenderUtils.drawConfiguredStringOnHUD(poseStack, I18n.get("string.explorerscompass.structure"), 5, 5, 0xFFFFFF, 3);
-					RenderUtils.drawConfiguredStringOnHUD(poseStack, StructureUtils.getGenericStructureName(mc.level, compass.getStructureKey(stack)), 5, 5, 0xAAAAAA, 4);
+					RenderUtils.drawConfiguredStringOnHUD(poseStack, StructureUtils.getPrettyStructureName(compass.getStructureKey(stack)), 5, 5, 0xAAAAAA, 4);
 					
 					RenderUtils.drawConfiguredStringOnHUD(poseStack, I18n.get("string.explorerscompass.radius"), 5, 5, 0xFFFFFF, 6);
  					RenderUtils.drawConfiguredStringOnHUD(poseStack, String.valueOf(compass.getSearchRadius(stack)), 5, 5, 0xAAAAAA, 7);
@@ -47,7 +47,7 @@ public class ClientEventHandler {
 					RenderUtils.drawConfiguredStringOnHUD(poseStack, I18n.get("string.explorerscompass.found"), 5, 5, 0xAAAAAA, 1);
 
 					RenderUtils.drawConfiguredStringOnHUD(poseStack, I18n.get("string.explorerscompass.structure"), 5, 5, 0xFFFFFF, 3);
-					RenderUtils.drawConfiguredStringOnHUD(poseStack, StructureUtils.getGenericStructureName(mc.level, compass.getStructureKey(stack)), 5, 5, 0xAAAAAA, 4);
+					RenderUtils.drawConfiguredStringOnHUD(poseStack, StructureUtils.getPrettyStructureName(compass.getStructureKey(stack)), 5, 5, 0xAAAAAA, 4);
 
 					if (compass.shouldDisplayCoordinates(stack)) {
 						RenderUtils.drawConfiguredStringOnHUD(poseStack, I18n.get("string.explorerscompass.coordinates"), 5, 5, 0xFFFFFF, 6);
@@ -61,7 +61,7 @@ public class ClientEventHandler {
 					RenderUtils.drawConfiguredStringOnHUD(poseStack, I18n.get("string.explorerscompass.notFound"), 5, 5, 0xAAAAAA, 1);
 
 					RenderUtils.drawConfiguredStringOnHUD(poseStack, I18n.get("string.explorerscompass.structure"), 5, 5, 0xFFFFFF, 3);
-					RenderUtils.drawConfiguredStringOnHUD(poseStack, StructureUtils.getGenericStructureName(mc.level, compass.getStructureKey(stack)), 5, 5, 0xAAAAAA, 4);
+					RenderUtils.drawConfiguredStringOnHUD(poseStack, StructureUtils.getPrettyStructureName(compass.getStructureKey(stack)), 5, 5, 0xAAAAAA, 4);
 
 					RenderUtils.drawConfiguredStringOnHUD(poseStack, I18n.get("string.explorerscompass.radius"), 5, 5, 0xFFFFFF, 6);
 					RenderUtils.drawConfiguredStringOnHUD(poseStack, String.valueOf(compass.getSearchRadius(stack)), 5, 5, 0xAAAAAA, 7);

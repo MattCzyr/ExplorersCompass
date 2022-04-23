@@ -47,9 +47,9 @@ public class ExplorersCompassItem extends Item {
 				final ServerLevel serverLevel = (ServerLevel) level;
 				final ServerPlayer serverPlayer = (ServerPlayer) player;
 				final boolean canTeleport = ConfigHandler.GENERAL.allowTeleport.get() && PlayerUtils.canTeleport(player.getServer(), player);
-				final List<ResourceLocation> allowedStructures = StructureUtils.getAllowedConfiguredStructures(level);
-				ListMultimap<ResourceLocation, ResourceLocation> dimensionsForAllowedConfiguredStructures = StructureUtils.getDimensionsForAllowedConfiguredStructures(serverLevel);
-				ExplorersCompass.network.sendTo(new SyncPacket(canTeleport, allowedStructures, dimensionsForAllowedConfiguredStructures), serverPlayer.connection.getConnection(), NetworkDirection.PLAY_TO_CLIENT);
+				final List<ResourceLocation> allowedStructures = StructureUtils.getAllowedConfiguredStructureKeys(serverLevel);
+				ListMultimap<ResourceLocation, ResourceLocation> dimensionsForAllowedConfiguredStructures = StructureUtils.getGeneratingDimensionsForAllowedConfiguredStructures(serverLevel);
+				ExplorersCompass.network.sendTo(new SyncPacket(canTeleport, allowedStructures, dimensionsForAllowedConfiguredStructures, StructureUtils.getConfiguredStructureKeysToStructureKeys(serverLevel), StructureUtils.getStructureKeysToConfiguredStructureKeys(serverLevel)), serverPlayer.connection.getConnection(), NetworkDirection.PLAY_TO_CLIENT);
 			}
 		} else {
 			setState(player.getItemInHand(hand), null, CompassState.INACTIVE, player);
@@ -69,11 +69,12 @@ public class ExplorersCompassItem extends Item {
 		setSearching(stack, categoryKey, player);
 		setSearchRadius(stack, 0, player);
 		if (level instanceof ServerLevel) {
+			ServerLevel serverLevel = (ServerLevel) level;
 			List<ConfiguredStructureFeature<?, ?>> configuredStructures = new ArrayList<ConfiguredStructureFeature<?, ?>>();
 			for (ResourceLocation key : structureKeys) {
-				configuredStructures.add(StructureUtils.getConfiguredStructureForKey(level, key));
+				configuredStructures.add(StructureUtils.getConfiguredStructureForKey(serverLevel, key));
 			}
-			StructureUtils.searchForStructure((ServerLevel) level, player, stack, configuredStructures, pos);
+			StructureUtils.searchForStructure(serverLevel, player, stack, configuredStructures, pos);
 		}
 	}
 

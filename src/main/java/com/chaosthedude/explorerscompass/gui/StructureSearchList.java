@@ -7,7 +7,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.ObjectSelectionList;
-import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -66,8 +66,8 @@ public class StructureSearchList extends ObjectSelectionList<StructureSearchEntr
 
 	public void refreshList() {
 		clearEntries();
-		for (ConfiguredStructureFeature<?, ?> structure : parentScreen.sortStructures()) {
-			addEntry(new StructureSearchEntry(this, structure));
+		for (ResourceLocation key : parentScreen.sortStructures()) {
+			addEntry(new StructureSearchEntry(this, key));
 		}
 		selectStructure(null);
 		setScrollAmount(0);
