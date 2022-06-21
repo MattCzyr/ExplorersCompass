@@ -1,5 +1,5 @@
 modLoader="javafml"
-loaderVersion="[40,)"
+loaderVersion="[41,)"
 license="CC BY-NC-SA 4.0"
 issueTrackerURL="https://github.com/MattCzyr/ExplorersCompass/issues"
 [[mods]]
@@ -15,12 +15,12 @@ issueTrackerURL="https://github.com/MattCzyr/ExplorersCompass/issues"
 [[dependencies.explorerscompass]]
     modId="forge"
     mandatory=true
-    versionRange="[40,)"
+    versionRange="[41,)"
     ordering="NONE"
     side="BOTH"
 [[dependencies.explorerscompass]]
     modId="minecraft"
     mandatory=true
-    versionRange="[1.18.2,)"
+    versionRange="[1.19,)"
     ordering="NONE"
     side="BOTH"

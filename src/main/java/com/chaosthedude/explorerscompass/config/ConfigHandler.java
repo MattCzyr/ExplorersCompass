@@ -2,6 +2,7 @@ package com.chaosthedude.explorerscompass.config;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import com.chaosthedude.explorerscompass.client.OverlaySide;
 
@@ -24,6 +25,7 @@ public class ConfigHandler {
 		public final ForgeConfigSpec.IntValue maxRadius;
 		public final ForgeConfigSpec.ConfigValue<List<String>> structureBlacklist;
 		public final ForgeConfigSpec.IntValue maxSamples;
+		public final ForgeConfigSpec.ConfigValue<List<List<String>>> structureGroupOverrides;
 
 		General(ForgeConfigSpec.Builder builder) {
 			String desc;
@@ -38,11 +40,14 @@ public class ConfigHandler {
 			desc = "The maximum radius that will be searched for a structure. Raising this value will increase search accuracy but will potentially make the process more resource intensive.";
 			maxRadius = builder.comment(desc).defineInRange("maxRadius", 5000, 0, 1000000);
 
-			desc = "A list of structures that the compass will not be able to search for, specified by resource location. The wildcard character * can be used to match any number of characters, and ? can be used to match one character. Ex: [\"minecraft:stronghold\", \"minecraft:endcity\", \"minecraft:*village*\"]";
+			desc = "A list of structures that the compass will not display in the GUI and will not be able to search for. Wildcard character * can be used to match any number of characters, and ? can be used to match one character. Ex: [\"minecraft:stronghold\", \"minecraft:endcity\", \"minecraft:*village*\"]";
 			structureBlacklist = builder.comment(desc).define("structureBlacklist", new ArrayList<String>());
 
 			desc = "The maximum number of samples to be taken when searching for a structure.";
 			maxSamples = builder.comment(desc).defineInRange("maxSamples", 100000, 0, 100000000);
+			
+			desc = "A map of structures to groups to override their default group with. Can be used for structures that belong to generic default groups, like putting village structures in the village group instead of the jigsaw group. Wildcard characters * and ? can be used. Ex: [[\"minecraft:*village*\", \"minecraft:village\"], [\"minecraft:bastion_remnant\", \"minecraft:bastion_remnant\"]]";
+			structureGroupOverrides = builder.comment(desc).define("structureGroupOverrides", List.of(List.of("minecraft:*village*", "minecraft:village")));
 
 			builder.pop();
 		}

@@ -19,16 +19,15 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
+import net.minecraft.data.worldgen.Structures;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
-import net.minecraft.world.level.levelgen.feature.StructureFeature;
+import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.ModContainer;
@@ -36,64 +35,71 @@ import net.minecraftforge.fml.ModList;
 
 public class StructureUtils {
 	
-	public static ListMultimap<ResourceLocation, ResourceLocation> getStructureKeysToConfiguredStructureKeys(ServerLevel level) {
-		ListMultimap<ResourceLocation, ResourceLocation> structureKeysToConfiguredStructureKeys = ArrayListMultimap.create();
-		for (ConfiguredStructureFeature<?, ?> configuredStructure : getConfiguredStructureRegistry(level)) {
-			structureKeysToConfiguredStructureKeys.put(getKeyForStructure(level, configuredStructure.feature), getKeyForConfiguredStructure(level, configuredStructure));
+	public static ListMultimap<ResourceLocation, ResourceLocation> getTypeKeysToStructureKeys(ServerLevel level) {
+		ListMultimap<ResourceLocation, ResourceLocation> typeKeysToStructureKeys = ArrayListMultimap.create();
+		for (Structure structure : getStructureRegistry(level)) {
+			typeKeysToStructureKeys.put(getTypeForStructure(level, structure), getKeyForStructure(level, structure));
 		}
-		return structureKeysToConfiguredStructureKeys;
+		return typeKeysToStructureKeys;
 	}
 	
-	public static Map<ResourceLocation, ResourceLocation> getConfiguredStructureKeysToStructureKeys(ServerLevel level) {
-		Map<ResourceLocation, ResourceLocation> configuredStructureKeysToStructureKeys = new HashMap<ResourceLocation, ResourceLocation>();
-		for (ConfiguredStructureFeature<?, ?> configuredStructure : getConfiguredStructureRegistry(level)) {
-			configuredStructureKeysToStructureKeys.put(getKeyForConfiguredStructure(level, configuredStructure), getKeyForStructure(level, configuredStructure.feature));
+	public static Map<ResourceLocation, ResourceLocation> getStructureKeysToTypeKeys(ServerLevel level) {
+		Map<ResourceLocation, ResourceLocation> structureKeysToStructureKeys = new HashMap<ResourceLocation, ResourceLocation>();
+		for (Structure structure : getStructureRegistry(level)) {
+			structureKeysToStructureKeys.put(getKeyForStructure(level, structure), getTypeForStructure(level, structure));
 		}
-		return configuredStructureKeysToStructureKeys;
+		return structureKeysToStructureKeys;
 	}
 	
-	public static Registry<ConfiguredStructureFeature<?, ?>> getConfiguredStructureRegistry(ServerLevel level) {
-		return level.registryAccess().ownedRegistryOrThrow(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY);
+	public static ResourceLocation getTypeForStructure(ServerLevel level, Structure structure) {
+		for (List<String> entry : ConfigHandler.GENERAL.structureGroupOverrides.get()) {
+			// Need to do some parsing since we are storing a map as a list of lists
+			if (entry.size() < 2) {
+				continue;
+			}
+			String overrideStructureKey = entry.get(0);
+			String overrideGroupKey = entry.get(1);
+			if (getKeyForStructure(level, structure).toString().matches(convertToRegex(overrideStructureKey)) && ResourceLocation.isValidResourceLocation(overrideGroupKey)) {
+				return new ResourceLocation(overrideGroupKey);
+			}
+		}
+		return Registry.STRUCTURE_TYPES.getKey(structure.type());
 	}
 
-	public static ResourceLocation getKeyForConfiguredStructure(ServerLevel level, ConfiguredStructureFeature<?, ?> structure) {
-		return getConfiguredStructureRegistry(level).getKey(structure);
+	public static ResourceLocation getKeyForStructure(ServerLevel level, Structure structure) {
+		return getStructureRegistry(level).getKey(structure);
 	}
 
-	public static ConfiguredStructureFeature<?, ?> getConfiguredStructureForKey(ServerLevel level, ResourceLocation key) {
-		return getConfiguredStructureRegistry(level).get(key);
-	}
-	
-	public static ResourceLocation getKeyForStructure(Level level, StructureFeature<?> structure) {
-		return structure.getRegistryName();
+	public static Structure getStructureForKey(ServerLevel level, ResourceLocation key) {
+		return getStructureRegistry(level).get(key);
 	}
 
-	public static List<ResourceLocation> getAllowedConfiguredStructureKeys(ServerLevel level) {
+	public static List<ResourceLocation> getAllowedStructureKeys(ServerLevel level) {
 		final List<ResourceLocation> structures = new ArrayList<ResourceLocation>();
-		for (ConfiguredStructureFeature<?, ?> structure : getConfiguredStructureRegistry(level)) {
-			if (structure != null && getKeyForConfiguredStructure(level, structure) != null && !configuredStructureIsBlacklisted(level, structure)) {
-				structures.add(getKeyForConfiguredStructure(level, structure));
+		for (Structure structure : getStructureRegistry(level)) {
+			if (structure != null && getKeyForStructure(level, structure) != null && !structureIsBlacklisted(level, structure)) {
+				structures.add(getKeyForStructure(level, structure));
 			}
 		}
 		return structures;
 	}
 	
-	public static boolean configuredStructureIsBlacklisted(ServerLevel level, ConfiguredStructureFeature<?, ?> structure) {
+	public static boolean structureIsBlacklisted(ServerLevel level, Structure structure) {
 		final List<String> structureBlacklist = ConfigHandler.GENERAL.structureBlacklist.get();
 		for (String structureKey : structureBlacklist) {
-			if (getKeyForConfiguredStructure(level, structure).toString().matches(convertToRegex(structureKey))) {
+			if (getKeyForStructure(level, structure).toString().matches(convertToRegex(structureKey))) {
 				return true;
 			}
 		}
 		return false;
 	}
 
-	public static void searchForStructure(ServerLevel serverLevel, Player player, ItemStack stack, List<ConfiguredStructureFeature<?, ?>> configuredStructures, BlockPos startPos) {
-		StructureSearchWorker worker = new StructureSearchWorker(serverLevel, player, stack, configuredStructures, startPos);
+	public static void searchForStructure(ServerLevel serverLevel, Player player, ItemStack stack, List<Structure> structures, BlockPos startPos) {
+		StructureSearchWorker worker = new StructureSearchWorker(serverLevel, player, stack, structures, startPos);
 		worker.start();
 	}
 
-	public static List<ResourceLocation> getGeneratingDimensionKeys(ServerLevel serverLevel, ConfiguredStructureFeature<?, ?> structure) {
+	public static List<ResourceLocation> getGeneratingDimensionKeys(ServerLevel serverLevel, Structure structure) {
 		final List<ResourceLocation> dimensions = new ArrayList<ResourceLocation>();
 		for (ServerLevel level : serverLevel.getServer().getAllLevels()) {
 			ChunkGenerator chunkGenerator = level.getChunkSource().getGenerator();
@@ -103,19 +109,19 @@ public class StructureUtils {
             }
 		}
 		// Fix empty dimensions for stronghold
-		if (structure.feature == StructureFeature.STRONGHOLD && dimensions.isEmpty()) {
+		if (structure == Structures.STRONGHOLD && dimensions.isEmpty()) {
 			dimensions.add(new ResourceLocation("minecraft:overworld"));
 		}
 		return dimensions;
 	}
 
-	public static ListMultimap<ResourceLocation, ResourceLocation> getGeneratingDimensionsForAllowedConfiguredStructures(ServerLevel serverLevel) {
-		ListMultimap<ResourceLocation, ResourceLocation> dimensionsForAllowedConfiguredStructures = ArrayListMultimap.create();
-		for (ResourceLocation structureKey : getAllowedConfiguredStructureKeys(serverLevel)) {
-			ConfiguredStructureFeature<?, ?> structure = getConfiguredStructureForKey(serverLevel, structureKey);
-			dimensionsForAllowedConfiguredStructures.putAll(structureKey, getGeneratingDimensionKeys(serverLevel, structure));
+	public static ListMultimap<ResourceLocation, ResourceLocation> getGeneratingDimensionsForAllowedStructures(ServerLevel serverLevel) {
+		ListMultimap<ResourceLocation, ResourceLocation> dimensionsForAllowedStructures = ArrayListMultimap.create();
+		for (ResourceLocation structureKey : getAllowedStructureKeys(serverLevel)) {
+			Structure structure = getStructureForKey(serverLevel, structureKey);
+			dimensionsForAllowedStructures.putAll(structureKey, getGeneratingDimensionKeys(serverLevel, structure));
 		}
-		return dimensionsForAllowedConfiguredStructures;
+		return dimensionsForAllowedStructures;
 	}
 	
 	public static int getHorizontalDistanceToLocation(Player player, int x, int z) {
@@ -177,6 +183,10 @@ public class StructureUtils {
 			name = WordUtils.capitalize(name.replace('_', ' '));
 		}
 		return name;
+	}
+	
+	private static Registry<Structure> getStructureRegistry(ServerLevel level) {
+		return level.registryAccess().ownedRegistryOrThrow(Registry.STRUCTURE_REGISTRY);
 	}
 
 	private static String convertToRegex(String glob) {

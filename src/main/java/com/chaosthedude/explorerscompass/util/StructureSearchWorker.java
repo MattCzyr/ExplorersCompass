@@ -16,7 +16,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkStatus;
-import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
+import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureCheckResult;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraftforge.common.WorldWorkerManager;
@@ -24,7 +24,7 @@ import net.minecraftforge.common.WorldWorkerManager;
 public class StructureSearchWorker implements WorldWorkerManager.IWorker {
 
 	public ServerLevel level;
-	public List<ConfiguredStructureFeature<?, ?>> configuredStructures;
+	public List<Structure> structures;
 	public ResourceLocation structureKey;
 	public BlockPos startPos;
 	public int samples;
@@ -40,11 +40,11 @@ public class StructureSearchWorker implements WorldWorkerManager.IWorker {
 	public int z;
 	public int lastRadiusThreshold;
 
-	public StructureSearchWorker(ServerLevel world, Player player, ItemStack stack, List<ConfiguredStructureFeature<?, ?>> configuredStructures, BlockPos startPos) {
+	public StructureSearchWorker(ServerLevel world, Player player, ItemStack stack, List<Structure> structures, BlockPos startPos) {
 		this.level = world;
 		this.player = player;
 		this.stack = stack;
-		this.configuredStructures = configuredStructures;
+		this.structures = structures;
 		this.startPos = startPos;
 		chunkX = startPos.getX() >> 4;
 		chunkZ = startPos.getZ() >> 4;
@@ -55,7 +55,7 @@ public class StructureSearchWorker implements WorldWorkerManager.IWorker {
 		samples = 0;
 		direction = Direction.UP;
 		lastRadiusThreshold = 0;
-		finished = !world.getServer().getWorldData().worldGenSettings().generateFeatures();
+		finished = !world.getServer().getWorldData().worldGenSettings().generateStructures();
 	}
 
 	public void start() {
@@ -90,19 +90,19 @@ public class StructureSearchWorker implements WorldWorkerManager.IWorker {
 			x = chunkX << 4;
 			z = chunkZ << 4;
 
-			for (ConfiguredStructureFeature<?, ?> configuredStructure : configuredStructures) {
-				StructureCheckResult checkResult = level.structureFeatureManager().checkStructurePresence(new ChunkPos(chunkX, chunkZ), configuredStructure, false);
+			for (Structure structure : structures) {
+				StructureCheckResult checkResult = level.structureManager().checkStructurePresence(new ChunkPos(chunkX, chunkZ), structure, false);
 				if (checkResult != StructureCheckResult.START_NOT_PRESENT) {
 					if (checkResult == StructureCheckResult.START_PRESENT) {
-						finish(configuredStructure);
+						finish(structure);
 						return true;
 					}
 					ChunkAccess chunkAccess = level.getChunk(chunkX, chunkZ, ChunkStatus.STRUCTURE_STARTS);
-					StructureStart structureStart = level.structureFeatureManager().getStartForFeature(SectionPos.bottomOf(chunkAccess), configuredStructure, chunkAccess);
+					StructureStart structureStart = level.structureManager().getStartForStructure(SectionPos.bottomOf(chunkAccess), structure, chunkAccess);
 					if (structureStart != null && structureStart.isValid()) {
 						x = getLocatePos(structureStart.getChunkPos()).getX();
 						z = getLocatePos(structureStart.getChunkPos()).getZ();
-						finish(configuredStructure);
+						finish(structure);
 						return true;
 					}
 				}
@@ -135,11 +135,11 @@ public class StructureSearchWorker implements WorldWorkerManager.IWorker {
 		return false;
 	}
 
-	private void finish(ConfiguredStructureFeature<?, ?> configuredStructure) {
+	private void finish(Structure structure) {
 		if (!stack.isEmpty() && stack.getItem() == ExplorersCompass.explorersCompass) {
-			if (configuredStructure != null) {
+			if (structure != null) {
 				ExplorersCompass.LOGGER.info("Search succeeded: " + getRadius() + " radius, " + samples + " samples");
-				((ExplorersCompassItem) stack.getItem()).setFound(stack, StructureUtils.getKeyForConfiguredStructure(level, configuredStructure), x, z, samples, player);
+				((ExplorersCompassItem) stack.getItem()).setFound(stack, StructureUtils.getKeyForStructure(level, structure), x, z, samples, player);
 				((ExplorersCompassItem) stack.getItem()).setDisplayCoordinates(stack, ConfigHandler.GENERAL.displayCoordinates.get());
 			} else {
 				ExplorersCompass.LOGGER.info("Search failed: " + getRadius() + " radius, " + samples + " samples");
@@ -159,8 +159,8 @@ public class StructureSearchWorker implements WorldWorkerManager.IWorker {
 		return ((int) radius / roundTo) * roundTo;
 	}
 
-	private BlockPos getLocatePos(ChunkPos p_191115_) {
-		return new BlockPos(p_191115_.getMinBlockX(), 0, p_191115_.getMinBlockZ());
+	private BlockPos getLocatePos(ChunkPos chunkPos) {
+		return new BlockPos(chunkPos.getMinBlockX(), 0, chunkPos.getMinBlockZ());
 	}
 
 }

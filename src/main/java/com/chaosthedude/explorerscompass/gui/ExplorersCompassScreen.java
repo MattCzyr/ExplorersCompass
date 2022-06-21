@@ -16,8 +16,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -30,8 +29,8 @@ public class ExplorersCompassScreen extends Screen {
 
 	private Level level;
 	private Player player;
-	private List<ResourceLocation> allowedConfiguredStructures;
-	private List<ResourceLocation> configuredStructuresMatchingSearch;
+	private List<ResourceLocation> allowedStructureKeys;
+	private List<ResourceLocation> structureKeysMatchingSearch;
 	private ItemStack stack;
 	private ExplorersCompassItem explorersCompass;
 	private Button searchButton;
@@ -43,15 +42,15 @@ public class ExplorersCompassScreen extends Screen {
 	private StructureSearchList selectionList;
 	private ISorting sortingCategory;
 
-	public ExplorersCompassScreen(Level level, Player player, ItemStack stack, ExplorersCompassItem explorersCompass, List<ResourceLocation> allowedConfiguredStructures) {
-		super(new TranslatableComponent("string.explorerscompass.selectStructure"));
+	public ExplorersCompassScreen(Level level, Player player, ItemStack stack, ExplorersCompassItem explorersCompass, List<ResourceLocation> allowedStructureKeys) {
+		super(Component.translatable("string.explorerscompass.selectStructure"));
 		this.level = level;
 		this.player = player;
 		this.stack = stack;
 		this.explorersCompass = explorersCompass;
 		
-		this.allowedConfiguredStructures = new ArrayList<ResourceLocation>(allowedConfiguredStructures);
-		configuredStructuresMatchingSearch = new ArrayList<ResourceLocation>(this.allowedConfiguredStructures);
+		this.allowedStructureKeys = new ArrayList<ResourceLocation>(allowedStructureKeys);
+		structureKeysMatchingSearch = new ArrayList<ResourceLocation>(this.allowedStructureKeys);
 		sortingCategory = new NameSorting();
 	}
 
@@ -72,10 +71,10 @@ public class ExplorersCompassScreen extends Screen {
 		teleportButton.active = explorersCompass.getState(stack) == CompassState.FOUND;
 		
 		// Check if the allowed structure list has synced
-		if (allowedConfiguredStructures.size() != ExplorersCompass.allowedConfiguredStructureKeys.size()) {
+		if (allowedStructureKeys.size() != ExplorersCompass.allowedStructureKeys.size()) {
 			removeWidget(selectionList);
-			allowedConfiguredStructures = new ArrayList<ResourceLocation>(ExplorersCompass.allowedConfiguredStructureKeys);
-			configuredStructuresMatchingSearch = new ArrayList<ResourceLocation>(allowedConfiguredStructures);
+			allowedStructureKeys = new ArrayList<ResourceLocation>(ExplorersCompass.allowedStructureKeys);
+			structureKeysMatchingSearch = new ArrayList<ResourceLocation>(allowedStructureKeys);
 			selectionList = new StructureSearchList(this, minecraft, width + 110, height, 40, height, 45);
 			addRenderableWidget(selectionList);
 		}
@@ -126,7 +125,7 @@ public class ExplorersCompassScreen extends Screen {
 	}
 	
 	public void searchForGroup(ResourceLocation key) {
-		ExplorersCompass.network.sendToServer(new CompassSearchPacket(key, ExplorersCompass.structureKeysToConfiguredStructureKeys.get(key), player.blockPosition()));
+		ExplorersCompass.network.sendToServer(new CompassSearchPacket(key, ExplorersCompass.typeKeysToStructureKeys.get(key), player.blockPosition()));
 		minecraft.setScreen(null);
 	}
 
@@ -136,17 +135,17 @@ public class ExplorersCompassScreen extends Screen {
 	}
 
 	public void processSearchTerm() {
-		configuredStructuresMatchingSearch = new ArrayList<ResourceLocation>();
-		for (ResourceLocation key : allowedConfiguredStructures) {
+		structureKeysMatchingSearch = new ArrayList<ResourceLocation>();
+		for (ResourceLocation key : allowedStructureKeys) {
 			if (StructureUtils.getPrettyStructureName(key).toLowerCase().contains(searchTextField.getValue().toLowerCase())) {
-				configuredStructuresMatchingSearch.add(key);
+				structureKeysMatchingSearch.add(key);
 			}
 		}
 		selectionList.refreshList();
 	}
 
 	public List<ResourceLocation> sortStructures() {
-		final List<ResourceLocation> structures = configuredStructuresMatchingSearch;
+		final List<ResourceLocation> structures = structureKeysMatchingSearch;
 		Collections.sort(structures, new NameSorting());
 		Collections.sort(structures, sortingCategory);
 		return structures;
@@ -154,25 +153,25 @@ public class ExplorersCompassScreen extends Screen {
 
 	private void setupWidgets() {
 		clearWidgets();
-		searchButton = addRenderableWidget(new TransparentButton(10, 40, 110, 20, new TranslatableComponent("string.explorerscompass.search"), (onPress) -> {
+		searchButton = addRenderableWidget(new TransparentButton(10, 40, 110, 20, Component.translatable("string.explorerscompass.search"), (onPress) -> {
 			if (selectionList.hasSelection()) {
 				selectionList.getSelected().searchForStructure();
 			}
 		}));
-		searchGroupButton = addRenderableWidget(new TransparentButton(10, 65, 110, 20, new TranslatableComponent("string.explorerscompass.searchForGroup"), (onPress) -> {
+		searchGroupButton = addRenderableWidget(new TransparentButton(10, 65, 110, 20, Component.translatable("string.explorerscompass.searchForGroup"), (onPress) -> {
 			if (selectionList.hasSelection()) {
 				selectionList.getSelected().searchForGroup();
 			}
 		}));
-		sortByButton = addRenderableWidget(new TransparentButton(10, 90, 110, 20, new TranslatableComponent("string.explorerscompass.sortBy").append(new TextComponent(": " + sortingCategory.getLocalizedName())), (onPress) -> {
+		sortByButton = addRenderableWidget(new TransparentButton(10, 90, 110, 20, Component.translatable("string.explorerscompass.sortBy").append(Component.literal(": " + sortingCategory.getLocalizedName())), (onPress) -> {
 			sortingCategory = sortingCategory.next();
-			sortByButton.setMessage(new TranslatableComponent("string.explorerscompass.sortBy").append(new TextComponent(": " + sortingCategory.getLocalizedName())));
+			sortByButton.setMessage(Component.translatable("string.explorerscompass.sortBy").append(Component.literal(": " + sortingCategory.getLocalizedName())));
 			selectionList.refreshList();
 		}));
-		cancelButton = addRenderableWidget(new TransparentButton(10, height - 30, 110, 20, new TranslatableComponent("gui.cancel"), (onPress) -> {
+		cancelButton = addRenderableWidget(new TransparentButton(10, height - 30, 110, 20, Component.translatable("gui.cancel"), (onPress) -> {
 			minecraft.setScreen(null);
 		}));
-		teleportButton = addRenderableWidget(new TransparentButton(width - 120, 10, 110, 20, new TranslatableComponent("string.explorerscompass.teleport"), (onPress) -> {
+		teleportButton = addRenderableWidget(new TransparentButton(width - 120, 10, 110, 20, Component.translatable("string.explorerscompass.teleport"), (onPress) -> {
 			teleport();
 		}));
 
@@ -181,7 +180,7 @@ public class ExplorersCompassScreen extends Screen {
 
 		teleportButton.visible = ExplorersCompass.canTeleport;
 		
-		searchTextField = new TransparentTextField(font, width / 2 - 82, 10, 140, 20, new TranslatableComponent("string.explorerscompass.search"));
+		searchTextField = new TransparentTextField(font, width / 2 - 82, 10, 140, 20, Component.translatable("string.explorerscompass.search"));
 		addRenderableWidget(searchTextField);
 		
 		if (selectionList == null) {

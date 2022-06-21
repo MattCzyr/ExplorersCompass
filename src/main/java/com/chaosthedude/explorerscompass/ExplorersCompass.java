@@ -53,22 +53,22 @@ public class ExplorersCompass {
 	public static ExplorersCompassItem explorersCompass;
 
 	public static boolean canTeleport;
-	public static List<ResourceLocation> allowedConfiguredStructureKeys;
-	public static ListMultimap<ResourceLocation, ResourceLocation> dimensionKeysForAllowedConfiguredStructureKeys;
-	public static Map<ResourceLocation, ResourceLocation> configuredStructureKeysToStructureKeys;
-	public static ListMultimap<ResourceLocation, ResourceLocation> structureKeysToConfiguredStructureKeys;
+	public static List<ResourceLocation> allowedStructureKeys;
+	public static ListMultimap<ResourceLocation, ResourceLocation> dimensionKeysForAllowedStructureKeys;
+	public static Map<ResourceLocation, ResourceLocation> structureKeysToTypeKeys;
+	public static ListMultimap<ResourceLocation, ResourceLocation> typeKeysToStructureKeys;
 	
 	public ExplorersCompass() {
-		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::preInit);
+		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::commonSetup);
 		DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
-			FMLJavaModLoadingContext.get().getModEventBus().addListener(this::clientInit);
+			FMLJavaModLoadingContext.get().getModEventBus().addListener(this::clientSetup);
 		});
 		
 		ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, ConfigHandler.GENERAL_SPEC);
 		ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, ConfigHandler.CLIENT_SPEC);
 	}
 
-	private void preInit(FMLCommonSetupEvent event) {
+	private void commonSetup(FMLCommonSetupEvent event) {
 		network = NetworkRegistry.newSimpleChannel(new ResourceLocation(MODID, MODID), () -> "1.0", s -> true, s -> true);
 
 		// Server packets
@@ -78,14 +78,14 @@ public class ExplorersCompass {
 		// Client packet
 		network.registerMessage(2, SyncPacket.class, SyncPacket::toBytes, SyncPacket::new, SyncPacket::handle);
 
-		allowedConfiguredStructureKeys = new ArrayList<ResourceLocation>();
-		dimensionKeysForAllowedConfiguredStructureKeys = ArrayListMultimap.create();
-		configuredStructureKeysToStructureKeys = new HashMap<ResourceLocation, ResourceLocation>();
-		structureKeysToConfiguredStructureKeys = ArrayListMultimap.create();
+		allowedStructureKeys = new ArrayList<ResourceLocation>();
+		dimensionKeysForAllowedStructureKeys = ArrayListMultimap.create();
+		structureKeysToTypeKeys = new HashMap<ResourceLocation, ResourceLocation>();
+		typeKeysToStructureKeys = ArrayListMultimap.create();
 	}
 	
 	@OnlyIn(Dist.CLIENT)
-	public void clientInit(FMLClientSetupEvent event) {
+	public void clientSetup(FMLClientSetupEvent event) {
 		MinecraftForge.EVENT_BUS.register(new ClientEventHandler());
 		
 		ItemProperties.register(explorersCompass, new ResourceLocation("angle"), new ClampedItemPropertyFunction() {

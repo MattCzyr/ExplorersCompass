@@ -11,7 +11,7 @@ import net.minecraft.world.level.Level;
 public class GuiWrapper {
 	
 	public static void openGUI(Level level, Player player, ItemStack stack) {
-		Minecraft.getInstance().setScreen(new ExplorersCompassScreen(level, player, stack, (ExplorersCompassItem) stack.getItem(), ExplorersCompass.allowedConfiguredStructureKeys));
+		Minecraft.getInstance().setScreen(new ExplorersCompassScreen(level, player, stack, (ExplorersCompassItem) stack.getItem(), ExplorersCompass.allowedStructureKeys));
 	}
 
 }

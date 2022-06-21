@@ -11,7 +11,6 @@ import com.chaosthedude.explorerscompass.util.CompassState;
 import com.chaosthedude.explorerscompass.util.ItemUtils;
 import com.chaosthedude.explorerscompass.util.PlayerUtils;
 import com.chaosthedude.explorerscompass.util.StructureUtils;
-import com.google.common.collect.ListMultimap;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
@@ -25,7 +24,7 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
+import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraftforge.network.NetworkDirection;
 
 public class ExplorersCompassItem extends Item {
@@ -34,7 +33,6 @@ public class ExplorersCompassItem extends Item {
 
 	public ExplorersCompassItem() {
 		super(new Properties().stacksTo(1).tab(CreativeModeTab.TAB_TOOLS));
-		setRegistryName(NAME);
 	}
 
 	@Override
@@ -47,9 +45,7 @@ public class ExplorersCompassItem extends Item {
 				final ServerLevel serverLevel = (ServerLevel) level;
 				final ServerPlayer serverPlayer = (ServerPlayer) player;
 				final boolean canTeleport = ConfigHandler.GENERAL.allowTeleport.get() && PlayerUtils.canTeleport(player.getServer(), player);
-				final List<ResourceLocation> allowedStructures = StructureUtils.getAllowedConfiguredStructureKeys(serverLevel);
-				ListMultimap<ResourceLocation, ResourceLocation> dimensionsForAllowedConfiguredStructures = StructureUtils.getGeneratingDimensionsForAllowedConfiguredStructures(serverLevel);
-				ExplorersCompass.network.sendTo(new SyncPacket(canTeleport, allowedStructures, dimensionsForAllowedConfiguredStructures, StructureUtils.getConfiguredStructureKeysToStructureKeys(serverLevel), StructureUtils.getStructureKeysToConfiguredStructureKeys(serverLevel)), serverPlayer.connection.getConnection(), NetworkDirection.PLAY_TO_CLIENT);
+				ExplorersCompass.network.sendTo(new SyncPacket(canTeleport, StructureUtils.getAllowedStructureKeys(serverLevel), StructureUtils.getGeneratingDimensionsForAllowedStructures(serverLevel), StructureUtils.getStructureKeysToTypeKeys(serverLevel), StructureUtils.getTypeKeysToStructureKeys(serverLevel)), serverPlayer.connection.getConnection(), NetworkDirection.PLAY_TO_CLIENT);
 			}
 		} else {
 			setState(player.getItemInHand(hand), null, CompassState.INACTIVE, player);
@@ -70,11 +66,11 @@ public class ExplorersCompassItem extends Item {
 		setSearchRadius(stack, 0, player);
 		if (level instanceof ServerLevel) {
 			ServerLevel serverLevel = (ServerLevel) level;
-			List<ConfiguredStructureFeature<?, ?>> configuredStructures = new ArrayList<ConfiguredStructureFeature<?, ?>>();
+			List<Structure> structures = new ArrayList<Structure>();
 			for (ResourceLocation key : structureKeys) {
-				configuredStructures.add(StructureUtils.getConfiguredStructureForKey(serverLevel, key));
+				structures.add(StructureUtils.getStructureForKey(serverLevel, key));
 			}
-			StructureUtils.searchForStructure(serverLevel, player, stack, configuredStructures, pos);
+			StructureUtils.searchForStructure(serverLevel, player, stack, structures, pos);
 		}
 	}
 

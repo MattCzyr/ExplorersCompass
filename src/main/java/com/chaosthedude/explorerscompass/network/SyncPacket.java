@@ -17,76 +17,76 @@ import net.minecraftforge.network.NetworkEvent;
 public class SyncPacket {
 
 	private boolean canTeleport;
-	private List<ResourceLocation> allowedConfiguredStructureKeys;
-	private ListMultimap<ResourceLocation, ResourceLocation> dimensionKeysForAllowedConfiguredStructureKeys;
-	private Map<ResourceLocation, ResourceLocation> configuredStructureKeysToStructureKeys;
-	private ListMultimap<ResourceLocation, ResourceLocation> structureKeysToConfiguredStructureKeys;
+	private List<ResourceLocation> allowedStructureKeys;
+	private ListMultimap<ResourceLocation, ResourceLocation> dimensionKeysForAllowedStructureKeys;
+	private Map<ResourceLocation, ResourceLocation> structureKeysToTypeKeys;
+	private ListMultimap<ResourceLocation, ResourceLocation> typeKeysToStructureKeys;
 
 	public SyncPacket() {}
 
-	public SyncPacket(boolean canTeleport, List<ResourceLocation> allowedStructures, ListMultimap<ResourceLocation, ResourceLocation> dimensionsForAllowedConfiguredStructures, Map<ResourceLocation, ResourceLocation> configuredStructureKeysToStructureKeys, ListMultimap<ResourceLocation, ResourceLocation> structureKeysToConfiguredStructureKeys) {
+	public SyncPacket(boolean canTeleport, List<ResourceLocation> allowedStructures, ListMultimap<ResourceLocation, ResourceLocation> dimensionsForAllowedStructures, Map<ResourceLocation, ResourceLocation> structureKeysToTypeKeys, ListMultimap<ResourceLocation, ResourceLocation> typeKeysToStructureKeys) {
 		this.canTeleport = canTeleport;
-		this.allowedConfiguredStructureKeys = allowedStructures;
-		this.dimensionKeysForAllowedConfiguredStructureKeys = dimensionsForAllowedConfiguredStructures;
-		this.configuredStructureKeysToStructureKeys = configuredStructureKeysToStructureKeys;
-		this.structureKeysToConfiguredStructureKeys = structureKeysToConfiguredStructureKeys;
+		this.allowedStructureKeys = allowedStructures;
+		this.dimensionKeysForAllowedStructureKeys = dimensionsForAllowedStructures;
+		this.structureKeysToTypeKeys = structureKeysToTypeKeys;
+		this.typeKeysToStructureKeys = typeKeysToStructureKeys;
 	}
 
 	public SyncPacket(FriendlyByteBuf buf) {
 		canTeleport = buf.readBoolean();
-		allowedConfiguredStructureKeys = new ArrayList<ResourceLocation>();
-		dimensionKeysForAllowedConfiguredStructureKeys = ArrayListMultimap.create();
-		configuredStructureKeysToStructureKeys = new HashMap<ResourceLocation, ResourceLocation>();
-		structureKeysToConfiguredStructureKeys = ArrayListMultimap.create();
+		allowedStructureKeys = new ArrayList<ResourceLocation>();
+		dimensionKeysForAllowedStructureKeys = ArrayListMultimap.create();
+		structureKeysToTypeKeys = new HashMap<ResourceLocation, ResourceLocation>();
+		typeKeysToStructureKeys = ArrayListMultimap.create();
 		
-		int numConfiguredStructures = buf.readInt();
-		for (int i = 0; i < numConfiguredStructures; i++) {
-			ResourceLocation configuredStructureKey = buf.readResourceLocation();
+		int numStructures = buf.readInt();
+		for (int i = 0; i < numStructures; i++) {
+			ResourceLocation structureKey = buf.readResourceLocation();
 			int numDimensions = buf.readInt();
 			List<ResourceLocation> dimensions = new ArrayList<ResourceLocation>();
 			for (int j = 0; j < numDimensions; j++) {
 				dimensions.add(buf.readResourceLocation());
 			}
-			ResourceLocation structureKey = buf.readResourceLocation();
-			if (configuredStructureKey != null) {
-				allowedConfiguredStructureKeys.add(configuredStructureKey);
-				dimensionKeysForAllowedConfiguredStructureKeys.putAll(configuredStructureKey, dimensions);
-				configuredStructureKeysToStructureKeys.put(configuredStructureKey, structureKey);
+			ResourceLocation typeKey = buf.readResourceLocation();
+			if (structureKey != null) {
+				allowedStructureKeys.add(structureKey);
+				dimensionKeysForAllowedStructureKeys.putAll(structureKey, dimensions);
+				structureKeysToTypeKeys.put(structureKey, typeKey);
 			}
 		}
 		
-		int numStructures = buf.readInt();
-		for (int i = 0; i < numStructures; i++) {
-			ResourceLocation structureKey = buf.readResourceLocation();
+		int numTypes = buf.readInt();
+		for (int i = 0; i < numTypes; i++) {
+			ResourceLocation typeKey = buf.readResourceLocation();
 			int numStructuresToAdd = buf.readInt();
 			for (int j = 0; j < numStructuresToAdd; j++) {
-				ResourceLocation configuredStructureKey = buf.readResourceLocation();
-				structureKeysToConfiguredStructureKeys.put(structureKey, configuredStructureKey);
+				ResourceLocation structureKey = buf.readResourceLocation();
+				typeKeysToStructureKeys.put(typeKey, structureKey);
 			}
 		}
 	}
 
 	public void toBytes(FriendlyByteBuf buf) {
 		buf.writeBoolean(canTeleport);
-		buf.writeInt(allowedConfiguredStructureKeys.size());
-		for (ResourceLocation configuredStructureKey : allowedConfiguredStructureKeys) {
-			buf.writeResourceLocation(configuredStructureKey);
-			List<ResourceLocation> dimensions = dimensionKeysForAllowedConfiguredStructureKeys.get(configuredStructureKey);
+		buf.writeInt(allowedStructureKeys.size());
+		for (ResourceLocation structureKey : allowedStructureKeys) {
+			buf.writeResourceLocation(structureKey);
+			List<ResourceLocation> dimensions = dimensionKeysForAllowedStructureKeys.get(structureKey);
 			buf.writeInt(dimensions.size());
 			for (ResourceLocation dimensionKey : dimensions) {
 				buf.writeResourceLocation(dimensionKey);
 			}
-			ResourceLocation structureKey = configuredStructureKeysToStructureKeys.get(configuredStructureKey);
-			buf.writeResourceLocation(structureKey);
+			ResourceLocation typeKey = structureKeysToTypeKeys.get(structureKey);
+			buf.writeResourceLocation(typeKey);
 		}
 		
-		buf.writeInt(structureKeysToConfiguredStructureKeys.keySet().size());
-		for (ResourceLocation structureKey : structureKeysToConfiguredStructureKeys.keySet()) {
-			buf.writeResourceLocation(structureKey);
-			List<ResourceLocation> configuredStructureKeys = structureKeysToConfiguredStructureKeys.get(structureKey);
-			buf.writeInt(configuredStructureKeys.size());
-			for (ResourceLocation configuredStructureKey : configuredStructureKeys) {
-				buf.writeResourceLocation(configuredStructureKey);
+		buf.writeInt(typeKeysToStructureKeys.keySet().size());
+		for (ResourceLocation typeKey : typeKeysToStructureKeys.keySet()) {
+			buf.writeResourceLocation(typeKey);
+			List<ResourceLocation> structureKeys = typeKeysToStructureKeys.get(typeKey);
+			buf.writeInt(structureKeys.size());
+			for (ResourceLocation structureKey : structureKeys) {
+				buf.writeResourceLocation(structureKey);
 			}
 		}
 	}
@@ -94,10 +94,10 @@ public class SyncPacket {
 	public void handle(Supplier<NetworkEvent.Context> ctx) {
 		ctx.get().enqueueWork(() -> {
 			ExplorersCompass.canTeleport = canTeleport;
-			ExplorersCompass.allowedConfiguredStructureKeys = allowedConfiguredStructureKeys;
-			ExplorersCompass.dimensionKeysForAllowedConfiguredStructureKeys = dimensionKeysForAllowedConfiguredStructureKeys;
-			ExplorersCompass.configuredStructureKeysToStructureKeys = configuredStructureKeysToStructureKeys;
-			ExplorersCompass.structureKeysToConfiguredStructureKeys = structureKeysToConfiguredStructureKeys;
+			ExplorersCompass.allowedStructureKeys = allowedStructureKeys;
+			ExplorersCompass.dimensionKeysForAllowedStructureKeys = dimensionKeysForAllowedStructureKeys;
+			ExplorersCompass.structureKeysToTypeKeys = structureKeysToTypeKeys;
+			ExplorersCompass.typeKeysToStructureKeys = typeKeysToStructureKeys;
 		});
 		ctx.get().setPacketHandled(true);
 	}
