@@ -10,6 +10,7 @@ import com.chaosthedude.explorerscompass.network.SyncPacket;
 import com.chaosthedude.explorerscompass.util.CompassState;
 import com.chaosthedude.explorerscompass.util.ItemUtils;
 import com.chaosthedude.explorerscompass.util.PlayerUtils;
+import com.chaosthedude.explorerscompass.util.StructureSearchWorker;
 import com.chaosthedude.explorerscompass.util.StructureUtils;
 
 import net.minecraft.core.BlockPos;
@@ -30,6 +31,8 @@ import net.minecraftforge.network.NetworkDirection;
 public class ExplorersCompassItem extends Item {
 
 	public static final String NAME = "explorerscompass";
+	
+	private StructureSearchWorker worker;
 
 	public ExplorersCompassItem() {
 		super(new Properties().stacksTo(1).tab(CreativeModeTab.TAB_TOOLS));
@@ -48,6 +51,10 @@ public class ExplorersCompassItem extends Item {
 				ExplorersCompass.network.sendTo(new SyncPacket(canTeleport, StructureUtils.getAllowedStructureKeys(serverLevel), StructureUtils.getGeneratingDimensionsForAllowedStructures(serverLevel), StructureUtils.getStructureKeysToTypeKeys(serverLevel), StructureUtils.getTypeKeysToStructureKeys(serverLevel)), serverPlayer.connection.getConnection(), NetworkDirection.PLAY_TO_CLIENT);
 			}
 		} else {
+			if (worker != null) {
+				worker.stop();
+				worker = null;
+			}
 			setState(player.getItemInHand(hand), null, CompassState.INACTIVE, player);
 		}
 		return new InteractionResultHolder<ItemStack>(InteractionResult.PASS, player.getItemInHand(hand));
@@ -70,7 +77,8 @@ public class ExplorersCompassItem extends Item {
 			for (ResourceLocation key : structureKeys) {
 				structures.add(StructureUtils.getStructureForKey(serverLevel, key));
 			}
-			StructureUtils.searchForStructure(serverLevel, player, stack, structures, pos);
+			worker = new StructureSearchWorker(serverLevel, player, stack, structures, pos);
+			worker.start();
 		}
 	}
 

@@ -94,11 +94,6 @@ public class StructureUtils {
 		return false;
 	}
 
-	public static void searchForStructure(ServerLevel serverLevel, Player player, ItemStack stack, List<Structure> structures, BlockPos startPos) {
-		StructureSearchWorker worker = new StructureSearchWorker(serverLevel, player, stack, structures, startPos);
-		worker.start();
-	}
-
 	public static List<ResourceLocation> getGeneratingDimensionKeys(ServerLevel serverLevel, Structure structure) {
 		final List<ResourceLocation> dimensions = new ArrayList<ResourceLocation>();
 		for (ServerLevel level : serverLevel.getServer().getAllLevels()) {
