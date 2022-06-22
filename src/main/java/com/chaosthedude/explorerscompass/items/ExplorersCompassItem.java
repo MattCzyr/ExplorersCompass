@@ -81,6 +81,17 @@ public class ExplorersCompassItem extends Item {
 			worker.start();
 		}
 	}
+	
+	public void succeed(ItemStack stack, Player player, ResourceLocation structureKey, int x, int z, int samples, boolean displayCoordinates) {
+		setFound(stack, structureKey, x, z, samples, player);
+		setDisplayCoordinates(stack, ConfigHandler.GENERAL.displayCoordinates.get());
+		worker = null;
+	}
+	
+	public void fail(ItemStack stack, Player player, int radius, int samples) {
+		setNotFound(stack, player, radius, samples);
+		worker = null;
+	}
 
 	public boolean isActive(ItemStack stack) {
 		if (ItemUtils.verifyNBT(stack)) {

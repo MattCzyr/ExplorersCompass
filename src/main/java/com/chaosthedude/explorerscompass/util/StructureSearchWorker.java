@@ -140,8 +140,7 @@ public class StructureSearchWorker implements WorldWorkerManager.IWorker {
 	private void succeed(Structure structure) {
 		ExplorersCompass.LOGGER.info("Search succeeded: " + getRadius() + " radius, " + samples + " samples");
 		if (!stack.isEmpty() && stack.getItem() == ExplorersCompass.explorersCompass) {
-			((ExplorersCompassItem) stack.getItem()).setFound(stack, StructureUtils.getKeyForStructure(level, structure), x, z, samples, player);
-			((ExplorersCompassItem) stack.getItem()).setDisplayCoordinates(stack, ConfigHandler.GENERAL.displayCoordinates.get());
+			((ExplorersCompassItem) stack.getItem()).succeed(stack, player, StructureUtils.getKeyForStructure(level, structure), x, z, samples, ConfigHandler.GENERAL.displayCoordinates.get());
 		} else {
 			ExplorersCompass.LOGGER.error("Invalid compass after successful search");
 		}
@@ -151,7 +150,7 @@ public class StructureSearchWorker implements WorldWorkerManager.IWorker {
 	private void fail() {
 		ExplorersCompass.LOGGER.info("Search failed: " + getRadius() + " radius, " + samples + " samples");
 		if (!stack.isEmpty() && stack.getItem() == ExplorersCompass.explorersCompass) {
-			((ExplorersCompassItem) stack.getItem()).setNotFound(stack, player, roundRadius(getRadius(), 250), samples);
+			((ExplorersCompassItem) stack.getItem()).fail(stack, player, roundRadius(getRadius(), 250), samples);
 		} else {
 			ExplorersCompass.LOGGER.error("Invalid compass after failed search");
 		}
