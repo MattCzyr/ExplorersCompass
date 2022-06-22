@@ -10,6 +10,7 @@ import java.util.Set;
 
 import org.apache.commons.lang3.text.WordUtils;
 
+import com.chaosthedude.explorerscompass.ExplorersCompass;
 import com.chaosthedude.explorerscompass.config.ConfigHandler;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
@@ -24,10 +25,11 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.structure.Structure;
+import net.minecraft.world.level.levelgen.structure.StructureSet;
+import net.minecraft.world.level.levelgen.structure.StructureSet.StructureSelectionEntry;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.ModContainer;
@@ -52,18 +54,15 @@ public class StructureUtils {
 	}
 	
 	public static ResourceLocation getTypeForStructure(ServerLevel level, Structure structure) {
-		for (List<String> entry : ConfigHandler.GENERAL.structureGroupOverrides.get()) {
-			// Need to do some parsing since we are storing a map as a list of lists
-			if (entry.size() < 2) {
-				continue;
-			}
-			String overrideStructureKey = entry.get(0);
-			String overrideGroupKey = entry.get(1);
-			if (getKeyForStructure(level, structure).toString().matches(convertToRegex(overrideStructureKey)) && ResourceLocation.isValidResourceLocation(overrideGroupKey)) {
-				return new ResourceLocation(overrideGroupKey);
+		Registry<StructureSet> registry = getStructureSetRegistry(level);
+		for (StructureSet set : registry) {
+			for (StructureSelectionEntry entry : set.structures()) {
+				if (entry.structure().get().equals(structure)) {
+					return registry.getKey(set);
+				}
 			}
 		}
-		return Registry.STRUCTURE_TYPES.getKey(structure.type());
+		return new ResourceLocation(ExplorersCompass.MODID, "none");
 	}
 
 	public static ResourceLocation getKeyForStructure(ServerLevel level, Structure structure) {
@@ -182,6 +181,10 @@ public class StructureUtils {
 	
 	private static Registry<Structure> getStructureRegistry(ServerLevel level) {
 		return level.registryAccess().ownedRegistryOrThrow(Registry.STRUCTURE_REGISTRY);
+	}
+	
+	private static Registry<StructureSet> getStructureSetRegistry(ServerLevel level) {
+		return level.registryAccess().ownedRegistryOrThrow(Registry.STRUCTURE_SET_REGISTRY);
 	}
 
 	private static String convertToRegex(String glob) {
