@@ -77,6 +77,9 @@ public class ExplorersCompassItem extends Item {
 			for (ResourceLocation key : structureKeys) {
 				structures.add(StructureUtils.getStructureForKey(serverLevel, key));
 			}
+			if (worker != null) {
+				worker.stop();
+			}
 			worker = new StructureSearchWorker(serverLevel, player, stack, structures, pos);
 			worker.start();
 		}
@@ -84,7 +87,7 @@ public class ExplorersCompassItem extends Item {
 	
 	public void succeed(ItemStack stack, Player player, ResourceLocation structureKey, int x, int z, int samples, boolean displayCoordinates) {
 		setFound(stack, structureKey, x, z, samples, player);
-		setDisplayCoordinates(stack, ConfigHandler.GENERAL.displayCoordinates.get());
+		setDisplayCoordinates(stack, displayCoordinates);
 		worker = null;
 	}
 	

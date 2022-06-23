@@ -16,7 +16,7 @@ import net.minecraftforge.network.NetworkEvent;
 
 public class CompassSearchPacket {
 
-	private ResourceLocation structureKey;
+	private ResourceLocation groupKey;
 	private List<ResourceLocation> structureKeys;
 	private int x;
 	private int y;
@@ -24,8 +24,8 @@ public class CompassSearchPacket {
 
 	public CompassSearchPacket() {}
 
-	public CompassSearchPacket(ResourceLocation structureKey, List<ResourceLocation> structureKeys, BlockPos pos) {
-		this.structureKey = structureKey;
+	public CompassSearchPacket(ResourceLocation groupKey, List<ResourceLocation> structureKeys, BlockPos pos) {
+		this.groupKey = groupKey;
 		this.structureKeys = structureKeys;
 
 		this.x = pos.getX();
@@ -34,7 +34,7 @@ public class CompassSearchPacket {
 	}
 
 	public CompassSearchPacket(FriendlyByteBuf buf) {
-		structureKey = buf.readResourceLocation();
+		groupKey = buf.readResourceLocation();
 		
 		structureKeys = new ArrayList<ResourceLocation>();
 		int numStructures = buf.readInt();
@@ -48,7 +48,7 @@ public class CompassSearchPacket {
 	}
 
 	public void toBytes(FriendlyByteBuf buf) {
-		buf.writeResourceLocation(structureKey);
+		buf.writeResourceLocation(groupKey);
 		
 		buf.writeInt(structureKeys.size());
 		for (ResourceLocation key : structureKeys) {
@@ -65,7 +65,7 @@ public class CompassSearchPacket {
 			final ItemStack stack = ItemUtils.getHeldItem(ctx.get().getSender(), ExplorersCompass.explorersCompass);
 			if (!stack.isEmpty()) {
 				final ExplorersCompassItem explorersCompass = (ExplorersCompassItem) stack.getItem();
-				explorersCompass.searchForStructure(ctx.get().getSender().getLevel(), ctx.get().getSender(), structureKey, structureKeys, new BlockPos(x, y, z), stack);
+				explorersCompass.searchForStructure(ctx.get().getSender().getLevel(), ctx.get().getSender(), groupKey, structureKeys, new BlockPos(x, y, z), stack);
 			}
 		});
 		ctx.get().setPacketHandled(true);

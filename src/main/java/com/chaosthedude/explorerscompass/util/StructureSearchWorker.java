@@ -25,7 +25,6 @@ public class StructureSearchWorker implements WorldWorkerManager.IWorker {
 
 	public ServerLevel level;
 	public List<Structure> structures;
-	public ResourceLocation structureKey;
 	public BlockPos startPos;
 	public int samples;
 	public int nextLength;
