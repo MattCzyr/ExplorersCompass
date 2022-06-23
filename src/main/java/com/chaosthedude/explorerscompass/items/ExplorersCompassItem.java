@@ -12,6 +12,7 @@ import com.chaosthedude.explorerscompass.util.CompassState;
 import com.chaosthedude.explorerscompass.util.ItemUtils;
 import com.chaosthedude.explorerscompass.util.PlayerUtils;
 import com.chaosthedude.explorerscompass.util.StructureUtils;
+import com.chaosthedude.explorerscompass.workers.StructureSearchWorker;
 import com.google.common.collect.ListMultimap;
 
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
@@ -27,11 +28,13 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraft.world.gen.feature.ConfiguredStructureFeature;
+import net.minecraft.world.gen.structure.Structure;
 
 public class ExplorersCompassItem extends Item {
 
 	public static final String NAME = "explorerscompass";
+	
+	private StructureSearchWorker worker;
 
 	public ExplorersCompassItem() {
 		super(new FabricItemSettings().maxCount(1).group(ItemGroup.TOOLS));
@@ -47,30 +50,49 @@ public class ExplorersCompassItem extends Item {
 				final ServerWorld serverWorld = (ServerWorld) world;
 				final ServerPlayerEntity serverPlayer = (ServerPlayerEntity) player;
 				final boolean canTeleport = ExplorersCompassConfig.allowTeleport && PlayerUtils.canTeleport(player);
-				final List<Identifier> allowedStructures = StructureUtils.getAllowedConfiguredStructureIDs(serverWorld);
-				final ListMultimap<Identifier, Identifier> dimensionsForAllowedStructures = StructureUtils.getGeneratingDimensionIDsForAllowedConfiguredStructures(serverWorld);
-				final Map<Identifier, Identifier> configuredStructureIDsToStructureIDs = StructureUtils.getConfiguredStructureIDsToStructureIDs(serverWorld);
-				final ListMultimap<Identifier, Identifier> structureIDsToConfiguredStructureIDs = StructureUtils.getStructureIDsToConfiguredStructureIDs(serverWorld);
-				ServerPlayNetworking.send(serverPlayer, SyncPacket.ID, new SyncPacket(canTeleport, allowedStructures, dimensionsForAllowedStructures, configuredStructureIDsToStructureIDs, structureIDsToConfiguredStructureIDs));
+				final List<Identifier> allowedStructures = StructureUtils.getAllowedStructureIDs(serverWorld);
+				final ListMultimap<Identifier, Identifier> dimensionsForAllowedStructures = StructureUtils.getGeneratingDimensionIDsForAllowedStructures(serverWorld);
+				final Map<Identifier, Identifier> structureIDsToGroupIDs = StructureUtils.getStructureIDsToGroupIDs(serverWorld);
+				final ListMultimap<Identifier, Identifier> groupIDsToStructureIDs = StructureUtils.getGroupIDsToStructureIDs(serverWorld);
+				ServerPlayNetworking.send(serverPlayer, SyncPacket.ID, new SyncPacket(canTeleport, allowedStructures, dimensionsForAllowedStructures, structureIDsToGroupIDs, groupIDsToStructureIDs));
 			}
 		} else {
+			if (worker != null) {
+				worker.stop();
+				worker = null;
+			}
 			setState(player.getStackInHand(hand), null, CompassState.INACTIVE, player);
 		}
 
 		return TypedActionResult.pass(player.getStackInHand(hand));
 	}
 
-	public void searchForStructure(World world, PlayerEntity player, Identifier structureID, List<Identifier> configuredStructureIDs, BlockPos pos, ItemStack stack) {
+	public void searchForStructure(World world, PlayerEntity player, Identifier structureID, List<Identifier> structureIDs, BlockPos pos, ItemStack stack) {
 		setSearching(stack, structureID, player);
 		setSearchRadius(stack, 0, player);
 		if (world instanceof ServerWorld) {
 			ServerWorld serverWorld = (ServerWorld) world;
-			List<ConfiguredStructureFeature<?, ?>> configuredStructures = new ArrayList<ConfiguredStructureFeature<?, ?>>();
-			for (Identifier id : configuredStructureIDs) {
-				configuredStructures.add(StructureUtils.getConfiguredStructureForID(serverWorld, id));
+			List<Structure> structures = new ArrayList<Structure>();
+			for (Identifier id : structureIDs) {
+				structures.add(StructureUtils.getStructureForID(serverWorld, id));
 			}
-			StructureUtils.searchForStructure(serverWorld, player, stack, configuredStructures, pos);
+			if (worker != null) {
+				worker.stop();
+			}
+			worker = new StructureSearchWorker(serverWorld, player, stack, structures, pos);
+			worker.start();
 		}
+	}
+	
+	public void succeed(ItemStack stack, PlayerEntity player, Identifier structureID, int x, int z, int samples, boolean displayCoordinates) {
+		setFound(stack, structureID, x, z, samples, player);
+		setDisplayCoordinates(stack, displayCoordinates);
+		worker = null;
+	}
+	
+	public void fail(ItemStack stack, PlayerEntity player, int radius, int samples) {
+		setNotFound(stack, player, radius, samples);
+		worker = null;
 	}
 
 	public boolean isActive(ItemStack stack) {

@@ -13,12 +13,12 @@ public class DimensionSorting implements ISorting {
 	
 	@Override
 	public int compare(Identifier id1, Identifier id2) {
-		return StructureUtils.structureDimensionsToString(ExplorersCompass.allowedConfiguredStructureIDsToDimensionIDs.get(id1)).compareTo(StructureUtils.structureDimensionsToString(ExplorersCompass.allowedConfiguredStructureIDsToDimensionIDs.get(id2)));
+		return StructureUtils.structureDimensionsToString(ExplorersCompass.allowedStructureIDsToDimensionIDs.get(id1)).compareTo(StructureUtils.structureDimensionsToString(ExplorersCompass.allowedStructureIDsToDimensionIDs.get(id2)));
 	}
 
 	@Override
 	public Object getValue(Identifier id) {
-		return StructureUtils.structureDimensionsToString(ExplorersCompass.allowedConfiguredStructureIDsToDimensionIDs.get(id));
+		return StructureUtils.structureDimensionsToString(ExplorersCompass.allowedStructureIDsToDimensionIDs.get(id));
 	}
 
 	@Override

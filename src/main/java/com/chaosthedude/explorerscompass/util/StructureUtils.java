@@ -9,6 +9,7 @@ import java.util.Set;
 
 import org.apache.commons.lang3.text.WordUtils;
 
+import com.chaosthedude.explorerscompass.ExplorersCompass;
 import com.chaosthedude.explorerscompass.config.ExplorersCompassConfig;
 import com.chaosthedude.explorerscompass.workers.StructureSearchWorker;
 import com.google.common.collect.ArrayListMultimap;
@@ -22,7 +23,8 @@ import net.minecraft.client.resource.language.I18n;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.structure.StructureContext;
+import net.minecraft.structure.StructureSet;
+import net.minecraft.structure.StructureSet.WeightedEntry;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
@@ -31,90 +33,89 @@ import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryEntry;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
-import net.minecraft.world.gen.feature.ConfiguredStructureFeature;
-import net.minecraft.world.gen.feature.StructureFeature;
+import net.minecraft.world.gen.structure.Structure;
+import net.minecraft.world.gen.structure.Structures;
 
 public class StructureUtils {
 	
-	public static ListMultimap<Identifier, Identifier> getStructureIDsToConfiguredStructureIDs(ServerWorld world) {
-		ListMultimap<Identifier, Identifier> structureKeysToConfiguredStructureKeys = ArrayListMultimap.create();
-		for (ConfiguredStructureFeature<?, ?> configuredStructure : getConfiguredStructureRegistry(world)) {
-			structureKeysToConfiguredStructureKeys.put(getIDForStructure(world, configuredStructure.feature), getIDForConfiguredStructure(world, configuredStructure));
+	public static ListMultimap<Identifier, Identifier> getGroupIDsToStructureIDs(ServerWorld world) {
+		ListMultimap<Identifier, Identifier> groupIDsToStructureIDs = ArrayListMultimap.create();
+		for (Structure structure : getStructureRegistry(world)) {
+			groupIDsToStructureIDs.put(getGroupForStructure(world, structure), getIDForStructure(world, structure));
 		}
-		return structureKeysToConfiguredStructureKeys;
+		return groupIDsToStructureIDs;
 	}
 	
-	public static Map<Identifier, Identifier> getConfiguredStructureIDsToStructureIDs(ServerWorld world) {
-		Map<Identifier, Identifier> configuredStructureKeysToStructureKeys = new HashMap<Identifier, Identifier>();
-		for (ConfiguredStructureFeature<?, ?> configuredStructure : getConfiguredStructureRegistry(world)) {
-			configuredStructureKeysToStructureKeys.put(getIDForConfiguredStructure(world, configuredStructure), getIDForStructure(world, configuredStructure.feature));
+	public static Map<Identifier, Identifier> getStructureIDsToGroupIDs(ServerWorld world) {
+		Map<Identifier, Identifier> structureIDsToGroupIDs = new HashMap<Identifier, Identifier>();
+		for (Structure structure : getStructureRegistry(world)) {
+			structureIDsToGroupIDs.put(getIDForStructure(world, structure), getGroupForStructure(world, structure));
 		}
-		return configuredStructureKeysToStructureKeys;
+		return structureIDsToGroupIDs;
 	}
 	
-	public static Registry<ConfiguredStructureFeature<?, ?>> getConfiguredStructureRegistry(ServerWorld world) {
-		return world.getRegistryManager().get(Registry.CONFIGURED_STRUCTURE_FEATURE_KEY);
+	public static Identifier getGroupForStructure(ServerWorld world, Structure structure) {
+		Registry<StructureSet> registry = getStructureSetRegistry(world);
+		for (StructureSet set : registry) {
+			for (WeightedEntry entry : set.structures()) {
+				if (entry.structure().value().equals(structure)) {
+					return registry.getId(set);
+				}
+			}
+		}
+		return new Identifier(ExplorersCompass.MODID, "none");
 	}
 
-	public static Identifier getIDForConfiguredStructure(ServerWorld world, ConfiguredStructureFeature<?, ?> configuredStructure) {
-		return getConfiguredStructureRegistry(world).getId(configuredStructure);
+	public static Identifier getIDForStructure(ServerWorld world, Structure structure) {
+		return getStructureRegistry(world).getId(structure);
 	}
 
-	public static ConfiguredStructureFeature<?, ?> getConfiguredStructureForID(ServerWorld world, Identifier id) {
-		return getConfiguredStructureRegistry(world).get(id);
-	}
-	
-	public static Identifier getIDForStructure(ServerWorld world, StructureFeature<?> structure) {
-		return StructureContext.from(world).registryManager().get(Registry.STRUCTURE_FEATURE_KEY).getId(structure);
+	public static Structure getStructureForID(ServerWorld world, Identifier id) {
+		return getStructureRegistry(world).get(id);
 	}
 
-	public static List<Identifier> getAllowedConfiguredStructureIDs(ServerWorld world) {
-		final List<Identifier> configuredStructureIDs = new ArrayList<Identifier>();
-		for (ConfiguredStructureFeature<?, ?> configuredStructure : getConfiguredStructureRegistry(world)) {
-			if (configuredStructure != null && getIDForConfiguredStructure(world, configuredStructure) != null && !getIDForConfiguredStructure(world, configuredStructure).getNamespace().isEmpty() && !getIDForConfiguredStructure(world, configuredStructure).getPath().isEmpty() && !structureIsBlacklisted(world, configuredStructure)) {
-				configuredStructureIDs.add(getIDForConfiguredStructure(world, configuredStructure));
+	public static List<Identifier> getAllowedStructureIDs(ServerWorld world) {
+		final List<Identifier> structureIDs = new ArrayList<Identifier>();
+		for (Structure structure : getStructureRegistry(world)) {
+			if (structure != null && getIDForStructure(world, structure) != null && !getIDForStructure(world, structure).getNamespace().isEmpty() && !getIDForStructure(world, structure).getPath().isEmpty() && !structureIsBlacklisted(world, structure)) {
+				structureIDs.add(getIDForStructure(world, structure));
 			}
 		}
 
-		return configuredStructureIDs;
+		return structureIDs;
 	}
 	
-	public static boolean structureIsBlacklisted(ServerWorld world, ConfiguredStructureFeature<?, ?> structure) {
+	public static boolean structureIsBlacklisted(ServerWorld world, Structure structure) {
 		final List<String> structureBlacklist = ExplorersCompassConfig.structureBlacklist;
 		for (String structureKey : structureBlacklist) {
-			if (getIDForConfiguredStructure(world, structure).toString().matches(convertToRegex(structureKey))) {
+			if (getIDForStructure(world, structure).toString().matches(convertToRegex(structureKey))) {
 				return true;
 			}
 		}
 		return false;
 	}
-
-	public static void searchForStructure(ServerWorld world, PlayerEntity player, ItemStack stack, List<ConfiguredStructureFeature<?, ?>> configuredStructures, BlockPos startPos) {
-		StructureSearchWorker worker = new StructureSearchWorker(world, player, stack, configuredStructures, startPos);
-		worker.start();
-	}
 	
-	public static List<Identifier> getGeneratingDimensionIDs(ServerWorld serverWorld, ConfiguredStructureFeature<?, ?> structure) {
+	public static List<Identifier> getGeneratingDimensionIDs(ServerWorld serverWorld, Structure structure) {
 		final List<Identifier> dimensions = new ArrayList<Identifier>();
 		for (ServerWorld world : serverWorld.getServer().getWorlds()) {
 			ChunkGenerator chunkGenerator = world.getChunkManager().getChunkGenerator();
 			Set<RegistryEntry<Biome>> biomeSet = chunkGenerator.getBiomeSource().getBiomes();
-			if (!structure.getBiomes().stream().noneMatch(biomeSet::contains)) {
+			if (!structure.getValidBiomes().stream().noneMatch(biomeSet::contains)) {
 				dimensions.add(world.getRegistryKey().getValue());
 			}
 		}
 		// Fix empty dimensions for stronghold
-		if (structure.feature == StructureFeature.STRONGHOLD && dimensions.isEmpty()) {
+		if (structure == Structures.STRONGHOLD && dimensions.isEmpty()) {
 			dimensions.add(new Identifier("minecraft:overworld"));
 		}
 		return dimensions;
 	}
 
-	public static ListMultimap<Identifier, Identifier> getGeneratingDimensionIDsForAllowedConfiguredStructures(ServerWorld serverWorld) {
+	public static ListMultimap<Identifier, Identifier> getGeneratingDimensionIDsForAllowedStructures(ServerWorld serverWorld) {
 		ListMultimap<Identifier, Identifier> dimensionsForAllowedStructures = ArrayListMultimap.create();
-		for (Identifier id : getAllowedConfiguredStructureIDs(serverWorld)) {
-			ConfiguredStructureFeature<?, ?> configuredStructure = getConfiguredStructureForID(serverWorld, id);
-			dimensionsForAllowedStructures.putAll(id, getGeneratingDimensionIDs(serverWorld, configuredStructure));
+		for (Identifier id : getAllowedStructureIDs(serverWorld)) {
+			Structure structure = getStructureForID(serverWorld, id);
+			dimensionsForAllowedStructures.putAll(id, getGeneratingDimensionIDs(serverWorld, structure));
 		}
 		return dimensionsForAllowedStructures;
 	}
@@ -186,6 +187,14 @@ public class StructureUtils {
 			name = WordUtils.capitalize(name.replace('_', ' '));
 		}
 		return name;
+	}
+	
+	private static Registry<Structure> getStructureRegistry(ServerWorld world) {
+		return world.getRegistryManager().get(Registry.STRUCTURE_KEY);
+	}
+	
+	private static Registry<StructureSet> getStructureSetRegistry(ServerWorld world) {
+		return world.getRegistryManager().get(Registry.STRUCTURE_SET_KEY);
 	}
 
 	private static String convertToRegex(String glob) {

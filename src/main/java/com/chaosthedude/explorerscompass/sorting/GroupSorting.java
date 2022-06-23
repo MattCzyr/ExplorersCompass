@@ -12,12 +12,12 @@ public class GroupSorting implements ISorting {
 	
 	@Override
 	public int compare(Identifier id1, Identifier id2) {
-		return ExplorersCompass.configuredStructureIDsToStructureIDs.get(id1).compareTo(ExplorersCompass.configuredStructureIDsToStructureIDs.get(id2));
+		return ExplorersCompass.structureIDsToGroupIDs.get(id1).compareTo(ExplorersCompass.structureIDsToGroupIDs.get(id2));
 	}
 
 	@Override
 	public Object getValue(Identifier id) {
-		return ExplorersCompass.configuredStructureIDsToStructureIDs.get(id);
+		return ExplorersCompass.structureIDsToGroupIDs.get(id);
 	}
 
 	@Override

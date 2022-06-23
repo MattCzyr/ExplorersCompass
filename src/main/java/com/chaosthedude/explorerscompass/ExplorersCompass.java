@@ -29,10 +29,10 @@ public class ExplorersCompass implements ModInitializer {
 	public static final ExplorersCompassItem EXPLORERS_COMPASS_ITEM = new ExplorersCompassItem();
 
 	public static boolean canTeleport;
-	public static List<Identifier> allowedConfiguredStructureIDs;
-	public static ListMultimap<Identifier, Identifier> allowedConfiguredStructureIDsToDimensionIDs;
-	public static Map<Identifier, Identifier> configuredStructureIDsToStructureIDs;
-	public static ListMultimap<Identifier, Identifier> structureIDsToConfiguredStructureIDs;
+	public static List<Identifier> allowedStructureIDs;
+	public static ListMultimap<Identifier, Identifier> allowedStructureIDsToDimensionIDs;
+	public static Map<Identifier, Identifier> structureIDsToGroupIDs;
+	public static ListMultimap<Identifier, Identifier> groupIDsToStructureIDs;
 
 	@Override
 	public void onInitialize() {
@@ -43,10 +43,10 @@ public class ExplorersCompass implements ModInitializer {
 		ServerPlayNetworking.registerGlobalReceiver(SearchPacket.ID, SearchPacket::apply);
 		ServerPlayNetworking.registerGlobalReceiver(TeleportPacket.ID, TeleportPacket::apply);
 		
-		allowedConfiguredStructureIDs = new ArrayList<Identifier>();
-		allowedConfiguredStructureIDsToDimensionIDs = ArrayListMultimap.create();
-		configuredStructureIDsToStructureIDs = new HashMap<Identifier, Identifier>();
-		structureIDsToConfiguredStructureIDs = ArrayListMultimap.create();
+		allowedStructureIDs = new ArrayList<Identifier>();
+		allowedStructureIDsToDimensionIDs = ArrayListMultimap.create();
+		structureIDsToGroupIDs = new HashMap<Identifier, Identifier>();
+		groupIDsToStructureIDs = ArrayListMultimap.create();
 	}
 
 }

@@ -99,7 +99,7 @@ public class ExplorersCompassConfig {
 			private final String maxSamplesComment = "The maximum number of samples to be taken when searching for a structure.";
 			private final int maxSamples;
 			
-			private final String structureBlacklistComment = "A list of structures that the compass will not be able to search for, specified by resource location. The wildcard character * can be used to match any number of characters, and ? can be used to match one character. Ex (ignore backslashes): [\"minecraft:stronghold\", \"minecraft:endcity\", \"minecraft:*village*\"]";
+			private final String structureBlacklistComment = "A list of structures that the compass will not display in the GUI and will not be able to search for. The wildcard character * can be used to match any number of characters, and ? can be used to match one character. Ex (ignore backslashes): [\"minecraft:stronghold\", \"minecraft:endcity\", \"minecraft:*village*\"]";
 			private final List<String> structureBlacklist;
 			
 			private Common() {

@@ -18,12 +18,12 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.StructurePresence;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkStatus;
-import net.minecraft.world.gen.feature.ConfiguredStructureFeature;
+import net.minecraft.world.gen.structure.Structure;
 
 public class StructureSearchWorker implements WorldWorkerManager.IWorker {
 
 	public ServerWorld world;
-	public List<ConfiguredStructureFeature<?, ?>> configuredStructures;
+	public List<Structure> structures;
 	public BlockPos startPos;
 	public int samples;
 	public int nextLength;
@@ -38,11 +38,11 @@ public class StructureSearchWorker implements WorldWorkerManager.IWorker {
 	public int z;
 	public int lastRadiusThreshold;
 
-	public StructureSearchWorker(ServerWorld world, PlayerEntity player, ItemStack stack, List<ConfiguredStructureFeature<?, ?>> configuredStructures, BlockPos startPos) {
+	public StructureSearchWorker(ServerWorld world, PlayerEntity player, ItemStack stack, List<Structure> structures, BlockPos startPos) {
 		this.world = world;
 		this.player = player;
 		this.stack = stack;
-		this.configuredStructures = configuredStructures;
+		this.structures = structures;
 		this.startPos = startPos;
 		chunkX = startPos.getX() >> 4;
 		chunkZ = startPos.getZ() >> 4;
@@ -62,7 +62,7 @@ public class StructureSearchWorker implements WorldWorkerManager.IWorker {
 				ExplorersCompass.LOGGER.info("Starting search: " + ExplorersCompassConfig.maxRadius + " max radius, " + ExplorersCompassConfig.maxSamples + " max samples");
 				WorldWorkerManager.addWorker(this);
 			} else {
-				finish(null);
+				succeed(null);
 			}
 		}
 	}
@@ -88,19 +88,19 @@ public class StructureSearchWorker implements WorldWorkerManager.IWorker {
 			x = chunkX << 4;
 			z = chunkZ << 4;
 
-			for (ConfiguredStructureFeature<?, ?> configuredStructure : configuredStructures) {
-				StructurePresence checkResult = world.getStructureAccessor().getStructurePresence(new ChunkPos(chunkX, chunkZ), configuredStructure, false);
+			for (Structure structure : structures) {
+				StructurePresence checkResult = world.getStructureAccessor().getStructurePresence(new ChunkPos(chunkX, chunkZ), structure, false);
 				if (checkResult != StructurePresence.START_NOT_PRESENT) {
 					if (checkResult == StructurePresence.START_PRESENT) {
-						finish(configuredStructure);
+						succeed(structure);
 						return true;
 					}
 					Chunk chunk = world.getChunk(chunkX, chunkZ, ChunkStatus.STRUCTURE_STARTS);
-					StructureStart structureStart = world.getStructureAccessor().getStructureStart(ChunkSectionPos.from(chunk), configuredStructure, chunk);
+					StructureStart structureStart = world.getStructureAccessor().getStructureStart(ChunkSectionPos.from(chunk), structure, chunk);
 					if (structureStart != null && structureStart.hasChildren()) {
 						x = getLocatePos(structureStart.getPos()).getX();
 						z = getLocatePos(structureStart.getPos()).getZ();
-						finish(configuredStructure);
+						succeed(structure);
 						return true;
 					}
 				}
@@ -129,23 +129,34 @@ public class StructureSearchWorker implements WorldWorkerManager.IWorker {
 		if (hasWork()) {
 			return true;
 		}
-		finish(null);
+		if (!finished) {
+			fail();
+		}
 		return false;
 	}
 
-	private void finish(ConfiguredStructureFeature<?, ?> configuredStructure) {
+	private void succeed(Structure structure) {
+		ExplorersCompass.LOGGER.info("Search succeeded: " + getRadius() + " radius, " + samples + " samples");
 		if (!stack.isEmpty() && stack.getItem() == ExplorersCompass.EXPLORERS_COMPASS_ITEM) {
-			if (configuredStructure != null) {
-				ExplorersCompass.LOGGER.info("Search succeeded: " + getRadius() + " radius, " + samples + " samples");
-				((ExplorersCompassItem) stack.getItem()).setFound(stack, StructureUtils.getIDForConfiguredStructure(world, configuredStructure), x, z, samples, player);
-				((ExplorersCompassItem) stack.getItem()).setDisplayCoordinates(stack, ExplorersCompassConfig.displayCoordinates);
-			} else {
-				ExplorersCompass.LOGGER.info("Search failed: " + getRadius() + " radius, " + samples + " samples");
-				((ExplorersCompassItem) stack.getItem()).setNotFound(stack, player, roundRadius(getRadius(), 250), samples);
-			}
+			((ExplorersCompassItem) stack.getItem()).succeed(stack, player, StructureUtils.getIDForStructure(world, structure), x, z, samples, ExplorersCompassConfig.displayCoordinates);
 		} else {
 			ExplorersCompass.LOGGER.error("Invalid compass after search");
 		}
+		finished = true;
+	}
+	
+	private void fail() {
+		ExplorersCompass.LOGGER.info("Search failed: " + getRadius() + " radius, " + samples + " samples");
+		if (!stack.isEmpty() && stack.getItem() == ExplorersCompass.EXPLORERS_COMPASS_ITEM) {
+			((ExplorersCompassItem) stack.getItem()).fail(stack, player, roundRadius(getRadius(), 250), samples);
+		} else {
+			ExplorersCompass.LOGGER.error("Invalid compass after search");
+		}
+		finished = true;
+	}
+	
+	public void stop() {
+		ExplorersCompass.LOGGER.info("Search stopped: " + getRadius() + " radius, " + samples + " samples");
 		finished = true;
 	}
 

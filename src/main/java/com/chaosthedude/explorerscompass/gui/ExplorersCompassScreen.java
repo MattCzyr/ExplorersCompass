@@ -21,7 +21,7 @@ import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
 
@@ -44,7 +44,7 @@ public class ExplorersCompassScreen extends Screen {
 	private ISorting sortingCategory;
 
 	public ExplorersCompassScreen(World world, PlayerEntity player, ItemStack stack, ExplorersCompassItem explorersCompass, List<Identifier> allowedStructureIDs) {
-		super(new TranslatableText("string.explorerscompass.selectStructure"));
+		super(Text.translatable("string.explorerscompass.selectStructure"));
 		this.world = world;
 		this.player = player;
 		this.stack = stack;
@@ -78,9 +78,9 @@ public class ExplorersCompassScreen extends Screen {
 		teleportButton.active = explorersCompass.getState(stack) == CompassState.FOUND;
 		
 		// Check if the allowed structure list has synced
-		if (allowedStructureIDs.size() != ExplorersCompass.allowedConfiguredStructureIDs.size()) {
+		if (allowedStructureIDs.size() != ExplorersCompass.allowedStructureIDs.size()) {
 			remove(selectionList);
-			allowedStructureIDs = ExplorersCompass.allowedConfiguredStructureIDs;
+			allowedStructureIDs = ExplorersCompass.allowedStructureIDs;
 			structureIDsMatchingSearch = new ArrayList<Identifier>(allowedStructureIDs);
 			selectionList = new StructureSearchList(this, client, width + 110, height, 40, height, 45);
 			addDrawableChild(selectionList);
@@ -134,7 +134,7 @@ public class ExplorersCompassScreen extends Screen {
 	}
 	
 	public void searchForStructureGroup(Identifier structureID) {
-		ClientPlayNetworking.send(SearchPacket.ID, new SearchPacket(structureID, ExplorersCompass.structureIDsToConfiguredStructureIDs.get(structureID), player.getBlockPos()));
+		ClientPlayNetworking.send(SearchPacket.ID, new SearchPacket(structureID, ExplorersCompass.groupIDsToStructureIDs.get(structureID), player.getBlockPos()));
 		client.setScreen(null);
 	}
 
@@ -161,25 +161,25 @@ public class ExplorersCompassScreen extends Screen {
 	}
 
 	private void setupButtons() {
-		searchButton = addDrawableChild(new TransparentButton(10, 40, 110, 20, new TranslatableText("string.explorerscompass.search"), (onPress) -> {
+		searchButton = addDrawableChild(new TransparentButton(10, 40, 110, 20, Text.translatable("string.explorerscompass.search"), (onPress) -> {
 			if (selectionList.hasSelection()) {
 				selectionList.getSelectedOrNull().searchForStructure();
 			}
 		}));
-		searchForGroupButton = addDrawableChild(new TransparentButton(10, 65, 110, 20, new TranslatableText("string.explorerscompass.searchForGroup"), (onPress) -> {
+		searchForGroupButton = addDrawableChild(new TransparentButton(10, 65, 110, 20, Text.translatable("string.explorerscompass.searchForGroup"), (onPress) -> {
 			if (selectionList.hasSelection()) {
 				selectionList.getSelectedOrNull().searchForStructureGroup();
 			}
 		}));
-		sortByButton = addDrawableChild(new TransparentButton(10, 90, 110, 20, new TranslatableText("string.explorerscompass.sortBy").append(": " + sortingCategory.getLocalizedName()), (onPress) -> {
+		sortByButton = addDrawableChild(new TransparentButton(10, 90, 110, 20, Text.translatable("string.explorerscompass.sortBy").append(": " + sortingCategory.getLocalizedName()), (onPress) -> {
 			sortingCategory = sortingCategory.next();
-			sortByButton.setMessage(new TranslatableText("string.explorerscompass.sortBy").append(": " + sortingCategory.getLocalizedName()));
+			sortByButton.setMessage(Text.translatable("string.explorerscompass.sortBy").append(": " + sortingCategory.getLocalizedName()));
 			selectionList.refreshList();
 		}));
-		cancelButton = addDrawableChild(new TransparentButton(10, height - 30, 110, 20, new TranslatableText("gui.cancel"), (onPress) -> {
+		cancelButton = addDrawableChild(new TransparentButton(10, height - 30, 110, 20, Text.translatable("gui.cancel"), (onPress) -> {
 			client.setScreen(null);
 		}));
-		teleportButton = addDrawableChild(new TransparentButton(width - 120, 10, 110, 20, new TranslatableText("string.explorerscompass.teleport"), (onPress) -> {
+		teleportButton = addDrawableChild(new TransparentButton(width - 120, 10, 110, 20, Text.translatable("string.explorerscompass.teleport"), (onPress) -> {
 			teleport();
 		}));
 
@@ -190,7 +190,7 @@ public class ExplorersCompassScreen extends Screen {
 	}
 
 	private void setupTextFields() {
-		searchTextField = new TransparentTextField(textRenderer, width / 2 - 82, 10, 140, 20, new TranslatableText("string.explorerscompass.search"));
+		searchTextField = new TransparentTextField(textRenderer, width / 2 - 82, 10, 140, 20, Text.translatable("string.explorerscompass.search"));
 		addDrawableChild(searchTextField);
 	}
 

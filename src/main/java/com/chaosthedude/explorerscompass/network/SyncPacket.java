@@ -20,72 +20,72 @@ public class SyncPacket extends PacketByteBuf {
 
 	public static final Identifier ID = new Identifier(ExplorersCompass.MODID, "sync");
 
-	public SyncPacket(boolean canTeleport, List<Identifier> allowedConfiguredStructureIDs, ListMultimap<Identifier, Identifier> allowedConfiguredStructureIDsToDimensionIDs, Map<Identifier, Identifier> configuredStructureIDsToStructureIDs, ListMultimap<Identifier, Identifier> structureIDsToConfiguredStructureIDs) {
+	public SyncPacket(boolean canTeleport, List<Identifier> allowedStructureIDs, ListMultimap<Identifier, Identifier> allowedStructureIDsToDimensionIDs, Map<Identifier, Identifier> structureIDsToGroupIDs, ListMultimap<Identifier, Identifier> groupIDsToStructureIDs) {
 		super(Unpooled.buffer());
 		writeBoolean(canTeleport);
-		writeInt(allowedConfiguredStructureIDs.size());
-		for (Identifier configuredStructureID : allowedConfiguredStructureIDs) {
-			writeIdentifier(configuredStructureID);
-			List<Identifier> dimensionIDs = allowedConfiguredStructureIDsToDimensionIDs.get(configuredStructureID);
+		writeInt(allowedStructureIDs.size());
+		for (Identifier structureID : allowedStructureIDs) {
+			writeIdentifier(structureID);
+			List<Identifier> dimensionIDs = allowedStructureIDsToDimensionIDs.get(structureID);
 			writeInt(dimensionIDs.size());
 			for (Identifier dimensionID : dimensionIDs) {
 				writeIdentifier(dimensionID);
 			}
-			Identifier structureID = configuredStructureIDsToStructureIDs.get(configuredStructureID);
-			writeIdentifier(structureID);
+			Identifier groupID = structureIDsToGroupIDs.get(structureID);
+			writeIdentifier(groupID);
 		}
 		
-		writeInt(structureIDsToConfiguredStructureIDs.keySet().size());
-		for (Identifier structureID : structureIDsToConfiguredStructureIDs.keySet()) {
-			writeIdentifier(structureID);
-			List<Identifier> configuredStructureIDs = structureIDsToConfiguredStructureIDs.get(structureID);
-			writeInt(configuredStructureIDs.size());
-			for (Identifier configuredStructureID : configuredStructureIDs) {
-				writeIdentifier(configuredStructureID);
+		writeInt(groupIDsToStructureIDs.keySet().size());
+		for (Identifier groupID : groupIDsToStructureIDs.keySet()) {
+			writeIdentifier(groupID);
+			List<Identifier> structureIDs = groupIDsToStructureIDs.get(groupID);
+			writeInt(structureIDs.size());
+			for (Identifier structureID : structureIDs) {
+				writeIdentifier(structureID);
 			}
 		}
 	}
 
 	public static void apply(MinecraftClient client, ClientPlayNetworkHandler handler, PacketByteBuf buf, PacketSender responseSender) {
 		final boolean canTeleport = buf.readBoolean();
-		final List<Identifier> allowedConfiguredStructureIDs = new ArrayList<Identifier>();
-		final ListMultimap<Identifier, Identifier> allowedConfiguredStructureIDsToDimensionIDs = ArrayListMultimap.create();
-		Map<Identifier, Identifier> configuredStructureIDsToStructureIDs = new HashMap<Identifier, Identifier>();
-		ListMultimap<Identifier, Identifier> structureIDsToConfiguredStructureIDs = ArrayListMultimap.create();
+		final List<Identifier> allowedStructureIDs = new ArrayList<Identifier>();
+		final ListMultimap<Identifier, Identifier> allowedStructureIDsToDimensionIDs = ArrayListMultimap.create();
+		Map<Identifier, Identifier> structureIDsToGroupIDs = new HashMap<Identifier, Identifier>();
+		ListMultimap<Identifier, Identifier> groupIDsToStructureIDs = ArrayListMultimap.create();
 		
-		final int numConfiguredStructures = buf.readInt();
-		for (int i = 0; i < numConfiguredStructures; i++) {
-			Identifier configuredStructureID = buf.readIdentifier();
+		final int numStructures = buf.readInt();
+		for (int i = 0; i < numStructures; i++) {
+			Identifier structureID = buf.readIdentifier();
 			int numDimensions = buf.readInt();
 			List<Identifier> dimensionIDs = new ArrayList<Identifier>();
 			for (int j = 0; j < numDimensions; j++) {
 				dimensionIDs.add(buf.readIdentifier());
 			}
-			Identifier structureID = buf.readIdentifier();
+			Identifier groupID = buf.readIdentifier();
 			
-			if (configuredStructureID != null) {
-				allowedConfiguredStructureIDs.add(configuredStructureID);
-				allowedConfiguredStructureIDsToDimensionIDs.putAll(configuredStructureID, dimensionIDs);
-				configuredStructureIDsToStructureIDs.put(configuredStructureID, structureID);
+			if (structureID != null) {
+				allowedStructureIDs.add(structureID);
+				allowedStructureIDsToDimensionIDs.putAll(structureID, dimensionIDs);
+				structureIDsToGroupIDs.put(structureID, groupID);
 			}
 		}
 		
-		int numStructures = buf.readInt();
-		for (int i = 0; i < numStructures; i++) {
-			Identifier structureID = buf.readIdentifier();
-			int numStructuresToAdd = buf.readInt();
-			for (int j = 0; j < numStructuresToAdd; j++) {
-				Identifier configuredStructureID = buf.readIdentifier();
-				structureIDsToConfiguredStructureIDs.put(structureID, configuredStructureID);
+		int numGroups = buf.readInt();
+		for (int i = 0; i < numGroups; i++) {
+			Identifier groupID = buf.readIdentifier();
+			int numGroupsToAdd = buf.readInt();
+			for (int j = 0; j < numGroupsToAdd; j++) {
+				Identifier structureID = buf.readIdentifier();
+				groupIDsToStructureIDs.put(groupID, structureID);
 			}
 		}
 		
 		client.execute(() -> {
 			ExplorersCompass.canTeleport = canTeleport;
-			ExplorersCompass.allowedConfiguredStructureIDs = allowedConfiguredStructureIDs;
-			ExplorersCompass.allowedConfiguredStructureIDsToDimensionIDs = allowedConfiguredStructureIDsToDimensionIDs;
-			ExplorersCompass.configuredStructureIDsToStructureIDs = configuredStructureIDsToStructureIDs;
-			ExplorersCompass.structureIDsToConfiguredStructureIDs = structureIDsToConfiguredStructureIDs;
+			ExplorersCompass.allowedStructureIDs = allowedStructureIDs;
+			ExplorersCompass.allowedStructureIDsToDimensionIDs = allowedStructureIDsToDimensionIDs;
+			ExplorersCompass.structureIDsToGroupIDs = structureIDsToGroupIDs;
+			ExplorersCompass.groupIDsToStructureIDs = groupIDsToStructureIDs;
 		});
 	}
 
