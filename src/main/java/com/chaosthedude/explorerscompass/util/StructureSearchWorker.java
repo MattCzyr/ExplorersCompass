@@ -27,7 +27,7 @@ public class StructureSearchWorker implements WorldWorkerManager.IWorker {
 	public List<Structure> structures;
 	public BlockPos startPos;
 	public int samples;
-	public int nextLength;
+	public double nextLength;
 	public Direction direction;
 	public ItemStack stack;
 	public Player player;
@@ -109,9 +109,9 @@ public class StructureSearchWorker implements WorldWorkerManager.IWorker {
 
 			samples++;
 			length++;
-			if (length >= nextLength) {
+			if (length >= (int)nextLength) {
 				if (direction != Direction.UP) {
-					nextLength++;
+					nextLength += 0.5;
 					direction = direction.getClockWise();
 				} else {
 					direction = Direction.NORTH;
