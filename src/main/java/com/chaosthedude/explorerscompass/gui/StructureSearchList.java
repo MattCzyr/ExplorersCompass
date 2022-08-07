@@ -38,12 +38,12 @@ public class StructureSearchList extends ObjectSelectionList<StructureSearchEntr
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int par1, int par2, float par3) {
-		renderList(poseStack, getRowLeft(), y0 + 4 - (int) getScrollAmount(), par1, par2, par3);
+	public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
+		renderList(poseStack, mouseX, mouseY, partialTicks);
 	}
 
 	@Override
-	protected void renderList(PoseStack poseStack, int par1, int par2, int par3, int par4, float par5) {
+	protected void renderList(PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
 		for (int j = 0; j < getItemCount(); ++j) {
 			int rowTop = getRowTop(j);
 			int rowBottom = getRowBottom(j);
@@ -54,7 +54,7 @@ public class StructureSearchList extends ObjectSelectionList<StructureSearchEntr
 					final int insideLeft = x0 + width / 2 - getRowWidth() / 2 + 2;
 					RenderUtils.drawRect(insideLeft - 4, rowTop - 4, insideLeft + getRowWidth() + 4, rowTop + itemHeight, 255 / 2 << 24);
 				}
-				entry.render(poseStack, j, rowTop, getRowLeft(), getRowWidth(), j1, par3, par4, isMouseOver((double) par3, (double) par4) && Objects .equals(getEntryAtPosition((double) par3, (double) par4), entry), par5);
+				entry.render(poseStack, j, rowTop, getRowLeft(), getRowWidth(), j1, mouseX, mouseY, isMouseOver((double) mouseX, (double) mouseY) && Objects .equals(getEntryAtPosition((double) mouseX, (double) mouseY), entry), partialTicks);
 			}
 		}
 
