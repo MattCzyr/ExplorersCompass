@@ -10,6 +10,17 @@
 
 
 ------------------------------------------------------------------
+ FABRIC VERSION: 2.1.2 - 1.19.2, 1.19.1, 1.19
+------------------------------------------------------------------
+1.19.2:
+ - Initial release for Fabric 1.19.2
+1.19.1:
+ - Initial release for Fabric 1.19.1
+1.19:
+ - Fixed a bug in which some chunks were skipped when searching for a structure
+
+
+------------------------------------------------------------------
  FORGE VERSION: 1.2.3 - 1.19, 1.18.2
 ------------------------------------------------------------------
 1.19, 1.18.2:
@@ -20,7 +31,7 @@
  FABRIC VERSION: 2.1.1 - 1.19
 ------------------------------------------------------------------
 1.19:
- - Initial release for Forge 1.19
+ - Initial release for Fabric 1.19
  - Improved structure grouping so that structures will be listed under more specific groups
  - Fixed an issue in which clearing the compass state did not cancel the current search
 
@@ -47,8 +58,8 @@
 1.18.2:
  - Initial release for Forge 1.18.2
  - Added a feature to allow searching for a group of related structures all at once
- 
- 
+
+
 ------------------------------------------------------------------
  FABRIC VERSION: 2.0.3 - 1.18.1
 ------------------------------------------------------------------
