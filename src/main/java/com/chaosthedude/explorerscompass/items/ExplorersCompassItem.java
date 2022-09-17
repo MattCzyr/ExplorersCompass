@@ -10,8 +10,9 @@ import com.chaosthedude.explorerscompass.network.SyncPacket;
 import com.chaosthedude.explorerscompass.util.CompassState;
 import com.chaosthedude.explorerscompass.util.ItemUtils;
 import com.chaosthedude.explorerscompass.util.PlayerUtils;
-import com.chaosthedude.explorerscompass.util.StructureSearchWorker;
 import com.chaosthedude.explorerscompass.util.StructureUtils;
+import com.chaosthedude.explorerscompass.worker.StructureSearchWorker;
+import com.chaosthedude.explorerscompass.worker.WorkerFactory;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
@@ -80,19 +81,19 @@ public class ExplorersCompassItem extends Item {
 			if (worker != null) {
 				worker.stop();
 			}
-			worker = new StructureSearchWorker(serverLevel, player, stack, structures, pos);
+			worker = WorkerFactory.createWorker(serverLevel, player, stack, structures, pos);
 			worker.start();
 		}
 	}
 	
-	public void succeed(ItemStack stack, Player player, ResourceLocation structureKey, int x, int z, int samples, boolean displayCoordinates) {
-		setFound(stack, structureKey, x, z, samples, player);
+	public void succeed(ItemStack stack, ResourceLocation structureKey, int x, int z, int samples, boolean displayCoordinates) {
+		setFound(stack, structureKey, x, z, samples);
 		setDisplayCoordinates(stack, displayCoordinates);
 		worker = null;
 	}
 	
-	public void fail(ItemStack stack, Player player, int radius, int samples) {
-		setNotFound(stack, player, radius, samples);
+	public void fail(ItemStack stack, int radius, int samples) {
+		setNotFound(stack, radius, samples);
 		worker = null;
 	}
 
@@ -111,7 +112,7 @@ public class ExplorersCompassItem extends Item {
 		}
 	}
 
-	public void setFound(ItemStack stack, ResourceLocation structureKey, int x, int z, int samples, Player player) {
+	public void setFound(ItemStack stack, ResourceLocation structureKey, int x, int z, int samples) {
 		if (ItemUtils.verifyNBT(stack)) {
 			stack.getTag().putInt("State", CompassState.FOUND.getID());
 			stack.getTag().putString("StructureKey", structureKey.toString());
@@ -121,7 +122,7 @@ public class ExplorersCompassItem extends Item {
 		}
 	}
 
-	public void setNotFound(ItemStack stack, Player player, int searchRadius, int samples) {
+	public void setNotFound(ItemStack stack, int searchRadius, int samples) {
 		if (ItemUtils.verifyNBT(stack)) {
 			stack.getTag().putInt("State", CompassState.NOT_FOUND.getID());
 			stack.getTag().putInt("SearchRadius", searchRadius);
