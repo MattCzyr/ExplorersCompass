@@ -10,8 +10,9 @@ import com.chaosthedude.explorerscompass.network.SyncPacket;
 import com.chaosthedude.explorerscompass.util.CompassState;
 import com.chaosthedude.explorerscompass.util.ItemUtils;
 import com.chaosthedude.explorerscompass.util.PlayerUtils;
-import com.chaosthedude.explorerscompass.util.StructureSearchWorker;
 import com.chaosthedude.explorerscompass.util.StructureUtils;
+import com.chaosthedude.explorerscompass.worker.StructureSearchWorker;
+import com.chaosthedude.explorerscompass.worker.SearchWorkerFactory;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
@@ -32,10 +33,11 @@ public class ExplorersCompassItem extends Item {
 
 	public static final String NAME = "explorerscompass";
 	
-	private StructureSearchWorker worker;
+	private List<StructureSearchWorker<?>> searchWorkers;
 
 	public ExplorersCompassItem() {
 		super(new Properties().stacksTo(1).tab(CreativeModeTab.TAB_TOOLS));
+		searchWorkers = new ArrayList<StructureSearchWorker<?>>();
 	}
 
 	@Override
@@ -51,10 +53,7 @@ public class ExplorersCompassItem extends Item {
 				ExplorersCompass.network.sendTo(new SyncPacket(canTeleport, StructureUtils.getAllowedStructureKeys(serverLevel), StructureUtils.getGeneratingDimensionsForAllowedStructures(serverLevel), StructureUtils.getStructureKeysToTypeKeys(serverLevel), StructureUtils.getTypeKeysToStructureKeys(serverLevel)), serverPlayer.connection.getConnection(), NetworkDirection.PLAY_TO_CLIENT);
 			}
 		} else {
-			if (worker != null) {
-				worker.stop();
-				worker = null;
-			}
+			killSearchWorkers();
 			setState(player.getItemInHand(hand), null, CompassState.INACTIVE, player);
 		}
 		return new InteractionResultHolder<ItemStack>(InteractionResult.PASS, player.getItemInHand(hand));
@@ -77,23 +76,29 @@ public class ExplorersCompassItem extends Item {
 			for (ResourceLocation key : structureKeys) {
 				structures.add(StructureUtils.getStructureForKey(serverLevel, key));
 			}
-			if (worker != null) {
-				worker.stop();
+			killSearchWorkers();
+			searchWorkers = SearchWorkerFactory.createWorkers(serverLevel, player, stack, structures, pos);
+			if (!searchWorkers.isEmpty()) {
+				searchWorkers.get(0).start();
+			} else {
+				setNotFound(stack, 0, 0);
 			}
-			worker = new StructureSearchWorker(serverLevel, player, stack, structures, pos);
-			worker.start();
 		}
 	}
 	
-	public void succeed(ItemStack stack, Player player, ResourceLocation structureKey, int x, int z, int samples, boolean displayCoordinates) {
-		setFound(stack, structureKey, x, z, samples, player);
+	public void succeed(ItemStack stack, ResourceLocation structureKey, int x, int z, int samples, boolean displayCoordinates) {
+		setFound(stack, structureKey, x, z, samples);
 		setDisplayCoordinates(stack, displayCoordinates);
-		worker = null;
+		searchWorkers.clear();
 	}
 	
-	public void fail(ItemStack stack, Player player, int radius, int samples) {
-		setNotFound(stack, player, radius, samples);
-		worker = null;
+	public void fail(ItemStack stack, int radius, int samples) {
+		searchWorkers.remove(0);
+		if (!searchWorkers.isEmpty()) {
+			searchWorkers.get(0).start();
+		} else {
+			setNotFound(stack, radius, samples);
+		}
 	}
 
 	public boolean isActive(ItemStack stack) {
@@ -111,7 +116,7 @@ public class ExplorersCompassItem extends Item {
 		}
 	}
 
-	public void setFound(ItemStack stack, ResourceLocation structureKey, int x, int z, int samples, Player player) {
+	public void setFound(ItemStack stack, ResourceLocation structureKey, int x, int z, int samples) {
 		if (ItemUtils.verifyNBT(stack)) {
 			stack.getTag().putInt("State", CompassState.FOUND.getID());
 			stack.getTag().putString("StructureKey", structureKey.toString());
@@ -121,7 +126,7 @@ public class ExplorersCompassItem extends Item {
 		}
 	}
 
-	public void setNotFound(ItemStack stack, Player player, int searchRadius, int samples) {
+	public void setNotFound(ItemStack stack, int searchRadius, int samples) {
 		if (ItemUtils.verifyNBT(stack)) {
 			stack.getTag().putInt("State", CompassState.NOT_FOUND.getID());
 			stack.getTag().putInt("SearchRadius", searchRadius);
@@ -235,6 +240,13 @@ public class ExplorersCompassItem extends Item {
 		}
 
 		return true;
+	}
+	
+	private void killSearchWorkers() {
+		for (StructureSearchWorker<?> worker : searchWorkers) {
+			worker.stop();
+		}
+		searchWorkers.clear();
 	}
 
 }

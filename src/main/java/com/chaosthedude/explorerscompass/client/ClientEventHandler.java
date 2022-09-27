@@ -65,9 +65,6 @@ public class ClientEventHandler {
 
 					RenderUtils.drawConfiguredStringOnHUD(poseStack, I18n.get("string.explorerscompass.radius"), 5, 5, 0xFFFFFF, 6);
 					RenderUtils.drawConfiguredStringOnHUD(poseStack, String.valueOf(compass.getSearchRadius(stack)), 5, 5, 0xAAAAAA, 7);
-
-					RenderUtils.drawConfiguredStringOnHUD(poseStack, I18n.get("string.explorerscompass.samples"), 5, 5, 0xFFFFFF, 9);
-					RenderUtils.drawConfiguredStringOnHUD(poseStack, String.valueOf(compass.getSamples(stack)), 5, 5, 0xAAAAAA, 10);
 				}
 			}
 		}
