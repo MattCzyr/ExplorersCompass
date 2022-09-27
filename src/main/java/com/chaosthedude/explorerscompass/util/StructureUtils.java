@@ -19,7 +19,6 @@ import net.minecraft.Util;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
 import net.minecraft.data.worldgen.Structures;
 import net.minecraft.resources.ResourceKey;
@@ -38,14 +37,6 @@ import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModList;
 
 public class StructureUtils {
-	
-	public static HolderSet<Structure> structuresToHolderSet(ServerLevel level, List<Structure> structures) {
-		List<Holder<Structure>> holders = new ArrayList<Holder<Structure>>();
-		for (Structure structure : structures) {
-			holders.add(getStructureRegistry(level).getHolder(getStructureRegistry(level).getResourceKey(structure).get()).get());
-		}
-		return HolderSet.direct(holders);
-	}
 
 	public static ListMultimap<ResourceLocation, ResourceLocation> getTypeKeysToStructureKeys(ServerLevel level) {
 		ListMultimap<ResourceLocation, ResourceLocation> typeKeysToStructureKeys = ArrayListMultimap.create();
