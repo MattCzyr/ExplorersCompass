@@ -25,7 +25,6 @@ import net.minecraft.data.worldgen.Structures;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.biome.Biome;
@@ -39,6 +38,14 @@ import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModList;
 
 public class StructureUtils {
+	
+	public static HolderSet<Structure> structuresToHolderSet(ServerLevel level, List<Structure> structures) {
+		List<Holder<Structure>> holders = new ArrayList<Holder<Structure>>();
+		for (Structure structure : structures) {
+			holders.add(getStructureRegistry(level).getHolder(getStructureRegistry(level).getResourceKey(structure).get()).get());
+		}
+		return HolderSet.direct(holders);
+	}
 
 	public static ListMultimap<ResourceLocation, ResourceLocation> getTypeKeysToStructureKeys(ServerLevel level) {
 		ListMultimap<ResourceLocation, ResourceLocation> typeKeysToStructureKeys = ArrayListMultimap.create();
@@ -74,6 +81,14 @@ public class StructureUtils {
 
 	public static Structure getStructureForKey(ServerLevel level, ResourceLocation key) {
 		return getStructureRegistry(level).get(key);
+	}
+	
+	public static Holder<Structure> getHolderForStructure(ServerLevel level, Structure structure) {
+		Optional<ResourceKey<Structure>> optional = getStructureRegistry(level).getResourceKey(structure);
+		if (optional.isPresent()) {
+			return getStructureRegistry(level).getHolderOrThrow(optional.get());
+		}
+		return null;
 	}
 
 	public static List<ResourceLocation> getAllowedStructureKeys(ServerLevel level) {
@@ -206,33 +221,6 @@ public class StructureUtils {
 		}
 		regex += "$";
 		return regex;
-	}
-	
-	// TODO
-	
-	public static HolderSet<Structure> getHolderSet(ServerLevel level, List<Structure> structures) {
-		List<Holder<Structure>> holders = new ArrayList<Holder<Structure>>();
-		for (Structure structure : structures) {
-			Optional<ResourceKey<Structure>> optional = getStructureRegistry(level).getResourceKey(structure);
-			if (optional.isPresent()) {
-				holders.add(getStructureRegistry(level).getHolderOrThrow(optional.get()));
-			} else {
-				ExplorersCompass.LOGGER.warn("Missing resource key");
-			}
-		}
-		return HolderSet.direct(holders);
-	}
-	
-	public static Structure tagKeyToStructure(ServerLevel level, TagKey<Structure> tagKey) {
-		Optional<HolderSet.Named<Structure>> optional = getStructureRegistry(level).getTag(tagKey);
-		if (optional.isPresent()) {
-			// TODO
-			for (int i = 0; i < optional.get().size(); i++) {
-				System.out.println("STRUCTURE: " + optional.get().get(i));
-			}
-			return optional.get().get(0).get();
-		}
-		return null;
 	}
 
 }

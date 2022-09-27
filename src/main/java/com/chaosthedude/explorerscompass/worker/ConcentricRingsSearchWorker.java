@@ -1,108 +1,113 @@
 package com.chaosthedude.explorerscompass.worker;
 
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map.Entry;
-import java.util.Set;
 
+import com.chaosthedude.explorerscompass.ExplorersCompass;
+import com.chaosthedude.explorerscompass.config.ConfigHandler;
 import com.mojang.datafixers.util.Pair;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Holder;
+import net.minecraft.core.BlockPos.MutableBlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.levelgen.structure.Structure;
-import net.minecraft.world.level.levelgen.structure.StructureCheckResult;
-import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.levelgen.structure.placement.ConcentricRingsStructurePlacement;
-import net.minecraft.world.level.levelgen.structure.placement.StructurePlacement;
+import net.minecraftforge.common.WorldWorkerManager;
 
-public class ConcentricRingsSearchWorker extends StructureSearchWorker {
+public class ConcentricRingsSearchWorker extends StructureSearchWorker<ConcentricRingsStructurePlacement> {
 
-	public Iterator<Entry<StructurePlacement, Set<Holder<Structure>>>> iterator;
+	private List<ChunkPos> potentialChunks;
+	private int chunkIndex;
+	private double minDistance;
+	private Pair<BlockPos, Structure> closest;
 
-	public ConcentricRingsSearchWorker(ServerLevel level, Player player, ItemStack stack, List<Entry<StructurePlacement, Set<Holder<Structure>>>> entries, BlockPos startPos) {
-		super(level, player, stack, entries, startPos);
-		iterator = entries.iterator();
+	public ConcentricRingsSearchWorker(ServerLevel level, Player player, ItemStack stack, BlockPos startPos, ConcentricRingsStructurePlacement placement, List<Structure> structureSet) {
+		super(level, player, stack, startPos, placement, structureSet);
+
+		minDistance = Double.MAX_VALUE;
+		chunkIndex = 0;
+		potentialChunks = level.getChunkSource().getGenerator().getRingPositionsFor(placement, level.getChunkSource().randomState());
+
+		finished = !level.getServer().getWorldData().worldGenSettings().generateStructures() || potentialChunks == null || potentialChunks.isEmpty();
+	}
+	
+	@Override
+	public void start() {
+		if (!stack.isEmpty() && stack.getItem() == ExplorersCompass.explorersCompass) {
+			if (ConfigHandler.GENERAL.maxRadius.get() > 0) {
+				ExplorersCompass.LOGGER.info("Starting search with ConcentricRingsSearchWorker: " + ConfigHandler.GENERAL.maxSamples.get() + " max samples");
+				WorldWorkerManager.addWorker(this);
+			} else {
+				fail();
+			}
+		}
 	}
 
 	@Override
 	public boolean hasWork() {
-		return super.hasWork() && iterator.hasNext();
+		// Samples for this placement are not necessarily in order of closest to furthest, so disregard radius
+		return !finished && samples < ConfigHandler.GENERAL.maxSamples.get() && chunkIndex < potentialChunks.size();
 	}
 
 	@Override
 	public boolean doWork() {
+		super.doWork();
 		if (hasWork()) {
-			Entry<StructurePlacement, Set<Holder<Structure>>> entry = iterator.next();
-			ConcentricRingsStructurePlacement placement = (ConcentricRingsStructurePlacement) entry.getKey();
-			Pair<BlockPos, Holder<Structure>> pair = getClosestConcentric(entry.getValue(), placement);
-			if (startPos.distSqr(pair.getFirst()) < startPos.distSqr(closest.getFirst())) {
-				closest = pair;
+			ChunkPos chunkPos = potentialChunks.get(chunkIndex);
+			currentPos = new BlockPos(SectionPos.sectionToBlockCoord(chunkPos.x, 8), 0, SectionPos.sectionToBlockCoord(chunkPos.z, 8));
+			double distance = startPos.distSqr(currentPos);
+			
+			if (closest == null || distance < minDistance) {
+				Pair<BlockPos, Structure> pair = getStructureGeneratingAt(chunkPos);
+				if (pair != null) {
+					minDistance = distance;
+					closest = pair;
+				}
 			}
-		} else {
-			if (closest != null) {
-				succeed(closest.getSecond().get());
-			} else {
-				fail();
-			}
+
+			samples++;
+			chunkIndex++;
 		}
 
 		if (hasWork()) {
 			return true;
 		}
-
+		
+		if (closest != null) {
+			succeed(closest.getFirst(), closest.getSecond());
+		} else if (!finished) {
+			fail();
+		}
+		
 		return false;
 	}
 
-	private Pair<BlockPos, Holder<Structure>> getClosestConcentric(Set<Holder<Structure>> structureSet, ConcentricRingsStructurePlacement placement) {
+	// Non-optimized method to get the closest structure, for testing purposes
+	private Pair<BlockPos, Structure> getClosest() {
 		List<ChunkPos> list = level.getChunkSource().getGenerator().getRingPositionsFor(placement, level.getChunkSource().randomState());
 		if (list == null) {
 			return null;
 		} else {
-			Pair<BlockPos, Holder<Structure>> pair = null;
-			double d0 = Double.MAX_VALUE;
-			BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
-
-			for (ChunkPos chunkpos : list) {
-				blockpos$mutableblockpos.set(SectionPos.sectionToBlockCoord(chunkpos.x, 8), 32, SectionPos.sectionToBlockCoord(chunkpos.z, 8));
-				double d1 = blockpos$mutableblockpos.distSqr(startPos);
-				boolean flag = pair == null || d1 < d0;
-				if (flag) {
-					Pair<BlockPos, Holder<Structure>> pair1 = getStructureGeneratingAt(structureSet, placement, chunkpos);
-					if (pair1 != null) {
-						pair = pair1;
-						d0 = d1;
+			Pair<BlockPos, Structure> closestPair = null;
+			double minDistance = Double.MAX_VALUE;
+			MutableBlockPos sampleBlockPos = new MutableBlockPos();
+			for (ChunkPos chunkPos : list) {
+				sampleBlockPos.set(SectionPos.sectionToBlockCoord(chunkPos.x, 8), 32, SectionPos.sectionToBlockCoord(chunkPos.z, 8));
+				double distance = sampleBlockPos.distSqr(startPos);
+				if (closestPair == null || distance < minDistance) {
+					Pair<BlockPos, Structure> pair = getStructureGeneratingAt(chunkPos);
+					if (pair != null) {
+						closestPair = pair;
+						minDistance = distance;
 					}
 				}
 			}
 
-			return pair;
+			return closestPair;
 		}
-	}
-
-	private Pair<BlockPos, Holder<Structure>> getStructureGeneratingAt(Set<Holder<Structure>> holderSet, StructurePlacement placement, ChunkPos chunkPos) {
-		for (Holder<Structure> holder : holderSet) {
-			StructureCheckResult structurecheckresult = level.structureManager().checkStructurePresence(chunkPos, holder.value(), false);
-			if (structurecheckresult != StructureCheckResult.START_NOT_PRESENT) {
-				if (structurecheckresult == StructureCheckResult.START_PRESENT) {
-					return Pair.of(placement.getLocatePos(chunkPos), holder);
-				}
-
-				ChunkAccess chunkaccess = level.getChunk(chunkPos.x, chunkPos.z, ChunkStatus.STRUCTURE_STARTS);
-				StructureStart structurestart = level.structureManager().getStartForStructure(SectionPos.bottomOf(chunkaccess), holder.value(), chunkaccess);
-				if (structurestart != null && structurestart.isValid()) {
-					return Pair.of(placement.getLocatePos(structurestart.getChunkPos()), holder);
-				}
-			}
-		}
-
-		return null;
 	}
 
 }
