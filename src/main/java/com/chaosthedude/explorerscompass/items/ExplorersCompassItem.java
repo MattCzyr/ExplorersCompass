@@ -11,8 +11,7 @@ import com.chaosthedude.explorerscompass.util.CompassState;
 import com.chaosthedude.explorerscompass.util.ItemUtils;
 import com.chaosthedude.explorerscompass.util.PlayerUtils;
 import com.chaosthedude.explorerscompass.util.StructureUtils;
-import com.chaosthedude.explorerscompass.worker.StructureSearchWorker;
-import com.chaosthedude.explorerscompass.worker.SearchWorkerFactory;
+import com.chaosthedude.explorerscompass.worker.SearchWorkerManager;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
@@ -33,11 +32,11 @@ public class ExplorersCompassItem extends Item {
 
 	public static final String NAME = "explorerscompass";
 	
-	private List<StructureSearchWorker<?>> searchWorkers;
+	private SearchWorkerManager workerManager;
 
 	public ExplorersCompassItem() {
 		super(new Properties().stacksTo(1).tab(CreativeModeTab.TAB_TOOLS));
-		searchWorkers = new ArrayList<StructureSearchWorker<?>>();
+		workerManager = new SearchWorkerManager();
 	}
 
 	@Override
@@ -53,7 +52,8 @@ public class ExplorersCompassItem extends Item {
 				ExplorersCompass.network.sendTo(new SyncPacket(canTeleport, StructureUtils.getAllowedStructureKeys(serverLevel), StructureUtils.getGeneratingDimensionsForAllowedStructures(serverLevel), StructureUtils.getStructureKeysToTypeKeys(serverLevel), StructureUtils.getTypeKeysToStructureKeys(serverLevel)), serverPlayer.connection.getConnection(), NetworkDirection.PLAY_TO_CLIENT);
 			}
 		} else {
-			killSearchWorkers();
+			workerManager.stop();
+			workerManager.clear();
 			setState(player.getItemInHand(hand), null, CompassState.INACTIVE, player);
 		}
 		return new InteractionResultHolder<ItemStack>(InteractionResult.PASS, player.getItemInHand(hand));
@@ -76,11 +76,10 @@ public class ExplorersCompassItem extends Item {
 			for (ResourceLocation key : structureKeys) {
 				structures.add(StructureUtils.getStructureForKey(serverLevel, key));
 			}
-			killSearchWorkers();
-			searchWorkers = SearchWorkerFactory.createWorkers(serverLevel, player, stack, structures, pos);
-			if (!searchWorkers.isEmpty()) {
-				searchWorkers.get(0).start();
-			} else {
+			workerManager.stop();
+			workerManager.createWorkers(serverLevel, player, stack, structures, pos);
+			boolean started = workerManager.start();
+			if (!started) {
 				setNotFound(stack, 0, 0);
 			}
 		}
@@ -89,14 +88,13 @@ public class ExplorersCompassItem extends Item {
 	public void succeed(ItemStack stack, ResourceLocation structureKey, int x, int z, int samples, boolean displayCoordinates) {
 		setFound(stack, structureKey, x, z, samples);
 		setDisplayCoordinates(stack, displayCoordinates);
-		searchWorkers.clear();
+		workerManager.clear();
 	}
 	
 	public void fail(ItemStack stack, int radius, int samples) {
-		searchWorkers.remove(0);
-		if (!searchWorkers.isEmpty()) {
-			searchWorkers.get(0).start();
-		} else {
+		workerManager.pop();
+		boolean started = workerManager.start();
+		if (!started) {
 			setNotFound(stack, radius, samples);
 		}
 	}
@@ -240,13 +238,6 @@ public class ExplorersCompassItem extends Item {
 		}
 
 		return true;
-	}
-	
-	private void killSearchWorkers() {
-		for (StructureSearchWorker<?> worker : searchWorkers) {
-			worker.stop();
-		}
-		searchWorkers.clear();
 	}
 
 }

@@ -17,10 +17,16 @@ import net.minecraft.world.level.levelgen.structure.placement.ConcentricRingsStr
 import net.minecraft.world.level.levelgen.structure.placement.RandomSpreadStructurePlacement;
 import net.minecraft.world.level.levelgen.structure.placement.StructurePlacement;
 
-public class SearchWorkerFactory {
+public class SearchWorkerManager {
 	
-	public static List<StructureSearchWorker<?>> createWorkers(ServerLevel level, Player player, ItemStack stack, List<Structure> structures, BlockPos startPos) {
-		List<StructureSearchWorker<?>> workers = new ArrayList<StructureSearchWorker<?>>();
+	private List<StructureSearchWorker<?>> workers;
+	
+	public SearchWorkerManager() {
+		workers = new ArrayList<StructureSearchWorker<?>>();
+	}
+	
+	public void createWorkers(ServerLevel level, Player player, ItemStack stack, List<Structure> structures, BlockPos startPos) {
+		workers.clear();
 		
 		Map<StructurePlacement, List<Structure>> placementToStructuresMap = new Object2ObjectArrayMap<>();
 		
@@ -42,8 +48,31 @@ public class SearchWorkerFactory {
 				workers.add(new GenericSearchWorker(level, player, stack, startPos, placement, entry.getValue()));
 			}
 		}
-
-		return workers;
+	}
+	
+	// Returns true if a worker starts, false otherwise
+	public boolean start() {
+		if (!workers.isEmpty()) {
+			workers.get(0).start();
+			return true;
+		}
+		return false;
+	}
+	
+	public void pop() {
+		if (!workers.isEmpty()) {
+			workers.remove(0);
+		}
+	}
+	
+	public void stop() {
+		for (StructureSearchWorker<?> worker : workers) {
+			worker.stop();
+		}
+	}
+	
+	public void clear() {
+		workers.clear();
 	}
 
 }
