@@ -72,9 +72,6 @@ public class InGameHudMixin {
 
 					RenderUtils.drawConfiguredStringOnHUD(matrixStack, I18n.translate("string.explorerscompass.radius"), client.textRenderer, 5, 5, 0xFFFFFF, 6);
 					RenderUtils.drawConfiguredStringOnHUD(matrixStack, String.valueOf(compass.getSearchRadius(stack)), client.textRenderer, 5, 5, 0xAAAAAA, 7);
-
-					RenderUtils.drawConfiguredStringOnHUD(matrixStack, I18n.translate("string.explorerscompass.samples"), client.textRenderer, 5, 5, 0xFFFFFF, 9);
-					RenderUtils.drawConfiguredStringOnHUD(matrixStack, String.valueOf(compass.getSamples(stack)), client.textRenderer, 5, 5, 0xAAAAAA, 10);
 				}
 			}
 		}

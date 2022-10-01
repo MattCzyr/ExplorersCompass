@@ -1,0 +1,2 @@
+accessWidener	v2	named
+accessible	method	net/minecraft/world/gen/chunk/ChunkGenerator	getStructurePlacement	(Lnet/minecraft/util/registry/RegistryEntry;Lnet/minecraft/world/gen/noise/NoiseConfig;)Ljava/util/List;

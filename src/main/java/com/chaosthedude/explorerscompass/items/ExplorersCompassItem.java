@@ -12,7 +12,7 @@ import com.chaosthedude.explorerscompass.util.CompassState;
 import com.chaosthedude.explorerscompass.util.ItemUtils;
 import com.chaosthedude.explorerscompass.util.PlayerUtils;
 import com.chaosthedude.explorerscompass.util.StructureUtils;
-import com.chaosthedude.explorerscompass.workers.StructureSearchWorker;
+import com.chaosthedude.explorerscompass.workers.SearchWorkerManager;
 import com.google.common.collect.ListMultimap;
 
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
@@ -34,10 +34,11 @@ public class ExplorersCompassItem extends Item {
 
 	public static final String NAME = "explorerscompass";
 	
-	private StructureSearchWorker worker;
+	private SearchWorkerManager workerManager;
 
 	public ExplorersCompassItem() {
 		super(new FabricItemSettings().maxCount(1).group(ItemGroup.TOOLS));
+		workerManager = new SearchWorkerManager();
 	}
 
 	@Override
@@ -57,42 +58,44 @@ public class ExplorersCompassItem extends Item {
 				ServerPlayNetworking.send(serverPlayer, SyncPacket.ID, new SyncPacket(canTeleport, allowedStructures, dimensionsForAllowedStructures, structureIDsToGroupIDs, groupIDsToStructureIDs));
 			}
 		} else {
-			if (worker != null) {
-				worker.stop();
-				worker = null;
-			}
-			setState(player.getStackInHand(hand), null, CompassState.INACTIVE, player);
+			workerManager.stop();
+			workerManager.clear();
+			setState(player.getStackInHand(hand), null, CompassState.INACTIVE);
 		}
 
 		return TypedActionResult.pass(player.getStackInHand(hand));
 	}
 
 	public void searchForStructure(World world, PlayerEntity player, Identifier structureID, List<Identifier> structureIDs, BlockPos pos, ItemStack stack) {
-		setSearching(stack, structureID, player);
-		setSearchRadius(stack, 0, player);
+		setSearching(stack, structureID);
+		setSearchRadius(stack, 0);
 		if (world instanceof ServerWorld) {
 			ServerWorld serverWorld = (ServerWorld) world;
 			List<Structure> structures = new ArrayList<Structure>();
 			for (Identifier id : structureIDs) {
 				structures.add(StructureUtils.getStructureForID(serverWorld, id));
 			}
-			if (worker != null) {
-				worker.stop();
+			workerManager.stop();
+			workerManager.createWorkers(serverWorld, player, stack, structures, pos);
+			boolean started = workerManager.start();
+			if (!started) {
+				setNotFound(stack, 0, 0);
 			}
-			worker = new StructureSearchWorker(serverWorld, player, stack, structures, pos);
-			worker.start();
 		}
 	}
 	
-	public void succeed(ItemStack stack, PlayerEntity player, Identifier structureID, int x, int z, int samples, boolean displayCoordinates) {
-		setFound(stack, structureID, x, z, samples, player);
+	public void succeed(ItemStack stack, Identifier structureID, int x, int z, int samples, boolean displayCoordinates) {
+		setFound(stack, structureID, x, z, samples);
 		setDisplayCoordinates(stack, displayCoordinates);
-		worker = null;
+		workerManager.clear();
 	}
 	
-	public void fail(ItemStack stack, PlayerEntity player, int radius, int samples) {
-		setNotFound(stack, player, radius, samples);
-		worker = null;
+	public void fail(ItemStack stack, int radius, int samples) {
+		workerManager.pop();
+		boolean started = workerManager.start();
+		if (!started) {
+			setNotFound(stack, radius, samples);
+		}
 	}
 
 	public boolean isActive(ItemStack stack) {
@@ -103,14 +106,14 @@ public class ExplorersCompassItem extends Item {
 		return false;
 	}
 
-	public void setSearching(ItemStack stack, Identifier structureID, PlayerEntity player) {
+	public void setSearching(ItemStack stack, Identifier structureID) {
 		if (ItemUtils.verifyNBT(stack)) {
 			stack.getNbt().putString("StructureID", structureID.toString());
 			stack.getNbt().putInt("State", CompassState.SEARCHING.getID());
 		}
 	}
 
-	public void setFound(ItemStack stack, Identifier structureID, int x, int z, int samples, PlayerEntity player) {
+	public void setFound(ItemStack stack, Identifier structureID, int x, int z, int samples) {
 		if (ItemUtils.verifyNBT(stack)) {
 			stack.getNbt().putString("StructureID", structureID.toString());
 			stack.getNbt().putInt("State", CompassState.FOUND.getID());
@@ -120,7 +123,7 @@ public class ExplorersCompassItem extends Item {
 		}
 	}
 
-	public void setNotFound(ItemStack stack, PlayerEntity player, int searchRadius, int samples) {
+	public void setNotFound(ItemStack stack, int searchRadius, int samples) {
 		if (ItemUtils.verifyNBT(stack)) {
 			stack.getNbt().putInt("State", CompassState.NOT_FOUND.getID());
 			stack.getNbt().putInt("SearchRadius", searchRadius);
@@ -128,43 +131,43 @@ public class ExplorersCompassItem extends Item {
 		}
 	}
 
-	public void setInactive(ItemStack stack, PlayerEntity player) {
+	public void setInactive(ItemStack stack) {
 		if (ItemUtils.verifyNBT(stack)) {
 			stack.getNbt().putInt("State", CompassState.INACTIVE.getID());
 		}
 	}
 
-	public void setState(ItemStack stack, BlockPos pos, CompassState state, PlayerEntity player) {
+	public void setState(ItemStack stack, BlockPos pos, CompassState state) {
 		if (ItemUtils.verifyNBT(stack)) {
 			stack.getNbt().putInt("State", state.getID());
 		}
 	}
 
-	public void setFoundStructureX(ItemStack stack, int x, PlayerEntity player) {
+	public void setFoundStructureX(ItemStack stack, int x) {
 		if (ItemUtils.verifyNBT(stack)) {
 			stack.getNbt().putInt("FoundX", x);
 		}
 	}
 
-	public void setFoundStructureZ(ItemStack stack, int z, PlayerEntity player) {
+	public void setFoundStructureZ(ItemStack stack, int z) {
 		if (ItemUtils.verifyNBT(stack)) {
 			stack.getNbt().putInt("FoundZ", z);
 		}
 	}
 
-	public void setStructureKey(ItemStack stack, Identifier structureID, PlayerEntity player) {
+	public void setStructureKey(ItemStack stack, Identifier structureID) {
 		if (ItemUtils.verifyNBT(stack)) {
 			stack.getNbt().putString("StructureID", structureID.toString());
 		}
 	}
 
-	public void setSearchRadius(ItemStack stack, int searchRadius, PlayerEntity player) {
+	public void setSearchRadius(ItemStack stack, int searchRadius) {
 		if (ItemUtils.verifyNBT(stack)) {
 			stack.getNbt().putInt("SearchRadius", searchRadius);
 		}
 	}
 
-	public void setSamples(ItemStack stack, int samples, PlayerEntity player) {
+	public void setSamples(ItemStack stack, int samples) {
 		if (ItemUtils.verifyNBT(stack)) {
 			stack.getNbt().putInt("Samples", samples);
 		}

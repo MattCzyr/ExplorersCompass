@@ -11,7 +11,6 @@ import org.apache.commons.lang3.text.WordUtils;
 
 import com.chaosthedude.explorerscompass.ExplorersCompass;
 import com.chaosthedude.explorerscompass.config.ExplorersCompassConfig;
-import com.chaosthedude.explorerscompass.workers.StructureSearchWorker;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 
@@ -21,7 +20,6 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.structure.StructureSet;
 import net.minecraft.structure.StructureSet.WeightedEntry;
@@ -31,6 +29,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryEntry;
+import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
 import net.minecraft.world.gen.structure.Structure;
@@ -72,6 +71,14 @@ public class StructureUtils {
 
 	public static Structure getStructureForID(ServerWorld world, Identifier id) {
 		return getStructureRegistry(world).get(id);
+	}
+	
+	public static RegistryEntry<Structure> getEntryForStructure(ServerWorld world, Structure structure) {
+		Optional<RegistryKey<Structure>> optional = getStructureRegistry(world).getKey(structure);
+		if (optional.isPresent()) {
+			return getStructureRegistry(world).getEntry(optional.get()).get();
+		}
+		return null;
 	}
 
 	public static List<Identifier> getAllowedStructureIDs(ServerWorld world) {
