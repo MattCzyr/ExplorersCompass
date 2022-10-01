@@ -11,6 +11,7 @@ import java.util.Set;
 import org.apache.commons.lang3.text.WordUtils;
 
 import com.chaosthedude.explorerscompass.config.ConfigHandler;
+import com.chaosthedude.explorerscompass.worker.StructureSearchWorker;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 
@@ -19,6 +20,7 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
@@ -87,10 +89,13 @@ public class StructureUtils {
 		}
 		return false;
 	}
-
-	public static void searchForStructure(ServerLevel serverLevel, Player player, ItemStack stack, List<ConfiguredStructureFeature<?, ?>> configuredStructures, BlockPos startPos) {
-		StructureSearchWorker worker = new StructureSearchWorker(serverLevel, player, stack, configuredStructures, startPos);
-		worker.start();
+	
+	public static Holder<ConfiguredStructureFeature<?, ?>> getHolderForStructure(ServerLevel level, ConfiguredStructureFeature<?, ?> structure) {
+		Optional<ResourceKey<ConfiguredStructureFeature<?, ?>>> optional = getConfiguredStructureRegistry(level).getResourceKey(structure);
+		if (optional.isPresent()) {
+			return getConfiguredStructureRegistry(level).getHolderOrThrow(optional.get());
+		}
+		return null;
 	}
 
 	public static List<ResourceLocation> getGeneratingDimensionKeys(ServerLevel serverLevel, ConfiguredStructureFeature<?, ?> structure) {

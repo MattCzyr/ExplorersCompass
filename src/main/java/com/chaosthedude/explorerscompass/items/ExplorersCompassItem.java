@@ -11,7 +11,7 @@ import com.chaosthedude.explorerscompass.util.CompassState;
 import com.chaosthedude.explorerscompass.util.ItemUtils;
 import com.chaosthedude.explorerscompass.util.PlayerUtils;
 import com.chaosthedude.explorerscompass.util.StructureUtils;
-import com.google.common.collect.ListMultimap;
+import com.chaosthedude.explorerscompass.worker.SearchWorkerManager;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
@@ -30,11 +30,13 @@ import net.minecraftforge.network.NetworkDirection;
 
 public class ExplorersCompassItem extends Item {
 
-	public static final String NAME = "explorerscompass";
+public static final String NAME = "explorerscompass";
+	
+	private SearchWorkerManager workerManager;
 
 	public ExplorersCompassItem() {
 		super(new Properties().stacksTo(1).tab(CreativeModeTab.TAB_TOOLS));
-		setRegistryName(NAME);
+		workerManager = new SearchWorkerManager();
 	}
 
 	@Override
@@ -47,11 +49,11 @@ public class ExplorersCompassItem extends Item {
 				final ServerLevel serverLevel = (ServerLevel) level;
 				final ServerPlayer serverPlayer = (ServerPlayer) player;
 				final boolean canTeleport = ConfigHandler.GENERAL.allowTeleport.get() && PlayerUtils.canTeleport(player.getServer(), player);
-				final List<ResourceLocation> allowedStructures = StructureUtils.getAllowedConfiguredStructureKeys(serverLevel);
-				ListMultimap<ResourceLocation, ResourceLocation> dimensionsForAllowedConfiguredStructures = StructureUtils.getGeneratingDimensionsForAllowedConfiguredStructures(serverLevel);
-				ExplorersCompass.network.sendTo(new SyncPacket(canTeleport, allowedStructures, dimensionsForAllowedConfiguredStructures, StructureUtils.getConfiguredStructureKeysToStructureKeys(serverLevel), StructureUtils.getStructureKeysToConfiguredStructureKeys(serverLevel)), serverPlayer.connection.getConnection(), NetworkDirection.PLAY_TO_CLIENT);
+				ExplorersCompass.network.sendTo(new SyncPacket(canTeleport, StructureUtils.getAllowedConfiguredStructureKeys(serverLevel), StructureUtils.getGeneratingDimensionsForAllowedConfiguredStructures(serverLevel), StructureUtils.getConfiguredStructureKeysToStructureKeys(serverLevel), StructureUtils.getStructureKeysToConfiguredStructureKeys(serverLevel)), serverPlayer.connection.getConnection(), NetworkDirection.PLAY_TO_CLIENT);
 			}
 		} else {
+			workerManager.stop();
+			workerManager.clear();
 			setState(player.getItemInHand(hand), null, CompassState.INACTIVE, player);
 		}
 		return new InteractionResultHolder<ItemStack>(InteractionResult.PASS, player.getItemInHand(hand));
@@ -70,11 +72,30 @@ public class ExplorersCompassItem extends Item {
 		setSearchRadius(stack, 0, player);
 		if (level instanceof ServerLevel) {
 			ServerLevel serverLevel = (ServerLevel) level;
-			List<ConfiguredStructureFeature<?, ?>> configuredStructures = new ArrayList<ConfiguredStructureFeature<?, ?>>();
+			List<ConfiguredStructureFeature<?, ?>> structures = new ArrayList<ConfiguredStructureFeature<?, ?>>();
 			for (ResourceLocation key : structureKeys) {
-				configuredStructures.add(StructureUtils.getConfiguredStructureForKey(serverLevel, key));
+				structures.add(StructureUtils.getConfiguredStructureForKey(serverLevel, key));
 			}
-			StructureUtils.searchForStructure(serverLevel, player, stack, configuredStructures, pos);
+			workerManager.stop();
+			workerManager.createWorkers(serverLevel, player, stack, structures, pos);
+			boolean started = workerManager.start();
+			if (!started) {
+				setNotFound(stack, 0, 0);
+			}
+		}
+	}
+	
+	public void succeed(ItemStack stack, ResourceLocation structureKey, int x, int z, int samples, boolean displayCoordinates) {
+		setFound(stack, structureKey, x, z, samples);
+		setDisplayCoordinates(stack, displayCoordinates);
+		workerManager.clear();
+	}
+	
+	public void fail(ItemStack stack, int radius, int samples) {
+		workerManager.pop();
+		boolean started = workerManager.start();
+		if (!started) {
+			setNotFound(stack, radius, samples);
 		}
 	}
 
@@ -93,7 +114,7 @@ public class ExplorersCompassItem extends Item {
 		}
 	}
 
-	public void setFound(ItemStack stack, ResourceLocation structureKey, int x, int z, int samples, Player player) {
+	public void setFound(ItemStack stack, ResourceLocation structureKey, int x, int z, int samples) {
 		if (ItemUtils.verifyNBT(stack)) {
 			stack.getTag().putInt("State", CompassState.FOUND.getID());
 			stack.getTag().putString("StructureKey", structureKey.toString());
@@ -103,7 +124,7 @@ public class ExplorersCompassItem extends Item {
 		}
 	}
 
-	public void setNotFound(ItemStack stack, Player player, int searchRadius, int samples) {
+	public void setNotFound(ItemStack stack, int searchRadius, int samples) {
 		if (ItemUtils.verifyNBT(stack)) {
 			stack.getTag().putInt("State", CompassState.NOT_FOUND.getID());
 			stack.getTag().putInt("SearchRadius", searchRadius);

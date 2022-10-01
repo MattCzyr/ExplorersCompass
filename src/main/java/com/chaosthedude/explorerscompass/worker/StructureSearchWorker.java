@@ -1,0 +1,136 @@
+package com.chaosthedude.explorerscompass.worker;
+
+import java.util.List;
+
+import com.chaosthedude.explorerscompass.ExplorersCompass;
+import com.chaosthedude.explorerscompass.config.ConfigHandler;
+import com.chaosthedude.explorerscompass.items.ExplorersCompassItem;
+import com.chaosthedude.explorerscompass.util.StructureUtils;
+import com.mojang.datafixers.util.Pair;
+
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.SectionPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
+import net.minecraft.world.level.levelgen.structure.StructureCheckResult;
+import net.minecraft.world.level.levelgen.structure.StructureStart;
+import net.minecraft.world.level.levelgen.structure.placement.StructurePlacement;
+import net.minecraftforge.common.WorldWorkerManager;
+
+public class StructureSearchWorker<T extends StructurePlacement> implements WorldWorkerManager.IWorker {
+
+	protected ServerLevel level;
+	protected Player player;
+	protected ItemStack stack;
+	protected BlockPos startPos;
+	protected BlockPos currentPos;
+	protected T placement;
+	protected List<ConfiguredStructureFeature<?, ?>> structureSet;
+	protected int samples;
+	protected boolean finished;
+	protected int lastRadiusThreshold;
+
+	public StructureSearchWorker(ServerLevel level, Player player, ItemStack stack, BlockPos startPos, T placement, List<ConfiguredStructureFeature<?, ?>> structureSet) {
+		this.level = level;
+		this.player = player;
+		this.stack = stack;
+		this.startPos = startPos;
+		this.structureSet = structureSet;
+		this.placement = placement;
+		
+		currentPos = startPos;
+		samples = 0;
+		
+		finished = !level.getServer().getWorldData().worldGenSettings().generateFeatures();
+	}
+
+	public void start() {
+		if (!stack.isEmpty() && stack.getItem() == ExplorersCompass.explorersCompass) {
+			if (ConfigHandler.GENERAL.maxRadius.get() > 0) {
+				ExplorersCompass.LOGGER.info("Starting search: " + ConfigHandler.GENERAL.maxRadius.get() + " max radius, " + ConfigHandler.GENERAL.maxSamples.get() + " max samples");
+				WorldWorkerManager.addWorker(this);
+			} else {
+				fail();
+			}
+		}
+	}
+
+	@Override
+	public boolean hasWork() {
+		return !finished && getRadius() < ConfigHandler.GENERAL.maxRadius.get() && samples < ConfigHandler.GENERAL.maxSamples.get();
+	}
+
+	@Override
+	public boolean doWork() {
+		int radius = getRadius();
+		if (radius > 250 && radius / 250 > lastRadiusThreshold) {
+			if (!stack.isEmpty() && stack.getItem() == ExplorersCompass.explorersCompass) {
+				((ExplorersCompassItem) stack.getItem()).setSearchRadius(stack, roundRadius(radius, 250), player);
+			}
+			lastRadiusThreshold = radius / 250;
+		}
+		return false;
+	}
+
+	protected Pair<BlockPos, ConfiguredStructureFeature<?, ?>> getStructureGeneratingAt(ChunkPos chunkPos) {
+		for (ConfiguredStructureFeature<?, ?> structure : structureSet) {
+			StructureCheckResult result = level.structureFeatureManager().checkStructurePresence(chunkPos, structure, false);
+			if (result != StructureCheckResult.START_NOT_PRESENT) {
+				if (result == StructureCheckResult.START_PRESENT) {
+					return Pair.of(getLocatePos(chunkPos), structure);
+				}
+
+				ChunkAccess chunkAccess = level.getChunk(chunkPos.x, chunkPos.z, ChunkStatus.STRUCTURE_STARTS);
+				StructureStart structureStart = level.structureFeatureManager().getStartForFeature(SectionPos.bottomOf(chunkAccess), structure, chunkAccess);
+				if (structureStart != null && structureStart.isValid()) {
+					return Pair.of(getLocatePos(structureStart.getChunkPos()), structure);
+				}
+			}
+		}
+
+		return null;
+	}
+
+	protected void succeed(BlockPos pos, ConfiguredStructureFeature<?, ?> structure) {
+		ExplorersCompass.LOGGER.info("Search succeeded: " + getRadius() + " radius, " + samples + " samples");
+		if (!stack.isEmpty() && stack.getItem() == ExplorersCompass.explorersCompass) {
+			((ExplorersCompassItem) stack.getItem()).succeed(stack, StructureUtils.getKeyForConfiguredStructure(level, structure), pos.getX(), pos.getZ(), samples, ConfigHandler.GENERAL.displayCoordinates.get());
+		} else {
+			ExplorersCompass.LOGGER.error("Invalid compass after successful search");
+		}
+		finished = true;
+	}
+
+	protected void fail() {
+		ExplorersCompass.LOGGER.info("Search failed: " + getRadius() + " radius, " + samples + " samples");
+		if (!stack.isEmpty() && stack.getItem() == ExplorersCompass.explorersCompass) {
+			((ExplorersCompassItem) stack.getItem()).fail(stack, roundRadius(getRadius(), 250), samples);
+		} else {
+			ExplorersCompass.LOGGER.error("Invalid compass after failed search");
+		}
+		finished = true;
+	}
+
+	public void stop() {
+		ExplorersCompass.LOGGER.info("Search stopped: " + getRadius() + " radius, " + samples + " samples");
+		finished = true;
+	}
+
+	protected int getRadius() {
+		return StructureUtils.getHorizontalDistanceToLocation(startPos, currentPos.getX(), currentPos.getZ());
+	}
+
+	protected int roundRadius(int radius, int roundTo) {
+		return ((int) radius / roundTo) * roundTo;
+	}
+	
+	private BlockPos getLocatePos(ChunkPos chunkPos) {
+		return new BlockPos(chunkPos.getMinBlockX(), 0, chunkPos.getMinBlockZ());
+	}
+
+}
