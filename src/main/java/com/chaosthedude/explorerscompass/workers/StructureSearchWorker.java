@@ -29,17 +29,17 @@ public class StructureSearchWorker<T extends StructurePlacement> implements Worl
 	protected BlockPos startPos;
 	protected BlockPos currentPos;
 	protected T placement;
-	protected List<ConfiguredStructureFeature<?, ?>> structureSet;
+	protected List<ConfiguredStructureFeature<?, ?>> configuredStructureSet;
 	protected int samples;
 	protected boolean finished;
 	protected int lastRadiusThreshold;
 
-	public StructureSearchWorker(ServerWorld level, PlayerEntity player, ItemStack stack, BlockPos startPos, T placement, List<ConfiguredStructureFeature<?, ?>> structureSet) {
+	public StructureSearchWorker(ServerWorld level, PlayerEntity player, ItemStack stack, BlockPos startPos, T placement, List<ConfiguredStructureFeature<?, ?>> configuredStructureSet) {
 		this.level = level;
 		this.player = player;
 		this.stack = stack;
 		this.startPos = startPos;
-		this.structureSet = structureSet;
+		this.configuredStructureSet = configuredStructureSet;
 		this.placement = placement;
 		
 		currentPos = startPos;
@@ -77,17 +77,17 @@ public class StructureSearchWorker<T extends StructurePlacement> implements Worl
 	}
 
 	protected Pair<BlockPos, ConfiguredStructureFeature<?, ?>> getStructureGeneratingAt(ChunkPos chunkPos) {
-		for (ConfiguredStructureFeature<?, ?> structure : structureSet) {
-			StructurePresence result = level.getStructureAccessor().getStructurePresence(chunkPos, structure, false);
+		for (ConfiguredStructureFeature<?, ?> configuredStructure : configuredStructureSet) {
+			StructurePresence result = level.getStructureAccessor().getStructurePresence(chunkPos, configuredStructure, false);
 			if (result != StructurePresence.START_NOT_PRESENT) {
 				if (result == StructurePresence.START_PRESENT) {
-					return Pair.of(getLocatePos(chunkPos), structure);
+					return Pair.of(getLocatePos(chunkPos), configuredStructure);
 				}
 
 				Chunk chunk = level.getChunk(chunkPos.x, chunkPos.z, ChunkStatus.STRUCTURE_STARTS);
-				StructureStart structureStart = level.getStructureAccessor().getStructureStart(ChunkSectionPos.from(chunk), structure, chunk);
+				StructureStart structureStart = level.getStructureAccessor().getStructureStart(ChunkSectionPos.from(chunk), configuredStructure, chunk);
 				if (structureStart != null && structureStart.hasChildren()) {
-					return Pair.of(getLocatePos(structureStart.getPos()), structure);
+					return Pair.of(getLocatePos(structureStart.getPos()), configuredStructure);
 				}
 			}
 		}

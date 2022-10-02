@@ -25,20 +25,20 @@ public class SearchWorkerManager {
 		workers = new ArrayList<StructureSearchWorker<?>>();
 	}
 	
-	public void createWorkers(ServerWorld world, PlayerEntity player, ItemStack stack, List<ConfiguredStructureFeature<?, ?>> structures, BlockPos startPos) {
+	public void createWorkers(ServerWorld world, PlayerEntity player, ItemStack stack, List<ConfiguredStructureFeature<?, ?>> configuredStructures, BlockPos startPos) {
 		workers.clear();
 		
-		Map<StructurePlacement, List<ConfiguredStructureFeature<?, ?>>> placementToStructuresMap = new Object2ObjectArrayMap<>();
+		Map<StructurePlacement, List<ConfiguredStructureFeature<?, ?>>> placementToConfiguredStructureMap = new Object2ObjectArrayMap<>();
 		
-		for (ConfiguredStructureFeature<?, ?> structure : structures) {
-			for (StructurePlacement structureplacement : world.getChunkManager().getChunkGenerator().method_41055(StructureUtils.getEntryForStructure(world, structure))) {
-				placementToStructuresMap.computeIfAbsent(structureplacement, (holderSet) -> {
+		for (ConfiguredStructureFeature<?, ?> configuredStructure : configuredStructures) {
+			for (StructurePlacement structureplacement : world.getChunkManager().getChunkGenerator().method_41055(StructureUtils.getEntryForStructure(world, configuredStructure))) {
+				placementToConfiguredStructureMap.computeIfAbsent(structureplacement, (holderSet) -> {
 					return new ObjectArrayList<ConfiguredStructureFeature<?, ?>>();
-				}).add(structure);
+				}).add(configuredStructure);
 			}
 		}
 
-		for (Map.Entry<StructurePlacement, List<ConfiguredStructureFeature<?, ?>>> entry : placementToStructuresMap.entrySet()) {
+		for (Map.Entry<StructurePlacement, List<ConfiguredStructureFeature<?, ?>>> entry : placementToConfiguredStructureMap.entrySet()) {
 			StructurePlacement placement = entry.getKey();
 			if (placement instanceof ConcentricRingsStructurePlacement) {
 				workers.add(new ConcentricRingsSearchWorker(world, player, stack, startPos, (ConcentricRingsStructurePlacement) placement, entry.getValue()));
