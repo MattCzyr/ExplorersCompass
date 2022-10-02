@@ -24,8 +24,8 @@ public class RandomSpreadSearchWorker extends StructureSearchWorker<RandomSpread
 	private int x;
 	private int z;
 
-	public RandomSpreadSearchWorker(ServerWorld level, PlayerEntity player, ItemStack stack, BlockPos startPos, RandomSpreadStructurePlacement placement, List<Structure> structureSet) {
-		super(level, player, stack, startPos, placement, structureSet);
+	public RandomSpreadSearchWorker(ServerWorld level, PlayerEntity player, ItemStack stack, BlockPos startPos, RandomSpreadStructurePlacement placement, List<Structure> structureSet, String managerId) {
+		super(level, player, stack, startPos, placement, structureSet, managerId);
 
 		spacing = placement.getSpacing();
 		startSectionPosX = ChunkSectionPos.getSectionCoord(startPos.getX());
@@ -35,18 +35,6 @@ public class RandomSpreadSearchWorker extends StructureSearchWorker<RandomSpread
 		length = 0;
 
 		finished = !level.getServer().getSaveProperties().getGeneratorOptions().shouldGenerateStructures();
-	}
-	
-	@Override
-	public void start() {
-		if (!stack.isEmpty() && stack.getItem() == ExplorersCompass.EXPLORERS_COMPASS_ITEM) {
-			if (ExplorersCompassConfig.maxRadius > 0) {
-				ExplorersCompass.LOGGER.info("Starting search with RandomSpreadSearchWorker: " + ExplorersCompassConfig.maxRadius + " max radius, " + ExplorersCompassConfig.maxSamples + " max samples");
-				WorldWorkerManager.addWorker(this);
-			} else {
-				fail();
-			}
-		}
 	}
 
 	@Override
@@ -99,6 +87,16 @@ public class RandomSpreadSearchWorker extends StructureSearchWorker<RandomSpread
 		}
 		
 		return false;
+	}
+	
+	@Override
+	protected String getName() {
+		return "RandomSpreadSearchWorker";
+	}
+	
+	@Override
+	public boolean shouldLogRadius() {
+		return true;
 	}
 
 	// Non-optimized method to get the closest structure, for testing purposes
