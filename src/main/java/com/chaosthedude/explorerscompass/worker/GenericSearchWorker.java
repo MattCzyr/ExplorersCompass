@@ -3,7 +3,6 @@ package com.chaosthedude.explorerscompass.worker;
 import java.util.List;
 
 import com.chaosthedude.explorerscompass.ExplorersCompass;
-import com.chaosthedude.explorerscompass.config.ConfigHandler;
 import com.chaosthedude.explorerscompass.items.ExplorersCompassItem;
 import com.mojang.datafixers.util.Pair;
 
@@ -16,7 +15,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.placement.StructurePlacement;
-import net.minecraftforge.common.WorldWorkerManager;
 
 public class GenericSearchWorker extends StructureSearchWorker<StructurePlacement> {
 
@@ -26,25 +24,13 @@ public class GenericSearchWorker extends StructureSearchWorker<StructurePlacemen
 	public double nextLength;
 	public Direction direction;
 
-	public GenericSearchWorker(ServerLevel level, Player player, ItemStack stack, BlockPos startPos, StructurePlacement placement, List<Structure> structureSet) {
-		super(level, player, stack, startPos, placement, structureSet);
+	public GenericSearchWorker(ServerLevel level, Player player, ItemStack stack, BlockPos startPos, StructurePlacement placement, List<Structure> structureSet, String managerId) {
+		super(level, player, stack, startPos, placement, structureSet, managerId);
 		chunkX = startPos.getX() >> 4;
 		chunkZ = startPos.getZ() >> 4;
 		nextLength = 1;
 		length = 0;
 		direction = Direction.UP;
-	}
-
-	@Override
-	public void start() {
-		if (!stack.isEmpty() && stack.getItem() == ExplorersCompass.explorersCompass) {
-			if (ConfigHandler.GENERAL.maxRadius.get() > 0) {
-				ExplorersCompass.LOGGER.info("Starting search with GenericSearchWorker: " + ConfigHandler.GENERAL.maxRadius.get() + " max radius, " + ConfigHandler.GENERAL.maxSamples.get() + " max samples");
-				WorldWorkerManager.addWorker(this);
-			} else {
-				fail();
-			}
-		}
 	}
 
 	@Override
@@ -98,6 +84,16 @@ public class GenericSearchWorker extends StructureSearchWorker<StructurePlacemen
 		}
 		
 		return false;
+	}
+	
+	@Override
+	protected String getName() {
+		return "GenericSearchWorker";
+	}
+	
+	@Override
+	public boolean shouldLogRadius() {
+		return true;
 	}
 
 }

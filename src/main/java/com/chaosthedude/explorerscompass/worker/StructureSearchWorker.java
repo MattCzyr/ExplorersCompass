@@ -22,8 +22,9 @@ import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.levelgen.structure.placement.StructurePlacement;
 import net.minecraftforge.common.WorldWorkerManager;
 
-public class StructureSearchWorker<T extends StructurePlacement> implements WorldWorkerManager.IWorker {
-
+public abstract class StructureSearchWorker<T extends StructurePlacement> implements WorldWorkerManager.IWorker {
+	
+	protected String managerId;
 	protected ServerLevel level;
 	protected Player player;
 	protected ItemStack stack;
@@ -35,13 +36,14 @@ public class StructureSearchWorker<T extends StructurePlacement> implements Worl
 	protected boolean finished;
 	protected int lastRadiusThreshold;
 
-	public StructureSearchWorker(ServerLevel level, Player player, ItemStack stack, BlockPos startPos, T placement, List<Structure> structureSet) {
+	public StructureSearchWorker(ServerLevel level, Player player, ItemStack stack, BlockPos startPos, T placement, List<Structure> structureSet, String managerId) {
 		this.level = level;
 		this.player = player;
 		this.stack = stack;
 		this.startPos = startPos;
 		this.structureSet = structureSet;
 		this.placement = placement;
+		this.managerId = managerId;
 		
 		currentPos = startPos;
 		samples = 0;
@@ -52,7 +54,7 @@ public class StructureSearchWorker<T extends StructurePlacement> implements Worl
 	public void start() {
 		if (!stack.isEmpty() && stack.getItem() == ExplorersCompass.explorersCompass) {
 			if (ConfigHandler.GENERAL.maxRadius.get() > 0) {
-				ExplorersCompass.LOGGER.info("Starting search: " + ConfigHandler.GENERAL.maxRadius.get() + " max radius, " + ConfigHandler.GENERAL.maxSamples.get() + " max samples");
+				ExplorersCompass.LOGGER.info("SearchWorkerManager " + managerId + ": " + getName() + " starting with " + (shouldLogRadius() ? ConfigHandler.GENERAL.maxRadius.get() + " max radius, " : "") + ConfigHandler.GENERAL.maxSamples.get() + " max samples");
 				WorldWorkerManager.addWorker(this);
 			} else {
 				fail();
@@ -97,27 +99,27 @@ public class StructureSearchWorker<T extends StructurePlacement> implements Worl
 	}
 
 	protected void succeed(BlockPos pos, Structure structure) {
-		ExplorersCompass.LOGGER.info("Search succeeded: " + getRadius() + " radius, " + samples + " samples");
+		ExplorersCompass.LOGGER.info("SearchWorkerManager " + managerId + ": " + getName() + " succeeded with " + (shouldLogRadius() ? getRadius() + " radius, " : "") + samples + " samples");
 		if (!stack.isEmpty() && stack.getItem() == ExplorersCompass.explorersCompass) {
 			((ExplorersCompassItem) stack.getItem()).succeed(stack, StructureUtils.getKeyForStructure(level, structure), pos.getX(), pos.getZ(), samples, ConfigHandler.GENERAL.displayCoordinates.get());
 		} else {
-			ExplorersCompass.LOGGER.error("Invalid compass after successful search");
+			ExplorersCompass.LOGGER.error("SearchWorkerManager " + managerId + ": " + getName() + " found invalid compass after successful search");
 		}
 		finished = true;
 	}
 
 	protected void fail() {
-		ExplorersCompass.LOGGER.info("Search failed: " + getRadius() + " radius, " + samples + " samples");
+		ExplorersCompass.LOGGER.info("SearchWorkerManager + " + managerId + ": " + getName() + " failed with " + (shouldLogRadius() ? getRadius() + " radius, " : "") + samples + " samples");
 		if (!stack.isEmpty() && stack.getItem() == ExplorersCompass.explorersCompass) {
 			((ExplorersCompassItem) stack.getItem()).fail(stack, roundRadius(getRadius(), 250), samples);
 		} else {
-			ExplorersCompass.LOGGER.error("Invalid compass after failed search");
+			ExplorersCompass.LOGGER.error("SearchWorkerManager " + managerId + ": " + getName() + " found invalid compass after failed search");
 		}
 		finished = true;
 	}
 
 	public void stop() {
-		ExplorersCompass.LOGGER.info("Search stopped: " + getRadius() + " radius, " + samples + " samples");
+		ExplorersCompass.LOGGER.info("SearchWorkerManager " + managerId + ": " + getName() + " stopped with " + (shouldLogRadius() ? getRadius() + " radius, " : "") + samples + " samples");
 		finished = true;
 	}
 
@@ -128,5 +130,9 @@ public class StructureSearchWorker<T extends StructurePlacement> implements Worl
 	protected int roundRadius(int radius, int roundTo) {
 		return ((int) radius / roundTo) * roundTo;
 	}
+	
+	protected abstract String getName();
+	
+	protected abstract boolean shouldLogRadius();
 
 }

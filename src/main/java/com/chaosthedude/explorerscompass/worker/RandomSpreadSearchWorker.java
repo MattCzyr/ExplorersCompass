@@ -2,8 +2,6 @@ package com.chaosthedude.explorerscompass.worker;
 
 import java.util.List;
 
-import com.chaosthedude.explorerscompass.ExplorersCompass;
-import com.chaosthedude.explorerscompass.config.ConfigHandler;
 import com.mojang.datafixers.util.Pair;
 
 import net.minecraft.core.BlockPos;
@@ -14,7 +12,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.placement.RandomSpreadStructurePlacement;
-import net.minecraftforge.common.WorldWorkerManager;
 
 public class RandomSpreadSearchWorker extends StructureSearchWorker<RandomSpreadStructurePlacement> {
 
@@ -25,8 +22,8 @@ public class RandomSpreadSearchWorker extends StructureSearchWorker<RandomSpread
 	private int x;
 	private int z;
 
-	public RandomSpreadSearchWorker(ServerLevel level, Player player, ItemStack stack, BlockPos startPos, RandomSpreadStructurePlacement placement, List<Structure> structureSet) {
-		super(level, player, stack, startPos, placement, structureSet);
+	public RandomSpreadSearchWorker(ServerLevel level, Player player, ItemStack stack, BlockPos startPos, RandomSpreadStructurePlacement placement, List<Structure> structureSet, String managerId) {
+		super(level, player, stack, startPos, placement, structureSet, managerId);
 
 		spacing = placement.spacing();
 		startSectionPosX = SectionPos.blockToSectionCoord(startPos.getX());
@@ -36,18 +33,6 @@ public class RandomSpreadSearchWorker extends StructureSearchWorker<RandomSpread
 		length = 0;
 
 		finished = !level.getServer().getWorldData().worldGenSettings().generateStructures();
-	}
-	
-	@Override
-	public void start() {
-		if (!stack.isEmpty() && stack.getItem() == ExplorersCompass.explorersCompass) {
-			if (ConfigHandler.GENERAL.maxRadius.get() > 0) {
-				ExplorersCompass.LOGGER.info("Starting search with RandomSpreadSearchWorker: " + ConfigHandler.GENERAL.maxRadius.get() + " max radius, " + ConfigHandler.GENERAL.maxSamples.get() + " max samples");
-				WorldWorkerManager.addWorker(this);
-			} else {
-				fail();
-			}
-		}
 	}
 
 	@Override
@@ -100,6 +85,16 @@ public class RandomSpreadSearchWorker extends StructureSearchWorker<RandomSpread
 		}
 		
 		return false;
+	}
+	
+	@Override
+	protected String getName() {
+		return "RandomSpreadSearchWorker";
+	}
+	
+	@Override
+	public boolean shouldLogRadius() {
+		return true;
 	}
 
 	// Non-optimized method to get the closest structure, for testing purposes

@@ -2,7 +2,6 @@ package com.chaosthedude.explorerscompass.worker;
 
 import java.util.List;
 
-import com.chaosthedude.explorerscompass.ExplorersCompass;
 import com.chaosthedude.explorerscompass.config.ConfigHandler;
 import com.mojang.datafixers.util.Pair;
 
@@ -15,7 +14,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.placement.ConcentricRingsStructurePlacement;
-import net.minecraftforge.common.WorldWorkerManager;
 
 public class ConcentricRingsSearchWorker extends StructureSearchWorker<ConcentricRingsStructurePlacement> {
 
@@ -24,26 +22,14 @@ public class ConcentricRingsSearchWorker extends StructureSearchWorker<Concentri
 	private double minDistance;
 	private Pair<BlockPos, Structure> closest;
 
-	public ConcentricRingsSearchWorker(ServerLevel level, Player player, ItemStack stack, BlockPos startPos, ConcentricRingsStructurePlacement placement, List<Structure> structureSet) {
-		super(level, player, stack, startPos, placement, structureSet);
+	public ConcentricRingsSearchWorker(ServerLevel level, Player player, ItemStack stack, BlockPos startPos, ConcentricRingsStructurePlacement placement, List<Structure> structureSet, String managerId) {
+		super(level, player, stack, startPos, placement, structureSet, managerId);
 
 		minDistance = Double.MAX_VALUE;
 		chunkIndex = 0;
 		potentialChunks = level.getChunkSource().getGenerator().getRingPositionsFor(placement, level.getChunkSource().randomState());
 
 		finished = !level.getServer().getWorldData().worldGenSettings().generateStructures() || potentialChunks == null || potentialChunks.isEmpty();
-	}
-	
-	@Override
-	public void start() {
-		if (!stack.isEmpty() && stack.getItem() == ExplorersCompass.explorersCompass) {
-			if (ConfigHandler.GENERAL.maxRadius.get() > 0) {
-				ExplorersCompass.LOGGER.info("Starting search with ConcentricRingsSearchWorker: " + ConfigHandler.GENERAL.maxSamples.get() + " max samples");
-				WorldWorkerManager.addWorker(this);
-			} else {
-				fail();
-			}
-		}
 	}
 
 	@Override
@@ -82,6 +68,16 @@ public class ConcentricRingsSearchWorker extends StructureSearchWorker<Concentri
 			fail();
 		}
 		
+		return false;
+	}
+	
+	@Override
+	protected String getName() {
+		return "ConcentricRingsSearchWorker";
+	}
+	
+	@Override
+	public boolean shouldLogRadius() {
 		return false;
 	}
 
