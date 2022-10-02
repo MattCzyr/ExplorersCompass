@@ -8,6 +8,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -54,10 +55,23 @@ public class StructureSearchList extends ObjectSelectionList<StructureSearchEntr
 					final int insideLeft = x0 + width / 2 - getRowWidth() / 2 + 2;
 					RenderUtils.drawRect(insideLeft - 4, rowTop - 4, insideLeft + getRowWidth() + 4, rowTop + itemHeight, 255 / 2 << 24);
 				}
-				entry.render(poseStack, j, rowTop, getRowLeft(), getRowWidth(), j1, mouseX, mouseY, isMouseOver((double) mouseX, (double) mouseY) && Objects .equals(getEntryAtPosition((double) mouseX, (double) mouseY), entry), partialTicks);
+				entry.render(poseStack, j, rowTop, getRowLeft(), getRowWidth(), j1, mouseX, mouseY, isMouseOver((double) mouseX, (double) mouseY) && Objects.equals(getEntryAtPosition((double) mouseX, (double) mouseY), entry), partialTicks);
 			}
 		}
 
+		if (getMaxScroll() > 0) {
+			int left = getScrollbarPosition();
+			int right = left + 6;
+			int height = (int) ((float) ((y1 - y0) * (y1 - y0)) / (float) getMaxPosition());
+			height = Mth.clamp(height, 32, y1 - y0 - 8);
+			int top = (int) getScrollAmount() * (y1 - y0 - height) / getMaxScroll() + y0;
+			if (top < y0) {
+				top = y0;
+			}
+			
+			RenderUtils.drawRect(left, y0, right, y1, (int) (2.35F * 255.0F) / 2 << 24);
+			RenderUtils.drawRect(left, top, right, top + height, (int) (1.9F * 255.0F) / 2 << 24);
+		}
 	}
 
 	private int getRowBottom(int index) {
