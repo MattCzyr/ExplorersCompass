@@ -109,7 +109,7 @@ public abstract class StructureSearchWorker<T extends StructurePlacement> implem
 	}
 
 	protected void fail() {
-		ExplorersCompass.LOGGER.info("SearchWorkerManager + " + managerId + ": " + getName() + " failed with " + (shouldLogRadius() ? getRadius() + " radius, " : "") + samples + " samples");
+		ExplorersCompass.LOGGER.info("SearchWorkerManager " + managerId + ": " + getName() + " failed with " + (shouldLogRadius() ? getRadius() + " radius, " : "") + samples + " samples");
 		if (!stack.isEmpty() && stack.getItem() == ExplorersCompass.explorersCompass) {
 			((ExplorersCompassItem) stack.getItem()).fail(stack, roundRadius(getRadius(), 250), samples);
 		} else {
