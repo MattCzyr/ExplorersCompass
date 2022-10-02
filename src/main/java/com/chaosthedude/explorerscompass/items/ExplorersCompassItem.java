@@ -30,12 +30,13 @@ import net.minecraftforge.network.NetworkDirection;
 
 public class ExplorersCompassItem extends Item {
 
-public static final String NAME = "explorerscompass";
+	public static final String NAME = "explorerscompass";
 	
 	private SearchWorkerManager workerManager;
 
 	public ExplorersCompassItem() {
 		super(new Properties().stacksTo(1).tab(CreativeModeTab.TAB_TOOLS));
+		setRegistryName(NAME);
 		workerManager = new SearchWorkerManager();
 	}
 
