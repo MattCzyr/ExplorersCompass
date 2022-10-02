@@ -22,26 +22,14 @@ public class ConcentricRingsSearchWorker extends StructureSearchWorker<Concentri
 	private double minDistance;
 	private Pair<BlockPos, ConfiguredStructureFeature<?, ?>> closest;
 
-	public ConcentricRingsSearchWorker(ServerWorld level, PlayerEntity player, ItemStack stack, BlockPos startPos, ConcentricRingsStructurePlacement placement, List<ConfiguredStructureFeature<?, ?>> configuredStructureSet) {
-		super(level, player, stack, startPos, placement, configuredStructureSet);
+	public ConcentricRingsSearchWorker(ServerWorld level, PlayerEntity player, ItemStack stack, BlockPos startPos, ConcentricRingsStructurePlacement placement, List<ConfiguredStructureFeature<?, ?>> configuredStructureSet, String managerId) {
+		super(level, player, stack, startPos, placement, configuredStructureSet, managerId);
 
 		minDistance = Double.MAX_VALUE;
 		chunkIndex = 0;
 		potentialChunks = level.getChunkManager().getChunkGenerator().getConcentricRingsStartChunks(placement);
 
 		finished = !level.getServer().getSaveProperties().getGeneratorOptions().shouldGenerateStructures() || potentialChunks == null || potentialChunks.isEmpty();
-	}
-
-	@Override
-	public void start() {
-		if (!stack.isEmpty() && stack.getItem() == ExplorersCompass.EXPLORERS_COMPASS_ITEM) {
-			if (ExplorersCompassConfig.maxRadius > 0) {
-				ExplorersCompass.LOGGER.info("Starting search with ConcentricRingsSearchWorker: " + ExplorersCompassConfig.maxSamples + " max samples");
-				WorldWorkerManager.addWorker(this);
-			} else {
-				fail();
-			}
-		}
 	}
 
 	@Override
@@ -81,6 +69,16 @@ public class ConcentricRingsSearchWorker extends StructureSearchWorker<Concentri
 			fail();
 		}
 
+		return false;
+	}
+	
+	@Override
+	protected String getName() {
+		return "ConcentricRingsSearchWorker";
+	}
+	
+	@Override
+	public boolean shouldLogRadius() {
 		return false;
 	}
 

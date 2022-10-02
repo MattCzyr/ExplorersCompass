@@ -25,25 +25,13 @@ public class GenericSearchWorker extends StructureSearchWorker<StructurePlacemen
 	public double nextLength;
 	public Direction direction;
 
-	public GenericSearchWorker(ServerWorld level, PlayerEntity player, ItemStack stack, BlockPos startPos, StructurePlacement placement, List<ConfiguredStructureFeature<?, ?>> configuredStructureSet) {
-		super(level, player, stack, startPos, placement, configuredStructureSet);
+	public GenericSearchWorker(ServerWorld level, PlayerEntity player, ItemStack stack, BlockPos startPos, StructurePlacement placement, List<ConfiguredStructureFeature<?, ?>> configuredStructureSet, String managerId) {
+		super(level, player, stack, startPos, placement, configuredStructureSet, managerId);
 		chunkX = startPos.getX() >> 4;
 		chunkZ = startPos.getZ() >> 4;
 		nextLength = 1;
 		length = 0;
 		direction = Direction.UP;
-	}
-
-	@Override
-	public void start() {
-		if (!stack.isEmpty() && stack.getItem() == ExplorersCompass.EXPLORERS_COMPASS_ITEM) {
-			if (ExplorersCompassConfig.maxRadius > 0) {
-				ExplorersCompass.LOGGER.info("Starting search with GenericSearchWorker: " + ExplorersCompassConfig.maxRadius + " max radius, " + ExplorersCompassConfig.maxSamples + " max samples");
-				WorldWorkerManager.addWorker(this);
-			} else {
-				fail();
-			}
-		}
 	}
 
 	@Override
@@ -97,6 +85,16 @@ public class GenericSearchWorker extends StructureSearchWorker<StructurePlacemen
 		}
 		
 		return false;
+	}
+	
+	@Override
+	protected String getName() {
+		return "GenericSearchWorker";
+	}
+	
+	@Override
+	public boolean shouldLogRadius() {
+		return true;
 	}
 
 }

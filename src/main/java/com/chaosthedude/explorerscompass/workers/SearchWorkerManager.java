@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.RandomStringUtils;
+
 import com.chaosthedude.explorerscompass.util.StructureUtils;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
@@ -18,6 +20,8 @@ import net.minecraft.world.gen.chunk.placement.StructurePlacement;
 import net.minecraft.world.gen.feature.ConfiguredStructureFeature;
 
 public class SearchWorkerManager {
+	
+	private final String id = RandomStringUtils.random(8, "0123456789abcdef");
 	
 	private List<StructureSearchWorker<?>> workers;
 	
@@ -41,11 +45,11 @@ public class SearchWorkerManager {
 		for (Map.Entry<StructurePlacement, List<ConfiguredStructureFeature<?, ?>>> entry : placementToConfiguredStructureMap.entrySet()) {
 			StructurePlacement placement = entry.getKey();
 			if (placement instanceof ConcentricRingsStructurePlacement) {
-				workers.add(new ConcentricRingsSearchWorker(world, player, stack, startPos, (ConcentricRingsStructurePlacement) placement, entry.getValue()));
+				workers.add(new ConcentricRingsSearchWorker(world, player, stack, startPos, (ConcentricRingsStructurePlacement) placement, entry.getValue(), id));
 			} else if (placement instanceof RandomSpreadStructurePlacement) {
-				workers.add(new RandomSpreadSearchWorker(world, player, stack, startPos, (RandomSpreadStructurePlacement) placement, entry.getValue()));
+				workers.add(new RandomSpreadSearchWorker(world, player, stack, startPos, (RandomSpreadStructurePlacement) placement, entry.getValue(), id));
 			} else {
-				workers.add(new GenericSearchWorker(world, player, stack, startPos, placement, entry.getValue()));
+				workers.add(new GenericSearchWorker(world, player, stack, startPos, placement, entry.getValue(), id));
 			}
 		}
 	}
