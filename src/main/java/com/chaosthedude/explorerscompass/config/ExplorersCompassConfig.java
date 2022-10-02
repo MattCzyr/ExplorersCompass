@@ -22,7 +22,7 @@ public class ExplorersCompassConfig {
 	
 	public static boolean allowTeleport = true;
 	public static boolean displayCoordinates = true;
-	public static int maxRadius = 5000;
+	public static int maxRadius = 10000;
 	public static int maxSamples = 100000;
 	public static List<String> structureBlacklist = new ArrayList<String>();
 	
@@ -105,7 +105,7 @@ public class ExplorersCompassConfig {
 			private Common() {
 				allowTeleport = true;
 				displayCoordinates = true;
-				maxRadius = 5000;
+				maxRadius = 10000;
 				maxSamples = 100000;
 				structureBlacklist = new ArrayList<String>();
 			}

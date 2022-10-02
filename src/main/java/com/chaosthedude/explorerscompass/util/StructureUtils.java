@@ -10,7 +10,6 @@ import java.util.Set;
 import org.apache.commons.lang3.text.WordUtils;
 
 import com.chaosthedude.explorerscompass.config.ExplorersCompassConfig;
-import com.chaosthedude.explorerscompass.workers.StructureSearchWorker;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 
@@ -20,7 +19,6 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.structure.StructureContext;
 import net.minecraft.util.Identifier;
@@ -29,6 +27,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryEntry;
+import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
 import net.minecraft.world.gen.feature.ConfiguredStructureFeature;
@@ -79,6 +78,14 @@ public class StructureUtils {
 		return configuredStructureIDs;
 	}
 	
+	public static RegistryEntry<ConfiguredStructureFeature<?, ?>> getEntryForStructure(ServerWorld world, ConfiguredStructureFeature<?, ?> structure) {
+		Optional<RegistryKey<ConfiguredStructureFeature<?, ?>>> optional = getConfiguredStructureRegistry(world).getKey(structure);
+		if (optional.isPresent()) {
+			return getConfiguredStructureRegistry(world).getEntry(optional.get()).get();
+		}
+		return null;
+	}
+	
 	public static boolean structureIsBlacklisted(ServerWorld world, ConfiguredStructureFeature<?, ?> structure) {
 		final List<String> structureBlacklist = ExplorersCompassConfig.structureBlacklist;
 		for (String structureKey : structureBlacklist) {
@@ -87,11 +94,6 @@ public class StructureUtils {
 			}
 		}
 		return false;
-	}
-
-	public static void searchForStructure(ServerWorld world, PlayerEntity player, ItemStack stack, List<ConfiguredStructureFeature<?, ?>> configuredStructures, BlockPos startPos) {
-		StructureSearchWorker worker = new StructureSearchWorker(world, player, stack, configuredStructures, startPos);
-		worker.start();
 	}
 	
 	public static List<Identifier> getGeneratingDimensionIDs(ServerWorld serverWorld, ConfiguredStructureFeature<?, ?> structure) {
