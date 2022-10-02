@@ -26,8 +26,8 @@ public class GenericSearchWorker extends StructureSearchWorker<StructurePlacemen
 	public double nextLength;
 	public Direction direction;
 
-	public GenericSearchWorker(ServerLevel level, Player player, ItemStack stack, BlockPos startPos, StructurePlacement placement, List<ConfiguredStructureFeature<?, ?>> configuredStructureSet) {
-		super(level, player, stack, startPos, placement, configuredStructureSet);
+	public GenericSearchWorker(ServerLevel level, Player player, ItemStack stack, BlockPos startPos, StructurePlacement placement, List<ConfiguredStructureFeature<?, ?>> configuredStructureSet, String managerId) {
+		super(level, player, stack, startPos, placement, configuredStructureSet, managerId);
 		chunkX = startPos.getX() >> 4;
 		chunkZ = startPos.getZ() >> 4;
 		nextLength = 1;
@@ -98,6 +98,16 @@ public class GenericSearchWorker extends StructureSearchWorker<StructurePlacemen
 		}
 		
 		return false;
+	}
+	
+	@Override
+	protected String getName() {
+		return "GenericSearchWorker";
+	}
+	
+	@Override
+	public boolean shouldLogRadius() {
+		return true;
 	}
 
 }
