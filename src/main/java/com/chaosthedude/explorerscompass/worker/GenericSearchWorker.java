@@ -26,8 +26,8 @@ public class GenericSearchWorker extends StructureSearchWorker<StructurePlacemen
 	public double nextLength;
 	public Direction direction;
 
-	public GenericSearchWorker(ServerLevel level, Player player, ItemStack stack, BlockPos startPos, StructurePlacement placement, List<ConfiguredStructureFeature<?, ?>> structureSet) {
-		super(level, player, stack, startPos, placement, structureSet);
+	public GenericSearchWorker(ServerLevel level, Player player, ItemStack stack, BlockPos startPos, StructurePlacement placement, List<ConfiguredStructureFeature<?, ?>> configuredStructureSet) {
+		super(level, player, stack, startPos, placement, configuredStructureSet);
 		chunkX = startPos.getX() >> 4;
 		chunkZ = startPos.getZ() >> 4;
 		nextLength = 1;

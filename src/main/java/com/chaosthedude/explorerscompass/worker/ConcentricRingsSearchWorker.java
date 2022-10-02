@@ -24,8 +24,8 @@ public class ConcentricRingsSearchWorker extends StructureSearchWorker<Concentri
 	private double minDistance;
 	private Pair<BlockPos, ConfiguredStructureFeature<?, ?>> closest;
 
-	public ConcentricRingsSearchWorker(ServerLevel level, Player player, ItemStack stack, BlockPos startPos, ConcentricRingsStructurePlacement placement, List<ConfiguredStructureFeature<?, ?>> structureSet) {
-		super(level, player, stack, startPos, placement, structureSet);
+	public ConcentricRingsSearchWorker(ServerLevel level, Player player, ItemStack stack, BlockPos startPos, ConcentricRingsStructurePlacement placement, List<ConfiguredStructureFeature<?, ?>> configuredStructureSet) {
+		super(level, player, stack, startPos, placement, configuredStructureSet);
 
 		minDistance = Double.MAX_VALUE;
 		chunkIndex = 0;

@@ -25,20 +25,20 @@ public class SearchWorkerManager {
 		workers = new ArrayList<StructureSearchWorker<?>>();
 	}
 	
-	public void createWorkers(ServerLevel level, Player player, ItemStack stack, List<ConfiguredStructureFeature<?, ?>> structures, BlockPos startPos) {
+	public void createWorkers(ServerLevel level, Player player, ItemStack stack, List<ConfiguredStructureFeature<?, ?>> configuredStructures, BlockPos startPos) {
 		workers.clear();
 		
-		Map<StructurePlacement, List<ConfiguredStructureFeature<?, ?>>> placementToStructuresMap = new Object2ObjectArrayMap<>();
+		Map<StructurePlacement, List<ConfiguredStructureFeature<?, ?>>> placementToConfiguredStructuresMap = new Object2ObjectArrayMap<>();
 		
-		for (ConfiguredStructureFeature<?, ?> structure : structures) {
-			for (StructurePlacement structureplacement : level.getChunkSource().getGenerator().getPlacementsForFeature(StructureUtils.getHolderForStructure(level, structure))) {
-				placementToStructuresMap.computeIfAbsent(structureplacement, (holderSet) -> {
+		for (ConfiguredStructureFeature<?, ?> configuredStructure : configuredStructures) {
+			for (StructurePlacement structureplacement : level.getChunkSource().getGenerator().getPlacementsForFeature(StructureUtils.getHolderForStructure(level, configuredStructure))) {
+				placementToConfiguredStructuresMap.computeIfAbsent(structureplacement, (holderSet) -> {
 					return new ObjectArrayList<ConfiguredStructureFeature<?, ?>>();
-				}).add(structure);
+				}).add(configuredStructure);
 			}
 		}
 
-		for (Map.Entry<StructurePlacement, List<ConfiguredStructureFeature<?, ?>>> entry : placementToStructuresMap.entrySet()) {
+		for (Map.Entry<StructurePlacement, List<ConfiguredStructureFeature<?, ?>>> entry : placementToConfiguredStructuresMap.entrySet()) {
 			StructurePlacement placement = entry.getKey();
 			if (placement instanceof ConcentricRingsStructurePlacement) {
 				workers.add(new ConcentricRingsSearchWorker(level, player, stack, startPos, (ConcentricRingsStructurePlacement) placement, entry.getValue()));

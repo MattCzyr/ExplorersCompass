@@ -30,17 +30,17 @@ public class StructureSearchWorker<T extends StructurePlacement> implements Worl
 	protected BlockPos startPos;
 	protected BlockPos currentPos;
 	protected T placement;
-	protected List<ConfiguredStructureFeature<?, ?>> structureSet;
+	protected List<ConfiguredStructureFeature<?, ?>> configuredStructureSet;
 	protected int samples;
 	protected boolean finished;
 	protected int lastRadiusThreshold;
 
-	public StructureSearchWorker(ServerLevel level, Player player, ItemStack stack, BlockPos startPos, T placement, List<ConfiguredStructureFeature<?, ?>> structureSet) {
+	public StructureSearchWorker(ServerLevel level, Player player, ItemStack stack, BlockPos startPos, T placement, List<ConfiguredStructureFeature<?, ?>> configuredStructureSet) {
 		this.level = level;
 		this.player = player;
 		this.stack = stack;
 		this.startPos = startPos;
-		this.structureSet = structureSet;
+		this.configuredStructureSet = configuredStructureSet;
 		this.placement = placement;
 		
 		currentPos = startPos;
@@ -78,7 +78,7 @@ public class StructureSearchWorker<T extends StructurePlacement> implements Worl
 	}
 
 	protected Pair<BlockPos, ConfiguredStructureFeature<?, ?>> getStructureGeneratingAt(ChunkPos chunkPos) {
-		for (ConfiguredStructureFeature<?, ?> structure : structureSet) {
+		for (ConfiguredStructureFeature<?, ?> structure : configuredStructureSet) {
 			StructureCheckResult result = level.structureFeatureManager().checkStructurePresence(chunkPos, structure, false);
 			if (result != StructureCheckResult.START_NOT_PRESENT) {
 				if (result == StructureCheckResult.START_PRESENT) {

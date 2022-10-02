@@ -25,8 +25,8 @@ public class RandomSpreadSearchWorker extends StructureSearchWorker<RandomSpread
 	private int x;
 	private int z;
 
-	public RandomSpreadSearchWorker(ServerLevel level, Player player, ItemStack stack, BlockPos startPos, RandomSpreadStructurePlacement placement, List<ConfiguredStructureFeature<?, ?>> structureSet) {
-		super(level, player, stack, startPos, placement, structureSet);
+	public RandomSpreadSearchWorker(ServerLevel level, Player player, ItemStack stack, BlockPos startPos, RandomSpreadStructurePlacement placement, List<ConfiguredStructureFeature<?, ?>> configuredStructureSet) {
+		super(level, player, stack, startPos, placement, configuredStructureSet);
 
 		spacing = placement.spacing();
 		startSectionPosX = SectionPos.blockToSectionCoord(startPos.getX());
