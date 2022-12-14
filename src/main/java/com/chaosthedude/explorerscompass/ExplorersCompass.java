@@ -28,10 +28,12 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.decoration.ItemFrame;
+import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.CreativeModeTabEvent;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
@@ -60,6 +62,8 @@ public class ExplorersCompass {
 	
 	public ExplorersCompass() {
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::commonSetup);
+		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::buildCreativeTabContents);
+		
 		DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
 			FMLJavaModLoadingContext.get().getModEventBus().addListener(this::clientSetup);
 		});
@@ -82,6 +86,12 @@ public class ExplorersCompass {
 		dimensionKeysForAllowedStructureKeys = ArrayListMultimap.create();
 		structureKeysToTypeKeys = new HashMap<ResourceLocation, ResourceLocation>();
 		typeKeysToStructureKeys = ArrayListMultimap.create();
+	}
+	
+	private void buildCreativeTabContents(CreativeModeTabEvent.BuildContents event) {
+		if (event.getTab() == CreativeModeTabs.TOOLS_AND_UTILITIES) {
+			event.accept(new ItemStack(explorersCompass));
+		}
 	}
 	
 	@OnlyIn(Dist.CLIENT)

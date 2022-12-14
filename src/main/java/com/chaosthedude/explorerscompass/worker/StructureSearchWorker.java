@@ -48,7 +48,7 @@ public abstract class StructureSearchWorker<T extends StructurePlacement> implem
 		currentPos = startPos;
 		samples = 0;
 		
-		finished = !level.getServer().getWorldData().worldGenSettings().generateStructures();
+		finished = !level.getServer().getWorldData().worldGenOptions().generateStructures();
 	}
 
 	public void start() {

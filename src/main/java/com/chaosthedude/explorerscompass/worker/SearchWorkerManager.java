@@ -35,7 +35,7 @@ public class SearchWorkerManager {
 		Map<StructurePlacement, List<Structure>> placementToStructuresMap = new Object2ObjectArrayMap<>();
 		
 		for (Structure structure : structures) {
-			for (StructurePlacement structureplacement : level.getChunkSource().getGenerator().getPlacementsForStructure(StructureUtils.getHolderForStructure(level, structure), level.getChunkSource().randomState())) {
+			for (StructurePlacement structureplacement : level.getChunkSource().getGeneratorState().getPlacementsForStructure(StructureUtils.getHolderForStructure(level, structure))) {
 				placementToStructuresMap.computeIfAbsent(structureplacement, (holderSet) -> {
 					return new ObjectArrayList<Structure>();
 				}).add(structure);

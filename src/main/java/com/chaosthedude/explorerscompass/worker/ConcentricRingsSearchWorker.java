@@ -27,9 +27,9 @@ public class ConcentricRingsSearchWorker extends StructureSearchWorker<Concentri
 
 		minDistance = Double.MAX_VALUE;
 		chunkIndex = 0;
-		potentialChunks = level.getChunkSource().getGenerator().getRingPositionsFor(placement, level.getChunkSource().randomState());
+		potentialChunks = level.getChunkSource().getGeneratorState().getRingPositionsFor(placement);
 
-		finished = !level.getServer().getWorldData().worldGenSettings().generateStructures() || potentialChunks == null || potentialChunks.isEmpty();
+		finished = !level.getServer().getWorldData().worldGenOptions().generateStructures() || potentialChunks == null || potentialChunks.isEmpty();
 	}
 
 	@Override
@@ -83,7 +83,7 @@ public class ConcentricRingsSearchWorker extends StructureSearchWorker<Concentri
 
 	// Non-optimized method to get the closest structure, for testing purposes
 	private Pair<BlockPos, Structure> getClosest() {
-		List<ChunkPos> list = level.getChunkSource().getGenerator().getRingPositionsFor(placement, level.getChunkSource().randomState());
+		List<ChunkPos> list = level.getChunkSource().getGeneratorState().getRingPositionsFor(placement);
 		if (list == null) {
 			return null;
 		} else {
