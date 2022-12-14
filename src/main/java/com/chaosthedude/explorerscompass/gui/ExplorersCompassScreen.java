@@ -62,7 +62,6 @@ public class ExplorersCompassScreen extends Screen {
 
 	@Override
 	protected void init() {
-		client.keyboard.setRepeatEvents(true);
 		clearChildren();
 		setupButtons();
 		setupTextFields();
@@ -114,12 +113,6 @@ public class ExplorersCompassScreen extends Screen {
 			return true;
 		}
 		return ret;
-	}
-
-	@Override
-	public void close() {
-		super.close();
-		client.keyboard.setRepeatEvents(false);
 	}
 
 	public void selectStructure(StructureSearchEntry entry) {

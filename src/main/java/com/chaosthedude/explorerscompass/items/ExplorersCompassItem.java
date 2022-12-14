@@ -19,7 +19,6 @@ import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -37,7 +36,7 @@ public class ExplorersCompassItem extends Item {
 	private SearchWorkerManager workerManager;
 
 	public ExplorersCompassItem() {
-		super(new FabricItemSettings().maxCount(1).group(ItemGroup.TOOLS));
+		super(new FabricItemSettings().maxCount(1));
 		workerManager = new SearchWorkerManager();
 	}
 

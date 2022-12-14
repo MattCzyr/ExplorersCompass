@@ -20,6 +20,10 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.structure.StructureSet;
 import net.minecraft.structure.StructureSet.WeightedEntry;
@@ -27,13 +31,10 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.registry.RegistryEntry;
-import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
 import net.minecraft.world.gen.structure.Structure;
-import net.minecraft.world.gen.structure.Structures;
+import net.minecraft.world.gen.structure.StructureType;
 
 public class StructureUtils {
 	
@@ -112,7 +113,7 @@ public class StructureUtils {
 			}
 		}
 		// Fix empty dimensions for stronghold
-		if (structure == Structures.STRONGHOLD && dimensions.isEmpty()) {
+		if (structure == StructureType.STRONGHOLD && dimensions.isEmpty()) {
 			dimensions.add(new Identifier("minecraft:overworld"));
 		}
 		return dimensions;
@@ -197,11 +198,11 @@ public class StructureUtils {
 	}
 	
 	private static Registry<Structure> getStructureRegistry(ServerWorld world) {
-		return world.getRegistryManager().get(Registry.STRUCTURE_KEY);
+		return world.getRegistryManager().get(RegistryKeys.STRUCTURE);
 	}
 	
 	private static Registry<StructureSet> getStructureSetRegistry(ServerWorld world) {
-		return world.getRegistryManager().get(Registry.STRUCTURE_SET_KEY);
+		return world.getRegistryManager().get(RegistryKeys.STRUCTURE_SET);
 	}
 
 	private static String convertToRegex(String glob) {
