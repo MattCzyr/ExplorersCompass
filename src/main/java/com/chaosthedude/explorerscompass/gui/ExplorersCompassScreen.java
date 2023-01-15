@@ -21,6 +21,7 @@ import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
@@ -135,12 +136,17 @@ public class ExplorersCompassScreen extends Screen {
 		ClientPlayNetworking.send(TeleportPacket.ID, new TeleportPacket());
 		client.setScreen(null);
 	}
-
+	
 	public void processSearchTerm() {
 		structureIDsMatchingSearch = new ArrayList<Identifier>();
-		for (Identifier structure : allowedStructureIDs) {
-			if (StructureUtils.getStructureName(structure).toLowerCase().contains(searchTextField.getText().toLowerCase())) {
-				structureIDsMatchingSearch.add(structure);
+		String searchTerm = searchTextField.getText().toLowerCase();
+		for (Identifier id : allowedStructureIDs) {
+			if (searchTerm.startsWith("@")) {
+				if (StructureUtils.getStructureSource(id).toLowerCase().contains(searchTerm.substring(1))) {
+					structureIDsMatchingSearch.add(id);
+				}
+			} else if (StructureUtils.getStructureName(id).toLowerCase().contains(searchTerm)) {
+				structureIDsMatchingSearch.add(id);
 			}
 		}
 		selectionList.refreshList();
