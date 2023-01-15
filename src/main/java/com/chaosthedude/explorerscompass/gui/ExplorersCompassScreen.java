@@ -129,8 +129,13 @@ public class ExplorersCompassScreen extends Screen {
 
 	public void processSearchTerm() {
 		structureKeysMatchingSearch = new ArrayList<ResourceLocation>();
+		String searchTerm = searchTextField.getValue().toLowerCase();
 		for (ResourceLocation key : allowedStructureKeys) {
-			if (StructureUtils.getPrettyStructureName(key).toLowerCase().contains(searchTextField.getValue().toLowerCase())) {
+			if (searchTerm.startsWith("@")) {
+				if (StructureUtils.getPrettyStructureSource(key).toLowerCase().contains(searchTerm.substring(1))) {
+					structureKeysMatchingSearch.add(key);
+				}
+			} else if (StructureUtils.getPrettyStructureName(key).toLowerCase().contains(searchTerm)) {
 				structureKeysMatchingSearch.add(key);
 			}
 		}
