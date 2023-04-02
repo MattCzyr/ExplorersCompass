@@ -198,7 +198,6 @@ public class TransparentTextField extends EditBox {
 		Tesselator tesselator = Tesselator.getInstance();
 		BufferBuilder bufferbuilder = tesselator.getBuilder();
 		RenderSystem.setShaderColor(0.0F, 0.0F, 255.0F, 255.0F);
-		RenderSystem.disableTexture();
 		RenderSystem.enableColorLogicOp();
 		RenderSystem.logicOp(GlStateManager.LogicOp.OR_REVERSE);
 		bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
@@ -208,7 +207,6 @@ public class TransparentTextField extends EditBox {
 		bufferbuilder.vertex((double) startX, (double) startY, 0.0D).endVertex();
 		tesselator.end();
 		RenderSystem.disableColorLogicOp();
-		RenderSystem.enableTexture();
 	}
 
 }

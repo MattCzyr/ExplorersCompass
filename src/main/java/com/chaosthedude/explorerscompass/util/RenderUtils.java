@@ -12,6 +12,7 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -55,23 +56,18 @@ public class RenderUtils {
 		final float green = (float) (color >> 8 & 255) / 255.0F;
 		final float blue = (float) (color & 255) / 255.0F;
 		final float alpha = (float) (color >> 24 & 255) / 255.0F;
-
+		
 		final Tesselator tesselator = Tesselator.getInstance();
 		final BufferBuilder buffer = tesselator.getBuilder();
 
 		RenderSystem.enableBlend();
-		RenderSystem.disableTexture();
-		RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-		RenderSystem.setShaderColor(red, green, blue, alpha);
-
-		buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
-		buffer.vertex((double) left, (double) bottom, 0.0D).endVertex();
-		buffer.vertex((double) right, (double) bottom, 0.0D).endVertex();
-		buffer.vertex((double) right, (double) top, 0.0D).endVertex();
-		buffer.vertex((double) left, (double) top, 0.0D).endVertex();
+		RenderSystem.setShader(GameRenderer::getPositionColorShader);
+		buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+		buffer.vertex((double) left, (double) bottom, 0.0D).color(red, green, blue, alpha).endVertex();
+		buffer.vertex((double) right, (double) bottom, 0.0D).color(red, green, blue, alpha).endVertex();
+		buffer.vertex((double) right, (double) top, 0.0D).color(red, green, blue, alpha).endVertex();
+		buffer.vertex((double) left, (double) top, 0.0D).color(red, green, blue, alpha).endVertex();
 		tesselator.end();
-
-		RenderSystem.enableTexture();
 		RenderSystem.disableBlend();
 	}
 
