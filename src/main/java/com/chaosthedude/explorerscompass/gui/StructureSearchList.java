@@ -78,7 +78,7 @@ public class StructureSearchList extends AlwaysSelectedEntryListWidget<Structure
 		}
 	}
 
-	private int getRowBottom(int index) {
+	protected int getRowBottom(int index) {
 		return getRowTop(index) + itemHeight;
 	}
 

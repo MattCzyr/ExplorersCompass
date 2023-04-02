@@ -1,7 +1,6 @@
 package com.chaosthedude.explorerscompass.util;
 
 import com.chaosthedude.explorerscompass.config.ExplorersCompassConfig;
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.fabricmc.api.EnvType;
@@ -9,9 +8,10 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.render.BufferBuilder;
+import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.render.Tessellator;
-import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.render.VertexFormat.DrawMode;
+import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.util.math.MatrixStack;
 
 @Environment(EnvType.CLIENT)
@@ -53,23 +53,18 @@ public class RenderUtils {
 		final float green = (float) (color >> 8 & 255) / 255.0F;
 		final float blue = (float) (color & 255) / 255.0F;
 		final float alpha = (float) (color >> 24 & 255) / 255.0F;
-
-		final Tessellator tessellator = Tessellator.getInstance();
-		final BufferBuilder buffer = tessellator.getBuffer();
+		
+		final Tessellator tesselator = Tessellator.getInstance();
+		final BufferBuilder buffer = tesselator.getBuffer();
 
 		RenderSystem.enableBlend();
-		RenderSystem.disableTexture();
-		RenderSystem.blendFuncSeparate(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SrcFactor.ONE, GlStateManager.DstFactor.ZERO);
-		RenderSystem.setShaderColor(red, green, blue, alpha);
-
-		buffer.begin(DrawMode.QUADS, VertexFormats.POSITION);
-		buffer.vertex((double) left, (double) bottom, 0.0D).next();
-		buffer.vertex((double) right, (double) bottom, 0.0D).next();
-		buffer.vertex((double) right, (double) top, 0.0D).next();
-		buffer.vertex((double) left, (double) top, 0.0D).next();
-		tessellator.draw();
-
-		RenderSystem.enableTexture();
+		RenderSystem.setShader(GameRenderer::getPositionColorProgram);
+		buffer.begin(DrawMode.QUADS, VertexFormats.POSITION_COLOR);
+		buffer.vertex((double) left, (double) bottom, 0.0D).color(red, green, blue, alpha).next();
+		buffer.vertex((double) right, (double) bottom, 0.0D).color(red, green, blue, alpha).next();
+		buffer.vertex((double) right, (double) top, 0.0D).color(red, green, blue, alpha).next();
+		buffer.vertex((double) left, (double) top, 0.0D).color(red, green, blue, alpha).next();
+		tesselator.draw();
 		RenderSystem.disableBlend();
 	}
 

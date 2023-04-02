@@ -195,10 +195,9 @@ public class TransparentTextField extends TextFieldWidget {
 			startX = getX() + getWidth();
 		}
 
-		Tessellator tessellator = Tessellator.getInstance();
-		BufferBuilder bufferbuilder = tessellator.getBuffer();
+		Tessellator tesselator = Tessellator.getInstance();
+		BufferBuilder bufferbuilder = tesselator.getBuffer();
 		RenderSystem.setShaderColor(0.0F, 0.0F, 255.0F, 255.0F);
-		RenderSystem.disableTexture();
 		RenderSystem.enableColorLogicOp();
 		RenderSystem.logicOp(GlStateManager.LogicOp.OR_REVERSE);
 		bufferbuilder.begin(DrawMode.QUADS, VertexFormats.POSITION);
@@ -206,9 +205,8 @@ public class TransparentTextField extends TextFieldWidget {
 		bufferbuilder.vertex((double) endX, (double) endY, 0.0D).next();
 		bufferbuilder.vertex((double) endX, (double) startY, 0.0D).next();
 		bufferbuilder.vertex((double) startX, (double) startY, 0.0D).next();
-		tessellator.draw();
+		tesselator.draw();
 		RenderSystem.disableColorLogicOp();
-		RenderSystem.enableTexture();
 	}
 
 }

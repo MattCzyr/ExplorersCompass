@@ -21,7 +21,6 @@ import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
@@ -92,7 +91,7 @@ public class ExplorersCompassScreen extends Screen {
 		renderBackground(matrixStack);
 		selectionList.render(matrixStack, mouseX, mouseY, partialTicks);
 		searchTextField.render(matrixStack, mouseX, mouseY, partialTicks);
-		drawCenteredText(matrixStack, textRenderer, title, 65, 15, 0xffffff);
+		drawCenteredTextWithShadow(matrixStack, textRenderer, title, 65, 15, 0xffffff);
 		super.render(matrixStack, mouseX, mouseY, partialTicks);
 	}
 

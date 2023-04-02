@@ -1,5 +1,6 @@
 package com.chaosthedude.explorerscompass.network;
 
+import java.util.Collections;
 import java.util.EnumSet;
 
 import com.chaosthedude.explorerscompass.ExplorersCompass;
@@ -42,7 +43,7 @@ public class TeleportPacket extends PacketByteBuf {
 						final int y = findValidTeleportHeight(player.getEntityWorld(), x, z);
 
 						player.stopRiding();
-						((ServerPlayerEntity) player).networkHandler.requestTeleport(x, y, z, player.getYaw(), player.getPitch(), EnumSet.noneOf(PlayerPositionLookS2CPacket.Flag.class));
+						((ServerPlayerEntity) player).networkHandler.requestTeleport(x, y, z, player.getYaw(), player.getPitch(), Collections.emptySet());
 
 						if (!player.isFallFlying()) {
 							player.setVelocity(player.getVelocity().getX(), 0, player.getVelocity().getZ());
