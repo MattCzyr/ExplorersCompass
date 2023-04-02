@@ -2,10 +2,10 @@ package com.chaosthedude.explorerscompass.gui;
 
 import java.util.Objects;
 
-import com.chaosthedude.explorerscompass.util.RenderUtils;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -53,7 +53,7 @@ public class StructureSearchList extends ObjectSelectionList<StructureSearchEntr
 				StructureSearchEntry entry = getEntry(j);
 				if (/*renderSelection*/ true && isSelectedItem(j)) {
 					final int insideLeft = x0 + width / 2 - getRowWidth() / 2 + 2;
-					RenderUtils.drawRect(insideLeft - 4, rowTop - 4, insideLeft + getRowWidth() + 4, rowTop + itemHeight, 255 / 2 << 24);
+					GuiComponent.fill(poseStack, insideLeft - 4, rowTop - 4, insideLeft + getRowWidth() + 4, rowTop + itemHeight, 255 / 2 << 24);
 				}
 				entry.render(poseStack, j, rowTop, getRowLeft(), getRowWidth(), j1, mouseX, mouseY, isMouseOver((double) mouseX, (double) mouseY) && Objects.equals(getEntryAtPosition((double) mouseX, (double) mouseY), entry), partialTicks);
 			}
@@ -69,8 +69,8 @@ public class StructureSearchList extends ObjectSelectionList<StructureSearchEntr
 				top = y0;
 			}
 			
-			RenderUtils.drawRect(left, y0, right, y1, (int) (2.35F * 255.0F) / 2 << 24);
-			RenderUtils.drawRect(left, top, right, top + height, (int) (1.9F * 255.0F) / 2 << 24);
+			GuiComponent.fill(poseStack, left, y0, right, y1, (int) (2.35F * 255.0F) / 2 << 24);
+			GuiComponent.fill(poseStack, left, top, right, top + height, (int) (1.9F * 255.0F) / 2 << 24);
 		}
 	}
 
