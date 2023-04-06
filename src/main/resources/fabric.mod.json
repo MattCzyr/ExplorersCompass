@@ -28,7 +28,6 @@
   "mixins": [
     "explorerscompass.mixins.json"
   ],
-  "accessWidener" : "explorerscompass.accesswidener",
   "depends": {
     "fabricloader": ">=0.14.11",
     "fabric": "*",
