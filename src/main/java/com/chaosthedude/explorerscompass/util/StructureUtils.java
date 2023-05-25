@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import net.minecraft.data.worldgen.Structures;
 import org.apache.commons.lang3.text.WordUtils;
 
 import com.chaosthedude.explorerscompass.ExplorersCompass;
