@@ -17,7 +17,7 @@ import net.minecraft.world.level.levelgen.structure.placement.ConcentricRingsStr
 
 public class ConcentricRingsSearchWorker extends StructureSearchWorker<ConcentricRingsStructurePlacement> {
 
-	private List<ChunkPos> potentialChunks;
+	private final List<ChunkPos> potentialChunks;
 	private int chunkIndex;
 	private double minDistance;
 	private Pair<BlockPos, Structure> closest;
@@ -27,9 +27,9 @@ public class ConcentricRingsSearchWorker extends StructureSearchWorker<Concentri
 
 		minDistance = Double.MAX_VALUE;
 		chunkIndex = 0;
-		potentialChunks = level.getChunkSource().getGeneratorState().getRingPositionsFor(placement);
+		potentialChunks = level.getChunkSource().getGenerator().getRingPositionsFor(placement, level.getChunkSource().randomState());
 
-		finished = !level.getServer().getWorldData().worldGenOptions().generateStructures() || potentialChunks == null || potentialChunks.isEmpty();
+		finished = !level.getServer().getWorldData().worldGenSettings().generateStructures() || potentialChunks == null || potentialChunks.isEmpty();
 	}
 
 	@Override
@@ -83,7 +83,7 @@ public class ConcentricRingsSearchWorker extends StructureSearchWorker<Concentri
 
 	// Non-optimized method to get the closest structure, for testing purposes
 	private Pair<BlockPos, Structure> getClosest() {
-		List<ChunkPos> list = level.getChunkSource().getGeneratorState().getRingPositionsFor(placement);
+		List<ChunkPos> list = level.getChunkSource().getGenerator().getRingPositionsFor(placement, level.getChunkSource().randomState());
 		if (list == null) {
 			return null;
 		} else {

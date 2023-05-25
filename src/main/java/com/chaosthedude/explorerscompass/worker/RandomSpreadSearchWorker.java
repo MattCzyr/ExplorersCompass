@@ -32,7 +32,7 @@ public class RandomSpreadSearchWorker extends StructureSearchWorker<RandomSpread
 		z = 0;
 		length = 0;
 
-		finished = !level.getServer().getWorldData().worldGenOptions().generateStructures();
+		finished = !level.getServer().getWorldData().worldGenSettings().generateStructures();
 	}
 
 	@Override

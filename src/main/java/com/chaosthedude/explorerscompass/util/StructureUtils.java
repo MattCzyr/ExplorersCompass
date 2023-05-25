@@ -20,7 +20,6 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -31,7 +30,6 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureSet;
 import net.minecraft.world.level.levelgen.structure.StructureSet.StructureSelectionEntry;
-import net.minecraft.world.level.levelgen.structure.StructureType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.ModContainer;
@@ -113,7 +111,7 @@ public class StructureUtils {
 			}
 		}
 		// Fix empty dimensions for stronghold
-		if (structure == StructureType.STRONGHOLD && dimensions.isEmpty()) {
+		if (structure == Structures.STRONGHOLD.get() && dimensions.isEmpty()) {
 			dimensions.add(new ResourceLocation("minecraft:overworld"));
 		}
 		return dimensions;
@@ -190,11 +188,11 @@ public class StructureUtils {
 	}
 
 	private static Registry<Structure> getStructureRegistry(ServerLevel level) {
-		return level.registryAccess().registryOrThrow(Registries.STRUCTURE);
+		return level.registryAccess().registryOrThrow(Registry.STRUCTURE_REGISTRY);
 	}
 
 	private static Registry<StructureSet> getStructureSetRegistry(ServerLevel level) {
-		return level.registryAccess().registryOrThrow(Registries.STRUCTURE_SET);
+		return level.registryAccess().registryOrThrow(Registry.STRUCTURE_SET_REGISTRY);
 	}
 
 	private static String convertToRegex(String glob) {

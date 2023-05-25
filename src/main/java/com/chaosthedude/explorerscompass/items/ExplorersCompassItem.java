@@ -21,6 +21,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -34,7 +35,7 @@ public class ExplorersCompassItem extends Item {
 	private SearchWorkerManager workerManager;
 
 	public ExplorersCompassItem() {
-		super(new Properties().stacksTo(1));
+		super(new Properties().stacksTo(1).tab(CreativeModeTab.TAB_TOOLS));
 		workerManager = new SearchWorkerManager();
 	}
 

@@ -2,7 +2,6 @@ package com.chaosthedude.explorerscompass.config;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import com.chaosthedude.explorerscompass.client.OverlaySide;
 
@@ -25,6 +24,7 @@ public class ConfigHandler {
 		public final ForgeConfigSpec.IntValue maxRadius;
 		public final ForgeConfigSpec.ConfigValue<List<String>> structureBlacklist;
 		public final ForgeConfigSpec.IntValue maxSamples;
+		public final ForgeConfigSpec.BooleanValue ignoreExplored;
 
 		General(ForgeConfigSpec.Builder builder) {
 			String desc;
@@ -40,10 +40,13 @@ public class ConfigHandler {
 			maxRadius = builder.comment(desc).defineInRange("maxRadius", 10000, 0, 1000000);
 
 			desc = "A list of structures that the compass will not display in the GUI and will not be able to search for. Wildcard character * can be used to match any number of characters, and ? can be used to match one character. Ex: [\"minecraft:stronghold\", \"minecraft:endcity\", \"minecraft:*village*\"]";
-			structureBlacklist = builder.comment(desc).define("structureBlacklist", new ArrayList<String>());
+			structureBlacklist = builder.comment(desc).define("structureBlacklist", new ArrayList<>());
 
 			desc = "The maximum number of samples to be taken when searching for a structure.";
 			maxSamples = builder.comment(desc).defineInRange("maxSamples", 100000, 0, 100000000);
+
+			desc = "Ignore already explored structures.";
+			ignoreExplored = builder.comment(desc).define("ignoreExplored", true);
 
 			builder.pop();
 		}

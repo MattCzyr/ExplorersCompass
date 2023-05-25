@@ -13,11 +13,11 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class TransparentButton extends Button {
 
 	public TransparentButton(int x, int y, int width, int height, Component label, OnPress onPress) {
-		super(x, y, width, height, label, onPress, DEFAULT_NARRATION);
+		super(x, y, width, height, label, onPress);
 	}
 
 	@Override
-	public void renderWidget(PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
+	public void renderButton(PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
 		if (visible) {
 			Minecraft mc = Minecraft.getInstance();
 			float state = 2;
@@ -29,8 +29,8 @@ public class TransparentButton extends Button {
 			final float f = state / 2 * 0.9F + 0.1F;
 			final int color = (int) (255.0F * f);
 
-			GuiComponent.fill(poseStack, getX(), getY(), getX() + getWidth(), getY() + getHeight(), color / 2 << 24);
-			drawCenteredString(poseStack, mc.font, getMessage(), getX() + getWidth() / 2, getY() + (getHeight() - 8) / 2, 0xffffff);
+			GuiComponent.fill(poseStack, x, y, x + getWidth(), y + getHeight(), color / 2 << 24);
+			drawCenteredString(poseStack, mc.font, getMessage(), x + getWidth() / 2, y + (getHeight() - 8) / 2, 0xffffff);
 		}
 	}
 

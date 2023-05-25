@@ -39,7 +39,7 @@ public class TransparentTextField extends EditBox {
 		if (isVisible()) {
 			if (pseudoEnableBackgroundDrawing) {
 				final int color = (int) (255.0F * 0.55f);
-				GuiComponent.fill(poseStack, getX(), getY(), getX() + getWidth(), getY() + getHeight(), color / 2 << 24);
+				GuiComponent.fill(poseStack, x, y, x + getWidth(), y + getHeight(), color / 2 << 24);
 			}
 			boolean showLabel = !isFocused() && getValue().isEmpty();
             int i = showLabel ? labelColor : (pseudoIsEnabled ? pseudoEnabledColor : pseudoDisabledColor);
@@ -49,8 +49,8 @@ public class TransparentTextField extends EditBox {
 			String s = font.plainSubstrByWidth(text.substring(pseudoLineScrollOffset), getWidth());
 			boolean flag = j >= 0 && j <= s.length();
 			boolean flag1 = isFocused() && pseudoCursorCounter / 6 % 2 == 0 && flag;
-			int l = pseudoEnableBackgroundDrawing ? getX() + 4 : getX();
-			int i1 = pseudoEnableBackgroundDrawing ? getY() + (getHeight() - 8) / 2 : getY();
+			int l = pseudoEnableBackgroundDrawing ? x + 4 : x;
+			int i1 = pseudoEnableBackgroundDrawing ? y + (getHeight() - 8) / 2 : y;
 			int j1 = l;
 
 			if (k > s.length()) {
@@ -183,12 +183,12 @@ public class TransparentTextField extends EditBox {
 			endY = j;
 		}
 
-		if (endX > getX() + getWidth()) {
-			endX = getX() + getWidth();
+		if (endX > x + getWidth()) {
+			endX = x + getWidth();
 		}
 
-		if (startX > getX() + getWidth()) {
-			startX = getX() + getWidth();
+		if (startX > x + getWidth()) {
+			startX = x + getWidth();
 		}
 
 		RenderSystem.enableColorLogicOp();
