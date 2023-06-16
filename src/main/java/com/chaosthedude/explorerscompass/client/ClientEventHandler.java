@@ -31,37 +31,37 @@ public class ClientEventHandler {
 			if (stack != null && stack.getItem() instanceof ExplorersCompassItem) {
 				final ExplorersCompassItem compass = (ExplorersCompassItem) stack.getItem();
 				if (compass.getState(stack) == CompassState.SEARCHING) {
-					RenderUtils.drawConfiguredStringOnHUD(event.getPoseStack(), I18n.get("string.explorerscompass.status"), 5, 5, 0xFFFFFF, 0);
-					RenderUtils.drawConfiguredStringOnHUD(event.getPoseStack(), I18n.get("string.explorerscompass.searching"), 5, 5, 0xAAAAAA, 1);
+					RenderUtils.drawConfiguredStringOnHUD(event.getGuiGraphics(), I18n.get("string.explorerscompass.status"), 5, 5, 0xFFFFFF, 0);
+					RenderUtils.drawConfiguredStringOnHUD(event.getGuiGraphics(), I18n.get("string.explorerscompass.searching"), 5, 5, 0xAAAAAA, 1);
 
-					RenderUtils.drawConfiguredStringOnHUD(event.getPoseStack(), I18n.get("string.explorerscompass.structure"), 5, 5, 0xFFFFFF, 3);
-					RenderUtils.drawConfiguredStringOnHUD(event.getPoseStack(), StructureUtils.getPrettyStructureName(compass.getStructureKey(stack)), 5, 5, 0xAAAAAA, 4);
+					RenderUtils.drawConfiguredStringOnHUD(event.getGuiGraphics(), I18n.get("string.explorerscompass.structure"), 5, 5, 0xFFFFFF, 3);
+					RenderUtils.drawConfiguredStringOnHUD(event.getGuiGraphics(), StructureUtils.getPrettyStructureName(compass.getStructureKey(stack)), 5, 5, 0xAAAAAA, 4);
 					
-					RenderUtils.drawConfiguredStringOnHUD(event.getPoseStack(), I18n.get("string.explorerscompass.radius"), 5, 5, 0xFFFFFF, 6);
- 					RenderUtils.drawConfiguredStringOnHUD(event.getPoseStack(), String.valueOf(compass.getSearchRadius(stack)), 5, 5, 0xAAAAAA, 7);
+					RenderUtils.drawConfiguredStringOnHUD(event.getGuiGraphics(), I18n.get("string.explorerscompass.radius"), 5, 5, 0xFFFFFF, 6);
+ 					RenderUtils.drawConfiguredStringOnHUD(event.getGuiGraphics(), String.valueOf(compass.getSearchRadius(stack)), 5, 5, 0xAAAAAA, 7);
 				} else if (compass.getState(stack) == CompassState.FOUND) {
-					RenderUtils.drawConfiguredStringOnHUD(event.getPoseStack(), I18n.get("string.explorerscompass.status"), 5, 5, 0xFFFFFF, 0);
-					RenderUtils.drawConfiguredStringOnHUD(event.getPoseStack(), I18n.get("string.explorerscompass.found"), 5, 5, 0xAAAAAA, 1);
+					RenderUtils.drawConfiguredStringOnHUD(event.getGuiGraphics(), I18n.get("string.explorerscompass.status"), 5, 5, 0xFFFFFF, 0);
+					RenderUtils.drawConfiguredStringOnHUD(event.getGuiGraphics(), I18n.get("string.explorerscompass.found"), 5, 5, 0xAAAAAA, 1);
 
-					RenderUtils.drawConfiguredStringOnHUD(event.getPoseStack(), I18n.get("string.explorerscompass.structure"), 5, 5, 0xFFFFFF, 3);
-					RenderUtils.drawConfiguredStringOnHUD(event.getPoseStack(), StructureUtils.getPrettyStructureName(compass.getStructureKey(stack)), 5, 5, 0xAAAAAA, 4);
+					RenderUtils.drawConfiguredStringOnHUD(event.getGuiGraphics(), I18n.get("string.explorerscompass.structure"), 5, 5, 0xFFFFFF, 3);
+					RenderUtils.drawConfiguredStringOnHUD(event.getGuiGraphics(), StructureUtils.getPrettyStructureName(compass.getStructureKey(stack)), 5, 5, 0xAAAAAA, 4);
 
 					if (compass.shouldDisplayCoordinates(stack)) {
-						RenderUtils.drawConfiguredStringOnHUD(event.getPoseStack(), I18n.get("string.explorerscompass.coordinates"), 5, 5, 0xFFFFFF, 6);
-						RenderUtils.drawConfiguredStringOnHUD(event.getPoseStack(), compass.getFoundStructureX(stack) + ", " + compass.getFoundStructureZ(stack), 5, 5, 0xAAAAAA, 7);
+						RenderUtils.drawConfiguredStringOnHUD(event.getGuiGraphics(), I18n.get("string.explorerscompass.coordinates"), 5, 5, 0xFFFFFF, 6);
+						RenderUtils.drawConfiguredStringOnHUD(event.getGuiGraphics(), compass.getFoundStructureX(stack) + ", " + compass.getFoundStructureZ(stack), 5, 5, 0xAAAAAA, 7);
 
-						RenderUtils.drawConfiguredStringOnHUD(event.getPoseStack(), I18n.get("string.explorerscompass.distance"), 5, 5, 0xFFFFFF, 9);
-						RenderUtils.drawConfiguredStringOnHUD(event.getPoseStack(), String.valueOf(StructureUtils.getHorizontalDistanceToLocation(player, compass.getFoundStructureX(stack), compass.getFoundStructureZ(stack))), 5, 5, 0xAAAAAA, 10);
+						RenderUtils.drawConfiguredStringOnHUD(event.getGuiGraphics(), I18n.get("string.explorerscompass.distance"), 5, 5, 0xFFFFFF, 9);
+						RenderUtils.drawConfiguredStringOnHUD(event.getGuiGraphics(), String.valueOf(StructureUtils.getHorizontalDistanceToLocation(player, compass.getFoundStructureX(stack), compass.getFoundStructureZ(stack))), 5, 5, 0xAAAAAA, 10);
 					}
 				} else if (compass.getState(stack) == CompassState.NOT_FOUND) {
-					RenderUtils.drawConfiguredStringOnHUD(event.getPoseStack(), I18n.get("string.explorerscompass.status"), 5, 5, 0xFFFFFF, 0);
-					RenderUtils.drawConfiguredStringOnHUD(event.getPoseStack(), I18n.get("string.explorerscompass.notFound"), 5, 5, 0xAAAAAA, 1);
+					RenderUtils.drawConfiguredStringOnHUD(event.getGuiGraphics(), I18n.get("string.explorerscompass.status"), 5, 5, 0xFFFFFF, 0);
+					RenderUtils.drawConfiguredStringOnHUD(event.getGuiGraphics(), I18n.get("string.explorerscompass.notFound"), 5, 5, 0xAAAAAA, 1);
 
-					RenderUtils.drawConfiguredStringOnHUD(event.getPoseStack(), I18n.get("string.explorerscompass.structure"), 5, 5, 0xFFFFFF, 3);
-					RenderUtils.drawConfiguredStringOnHUD(event.getPoseStack(), StructureUtils.getPrettyStructureName(compass.getStructureKey(stack)), 5, 5, 0xAAAAAA, 4);
+					RenderUtils.drawConfiguredStringOnHUD(event.getGuiGraphics(), I18n.get("string.explorerscompass.structure"), 5, 5, 0xFFFFFF, 3);
+					RenderUtils.drawConfiguredStringOnHUD(event.getGuiGraphics(), StructureUtils.getPrettyStructureName(compass.getStructureKey(stack)), 5, 5, 0xAAAAAA, 4);
 
-					RenderUtils.drawConfiguredStringOnHUD(event.getPoseStack(), I18n.get("string.explorerscompass.radius"), 5, 5, 0xFFFFFF, 6);
-					RenderUtils.drawConfiguredStringOnHUD(event.getPoseStack(), String.valueOf(compass.getSearchRadius(stack)), 5, 5, 0xAAAAAA, 7);
+					RenderUtils.drawConfiguredStringOnHUD(event.getGuiGraphics(), I18n.get("string.explorerscompass.radius"), 5, 5, 0xFFFFFF, 6);
+					RenderUtils.drawConfiguredStringOnHUD(event.getGuiGraphics(), String.valueOf(compass.getSearchRadius(stack)), 5, 5, 0xAAAAAA, 7);
 				}
 			}
 		}

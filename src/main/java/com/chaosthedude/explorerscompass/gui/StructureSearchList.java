@@ -2,10 +2,8 @@ package com.chaosthedude.explorerscompass.gui;
 
 import java.util.Objects;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -39,12 +37,12 @@ public class StructureSearchList extends ObjectSelectionList<StructureSearchEntr
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
-		renderList(poseStack, mouseX, mouseY, partialTicks);
+	public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+		renderList(guiGraphics, mouseX, mouseY, partialTicks);
 	}
 
 	@Override
-	protected void renderList(PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
+	protected void renderList(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
 		for (int j = 0; j < getItemCount(); ++j) {
 			int rowTop = getRowTop(j);
 			int rowBottom = getRowBottom(j);
@@ -53,9 +51,9 @@ public class StructureSearchList extends ObjectSelectionList<StructureSearchEntr
 				StructureSearchEntry entry = getEntry(j);
 				if (/*renderSelection*/ true && isSelectedItem(j)) {
 					final int insideLeft = x0 + width / 2 - getRowWidth() / 2 + 2;
-					GuiComponent.fill(poseStack, insideLeft - 4, rowTop - 4, insideLeft + getRowWidth() + 4, rowTop + itemHeight, 255 / 2 << 24);
+					guiGraphics.fill(insideLeft - 4, rowTop - 4, insideLeft + getRowWidth() + 4, rowTop + itemHeight, 255 / 2 << 24);
 				}
-				entry.render(poseStack, j, rowTop, getRowLeft(), getRowWidth(), j1, mouseX, mouseY, isMouseOver((double) mouseX, (double) mouseY) && Objects.equals(getEntryAtPosition((double) mouseX, (double) mouseY), entry), partialTicks);
+				entry.render(guiGraphics, j, rowTop, getRowLeft(), getRowWidth(), j1, mouseX, mouseY, isMouseOver((double) mouseX, (double) mouseY) && Objects.equals(getEntryAtPosition((double) mouseX, (double) mouseY), entry), partialTicks);
 			}
 		}
 
@@ -69,8 +67,8 @@ public class StructureSearchList extends ObjectSelectionList<StructureSearchEntr
 				top = y0;
 			}
 			
-			GuiComponent.fill(poseStack, left, y0, right, y1, (int) (2.35F * 255.0F) / 2 << 24);
-			GuiComponent.fill(poseStack, left, top, right, top + height, (int) (1.9F * 255.0F) / 2 << 24);
+			guiGraphics.fill(left, y0, right, y1, (int) (2.35F * 255.0F) / 2 << 24);
+			guiGraphics.fill(left, top, right, top + height, (int) (1.9F * 255.0F) / 2 << 24);
 		}
 	}
 

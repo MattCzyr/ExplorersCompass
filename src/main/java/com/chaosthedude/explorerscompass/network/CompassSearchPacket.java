@@ -65,7 +65,7 @@ public class CompassSearchPacket {
 			final ItemStack stack = ItemUtils.getHeldItem(ctx.get().getSender(), ExplorersCompass.explorersCompass);
 			if (!stack.isEmpty()) {
 				final ExplorersCompassItem explorersCompass = (ExplorersCompassItem) stack.getItem();
-				explorersCompass.searchForStructure(ctx.get().getSender().getLevel(), ctx.get().getSender(), groupKey, structureKeys, new BlockPos(x, y, z), stack);
+				explorersCompass.searchForStructure(ctx.get().getSender().serverLevel(), ctx.get().getSender(), groupKey, structureKeys, new BlockPos(x, y, z), stack);
 			}
 		});
 		ctx.get().setPacketHandled(true);

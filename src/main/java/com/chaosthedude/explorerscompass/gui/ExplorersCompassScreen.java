@@ -12,8 +12,8 @@ import com.chaosthedude.explorerscompass.sorting.ISorting;
 import com.chaosthedude.explorerscompass.sorting.NameSorting;
 import com.chaosthedude.explorerscompass.util.CompassState;
 import com.chaosthedude.explorerscompass.util.StructureUtils;
-import com.mojang.blaze3d.vertex.PoseStack;
 
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -80,10 +80,10 @@ public class ExplorersCompassScreen extends Screen {
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
-		renderBackground(poseStack);
-		drawCenteredString(poseStack, font, title, 65, 15, 0xffffff);
-		super.render(poseStack, mouseX, mouseY, partialTicks);
+	public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+		renderBackground(guiGraphics);
+		guiGraphics.drawCenteredString(font, title, 65, 15, 0xffffff);
+		super.render(guiGraphics, mouseX, mouseY, partialTicks);
 	}
 
 	@Override

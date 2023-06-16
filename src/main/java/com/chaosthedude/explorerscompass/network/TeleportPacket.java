@@ -37,7 +37,7 @@ public class TeleportPacket {
 					if (explorersCompass.getState(stack) == CompassState.FOUND) {
 						final int x = explorersCompass.getFoundStructureX(stack);
 						final int z = explorersCompass.getFoundStructureZ(stack);
-						final int y = findValidTeleportHeight(player.level, x, z);
+						final int y = findValidTeleportHeight(player.level(), x, z);
 
 						player.stopRiding();
 						player.connection.teleport(x, y, z, player.getYRot(), player.getXRot());
@@ -78,7 +78,7 @@ public class TeleportPacket {
 	}
 	
 	private boolean isFree(Level level, BlockPos pos) {
-		return level.getBlockState(pos).isAir() || level.getBlockState(pos).is(BlockTags.FIRE) || level.getBlockState(pos).getMaterial().isLiquid() || level.getBlockState(pos).getMaterial().isReplaceable();
+		return level.getBlockState(pos).isAir() || level.getBlockState(pos).is(BlockTags.FIRE) || level.getBlockState(pos).liquid() || level.getBlockState(pos).canBeReplaced();
 	}
 
 }
