@@ -16,9 +16,9 @@ import com.chaosthedude.explorerscompass.util.StructureUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
@@ -87,12 +87,12 @@ public class ExplorersCompassScreen extends Screen {
 	}
 
 	@Override
-	public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-		renderBackground(matrixStack);
-		selectionList.render(matrixStack, mouseX, mouseY, partialTicks);
-		searchTextField.render(matrixStack, mouseX, mouseY, partialTicks);
-		drawCenteredTextWithShadow(matrixStack, textRenderer, title, 65, 15, 0xffffff);
-		super.render(matrixStack, mouseX, mouseY, partialTicks);
+	public void render(DrawContext context, int mouseX, int mouseY, float partialTicks) {
+		renderBackground(context);
+		selectionList.render(context, mouseX, mouseY, partialTicks);
+		searchTextField.render(context, mouseX, mouseY, partialTicks);
+		context.drawCenteredTextWithShadow(textRenderer, title, 65, 15, 0xffffff);
+		super.render(context, mouseX, mouseY, partialTicks);
 	}
 
 	@Override

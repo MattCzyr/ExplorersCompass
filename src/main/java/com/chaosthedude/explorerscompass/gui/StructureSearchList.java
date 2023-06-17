@@ -2,14 +2,11 @@ package com.chaosthedude.explorerscompass.gui;
 
 import java.util.Objects;
 
-import com.chaosthedude.explorerscompass.util.RenderUtils;
-
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawableHelper;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.widget.AlwaysSelectedEntryListWidget;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 
@@ -40,12 +37,12 @@ public class StructureSearchList extends AlwaysSelectedEntryListWidget<Structure
 	}
 
 	@Override
-	public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-		renderList(matrixStack, mouseX, mouseY, partialTicks);
+	public void render(DrawContext context, int mouseX, int mouseY, float partialTicks) {
+		renderList(context, mouseX, mouseY, partialTicks);
 	}
 
 	@Override
-	protected void renderList(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+	protected void renderList(DrawContext context, int mouseX, int mouseY, float partialTicks) {
 		int i = getEntryCount();
 		for (int j = 0; j < i; ++j) {
 			int k = getRowTop(j);
@@ -56,11 +53,11 @@ public class StructureSearchList extends AlwaysSelectedEntryListWidget<Structure
 				int k1 = getRowWidth();
 				if (/*renderSelection*/ true && isSelectedEntry(j)) {
 					final int insideLeft = left + width / 2 - getRowWidth() / 2 + 2;
-					DrawableHelper.fill(matrixStack, insideLeft - 4, k - 4, insideLeft + getRowWidth() + 4, k + itemHeight, 255 / 2 << 24);
+					context.fill(insideLeft - 4, k - 4, insideLeft + getRowWidth() + 4, k + itemHeight, 255 / 2 << 24);
 				}
 
 				int j2 = getRowLeft();
-				e.render(matrixStack, j, k, j2, k1, j1, mouseX, mouseY, isMouseOver((double) mouseX, (double) mouseY) && Objects .equals(getEntryAtPosition((double) mouseX, (double) mouseY), e), partialTicks);
+				e.render(context, j, k, j2, k1, j1, mouseX, mouseY, isMouseOver((double) mouseX, (double) mouseY) && Objects .equals(getEntryAtPosition((double) mouseX, (double) mouseY), e), partialTicks);
 			}
 		}
 
@@ -74,8 +71,8 @@ public class StructureSearchList extends AlwaysSelectedEntryListWidget<Structure
 				scrollbarTop = top;
 			}
 			
-			DrawableHelper.fill(matrixStack, left, scrollbarTop, right, bottom, (int) (2.35F * 255.0F) / 2 << 24);
-			DrawableHelper.fill(matrixStack, left, scrollbarTop, right, scrollbarTop + height, (int) (1.9F * 255.0F) / 2 << 24);
+			context.fill(left, scrollbarTop, right, bottom, (int) (2.35F * 255.0F) / 2 << 24);
+			context.fill(left, scrollbarTop, right, scrollbarTop + height, (int) (1.9F * 255.0F) / 2 << 24);
 		}
 	}
 
