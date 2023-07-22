@@ -1,7 +1,6 @@
 package com.chaosthedude.explorerscompass.network;
 
 import java.util.Collections;
-import java.util.EnumSet;
 
 import com.chaosthedude.explorerscompass.ExplorersCompass;
 import com.chaosthedude.explorerscompass.config.ExplorersCompassConfig;
@@ -14,7 +13,6 @@ import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
@@ -60,7 +58,7 @@ public class TeleportPacket extends PacketByteBuf {
 	private static int findValidTeleportHeight(World world, int x, int z) {
 		int upY = world.getSeaLevel();
 		int downY = world.getSeaLevel();
-		while (!(isValidTeleportPosition(world, new BlockPos(x, upY, z)) || isValidTeleportPosition(world, new BlockPos(x, downY, z)))) {
+		while ((!world.isOutOfHeightLimit(upY) || !world.isOutOfHeightLimit(downY)) && !(isValidTeleportPosition(world, new BlockPos(x, upY, z)) || isValidTeleportPosition(world, new BlockPos(x, downY, z)))) {
 			upY++;
 			downY--;
 		}
@@ -76,7 +74,7 @@ public class TeleportPacket extends PacketByteBuf {
 	}
 	
 	private static boolean isValidTeleportPosition(World world, BlockPos pos) {
-		return !world.isOutOfHeightLimit(pos) && isFree(world, pos) && isFree(world, pos.up()) && !isFree(world, pos.down());
+		return isFree(world, pos) && isFree(world, pos.up()) && !isFree(world, pos.down());
 	}
 	
 	private static boolean isFree(World world, BlockPos pos) {
