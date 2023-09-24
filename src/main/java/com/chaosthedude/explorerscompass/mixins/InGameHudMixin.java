@@ -35,7 +35,7 @@ public class InGameHudMixin {
 
 	@Inject(method = "render(Lnet/minecraft/client/gui/DrawContext;F)V", at = @At(value = "TAIL"))
 	private void renderCompassInfo(DrawContext context, float tickDelta, CallbackInfo info) {
-		if (client.player != null && !client.options.hudHidden && !client.options.debugEnabled && (client.currentScreen == null || (ExplorersCompassConfig.displayWithChatOpen && client.currentScreen instanceof ChatScreen))) {
+		if (client.player != null && !client.options.hudHidden && !client.getDebugHud().shouldShowDebugHud() && (client.currentScreen == null || (ExplorersCompassConfig.displayWithChatOpen && client.currentScreen instanceof ChatScreen))) {
 			final PlayerEntity player = client.player;
 			final ItemStack stack = ItemUtils.getHeldItem(player, ExplorersCompass.EXPLORERS_COMPASS_ITEM);
 			if (stack != null && stack.getItem() instanceof ExplorersCompassItem) {

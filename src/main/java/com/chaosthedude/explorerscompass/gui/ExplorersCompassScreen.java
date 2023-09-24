@@ -56,8 +56,8 @@ public class ExplorersCompassScreen extends Screen {
 	}
 
 	@Override
-	public boolean mouseScrolled(double scroll1, double scroll2, double scroll3) {
-		return selectionList.mouseScrolled(scroll1, scroll2, scroll3);
+	public boolean mouseScrolled(double par1, double par2, double par3, double par4) {
+		return selectionList.mouseScrolled(par1, par2, par3, par4);
 	}
 
 	@Override
@@ -73,7 +73,6 @@ public class ExplorersCompassScreen extends Screen {
 
 	@Override
 	public void tick() {
-		searchTextField.tick();
 		teleportButton.active = explorersCompass.getState(stack) == CompassState.FOUND;
 		
 		// Check if the allowed structure list has synced
@@ -88,7 +87,6 @@ public class ExplorersCompassScreen extends Screen {
 
 	@Override
 	public void render(DrawContext context, int mouseX, int mouseY, float partialTicks) {
-		renderBackground(context);
 		selectionList.render(context, mouseX, mouseY, partialTicks);
 		searchTextField.render(context, mouseX, mouseY, partialTicks);
 		context.drawCenteredTextWithShadow(textRenderer, title, 65, 15, 0xffffff);
