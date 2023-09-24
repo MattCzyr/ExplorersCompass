@@ -23,6 +23,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.network.PacketDistributor;
 
 @OnlyIn(Dist.CLIENT)
 public class ExplorersCompassScreen extends Screen {
@@ -55,8 +56,8 @@ public class ExplorersCompassScreen extends Screen {
 	}
 
 	@Override
-	public boolean mouseScrolled(double scroll1, double scroll2, double scroll3) {
-		return selectionList.mouseScrolled(scroll1, scroll2, scroll3);
+	public boolean mouseScrolled(double par1, double par2, double par3, double par4) {
+		return selectionList.mouseScrolled(par1, par2, par3, par4);
 	}
 
 	@Override
@@ -66,7 +67,6 @@ public class ExplorersCompassScreen extends Screen {
 
 	@Override
 	public void tick() {
-		searchTextField.tick();
 		teleportButton.active = explorersCompass.getState(stack) == CompassState.FOUND;
 		
 		// Check if the allowed structure list has synced
@@ -81,7 +81,6 @@ public class ExplorersCompassScreen extends Screen {
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
-		renderBackground(guiGraphics);
 		guiGraphics.drawCenteredString(font, title, 65, 15, 0xffffff);
 		super.render(guiGraphics, mouseX, mouseY, partialTicks);
 	}
@@ -113,17 +112,17 @@ public class ExplorersCompassScreen extends Screen {
 	}
 
 	public void searchForStructure(ResourceLocation key) {
-		ExplorersCompass.network.sendToServer(new CompassSearchPacket(key, List.of(key), player.blockPosition()));
+		ExplorersCompass.network.send(new CompassSearchPacket(key, List.of(key), player.blockPosition()), PacketDistributor.SERVER.noArg());
 		minecraft.setScreen(null);
 	}
 	
 	public void searchForGroup(ResourceLocation key) {
-		ExplorersCompass.network.sendToServer(new CompassSearchPacket(key, ExplorersCompass.typeKeysToStructureKeys.get(key), player.blockPosition()));
+		ExplorersCompass.network.send(new CompassSearchPacket(key, ExplorersCompass.typeKeysToStructureKeys.get(key), player.blockPosition()), PacketDistributor.SERVER.noArg());
 		minecraft.setScreen(null);
 	}
 
 	public void teleport() {
-		ExplorersCompass.network.sendToServer(new TeleportPacket());
+		ExplorersCompass.network.send(new TeleportPacket(), PacketDistributor.SERVER.noArg());
 		minecraft.setScreen(null);
 	}
 

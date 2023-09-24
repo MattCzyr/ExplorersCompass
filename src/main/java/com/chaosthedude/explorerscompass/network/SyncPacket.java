@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
 
 import com.chaosthedude.explorerscompass.ExplorersCompass;
 import com.google.common.collect.ArrayListMultimap;
@@ -12,7 +11,7 @@ import com.google.common.collect.ListMultimap;
 
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraftforge.event.network.CustomPayloadEvent;
 
 public class SyncPacket {
 
@@ -91,15 +90,15 @@ public class SyncPacket {
 		}
 	}
 
-	public void handle(Supplier<NetworkEvent.Context> ctx) {
-		ctx.get().enqueueWork(() -> {
-			ExplorersCompass.canTeleport = canTeleport;
-			ExplorersCompass.allowedStructureKeys = allowedStructureKeys;
-			ExplorersCompass.dimensionKeysForAllowedStructureKeys = dimensionKeysForAllowedStructureKeys;
-			ExplorersCompass.structureKeysToTypeKeys = structureKeysToTypeKeys;
-			ExplorersCompass.typeKeysToStructureKeys = typeKeysToStructureKeys;
+	public static void handle(SyncPacket packet, CustomPayloadEvent.Context ctx) {
+		ctx.enqueueWork(() -> {
+			ExplorersCompass.canTeleport = packet.canTeleport;
+			ExplorersCompass.allowedStructureKeys = packet.allowedStructureKeys;
+			ExplorersCompass.dimensionKeysForAllowedStructureKeys = packet.dimensionKeysForAllowedStructureKeys;
+			ExplorersCompass.structureKeysToTypeKeys = packet.structureKeysToTypeKeys;
+			ExplorersCompass.typeKeysToStructureKeys = packet.typeKeysToStructureKeys;
 		});
-		ctx.get().setPacketHandled(true);
+		ctx.setPacketHandled(true);
 	}
 
 }

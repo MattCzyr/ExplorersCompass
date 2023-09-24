@@ -41,8 +41,9 @@ import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.network.NetworkRegistry;
-import net.minecraftforge.network.simple.SimpleChannel;
+import net.minecraftforge.network.Channel;
+import net.minecraftforge.network.ChannelBuilder;
+import net.minecraftforge.network.SimpleChannel;
 
 @Mod(ExplorersCompass.MODID)
 public class ExplorersCompass {
@@ -73,14 +74,14 @@ public class ExplorersCompass {
 	}
 
 	private void commonSetup(FMLCommonSetupEvent event) {
-		network = NetworkRegistry.newSimpleChannel(new ResourceLocation(MODID, MODID), () -> "1.0", s -> true, s -> true);
+		network = ChannelBuilder.named(new ResourceLocation(ExplorersCompass.MODID, ExplorersCompass.MODID)).networkProtocolVersion(1).acceptedVersions(Channel.VersionTest.exact(1)).simpleChannel();
 
 		// Server packets
-		network.registerMessage(0, CompassSearchPacket.class, CompassSearchPacket::toBytes, CompassSearchPacket::new, CompassSearchPacket::handle);
-		network.registerMessage(1, TeleportPacket.class, TeleportPacket::toBytes, TeleportPacket::new, TeleportPacket::handle);
+		network.messageBuilder(CompassSearchPacket.class).encoder(CompassSearchPacket::toBytes).decoder(CompassSearchPacket::new).consumerMainThread(CompassSearchPacket::handle).add();
+		network.messageBuilder(TeleportPacket.class).encoder(TeleportPacket::toBytes).decoder(TeleportPacket::new).consumerMainThread(TeleportPacket::handle).add();
 
 		// Client packet
-		network.registerMessage(2, SyncPacket.class, SyncPacket::toBytes, SyncPacket::new, SyncPacket::handle);
+		network.messageBuilder(SyncPacket.class).encoder(SyncPacket::toBytes).decoder(SyncPacket::new).consumerMainThread(SyncPacket::handle).add();
 
 		allowedStructureKeys = new ArrayList<ResourceLocation>();
 		dimensionKeysForAllowedStructureKeys = ArrayListMultimap.create();

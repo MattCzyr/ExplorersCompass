@@ -1,11 +1,13 @@
 ## Version 1.3.3
-#### Forge 1.20.1
+#### Forge 1.20.2, 1.20.1
+- Updated to Forge 1.20.2
 - Added the compass to the minecraft:compasses tag
 - Fixed compass spinning when player's yaw goes from positive to negative or vice versa
 - Fixed a server hang and eventual crash that occurred when using the compass to teleport to coordinates with no blocks to stand on
 
 ## Version 2.2.3
-#### Fabric 1.20.1
+#### Fabric 1.20.2, 1.20.1
+- Updated to Fabric 1.20.2
 - Added the compass to the minecraft:compasses tag
 - Fixed compass spinning when player's yaw goes from positive to negative or vice versa
 - Fixed a server hang and eventual crash that occurred when using the compass to teleport to coordinates with no blocks to stand on
