@@ -15,8 +15,8 @@ public class StructureSearchList extends AlwaysSelectedEntryListWidget<Structure
 
 	private final ExplorersCompassScreen parentScreen;
 
-	public StructureSearchList(ExplorersCompassScreen parentScreen, MinecraftClient client, int width, int height, int top, int bottom, int slotHeight) {
-		super(client, width, height, top, bottom, slotHeight);
+	public StructureSearchList(ExplorersCompassScreen parentScreen, MinecraftClient client, int width, int height, int top, int bottom) {
+		super(client, width, height, top, bottom);
 		this.parentScreen = parentScreen;
 		refreshList();
 	}
@@ -37,7 +37,7 @@ public class StructureSearchList extends AlwaysSelectedEntryListWidget<Structure
 	}
 
 	@Override
-	public void render(DrawContext context, int mouseX, int mouseY, float partialTicks) {
+	public void renderWidget(DrawContext context, int mouseX, int mouseY, float partialTicks) {
 		renderList(context, mouseX, mouseY, partialTicks);
 	}
 
@@ -47,12 +47,12 @@ public class StructureSearchList extends AlwaysSelectedEntryListWidget<Structure
 		for (int j = 0; j < i; ++j) {
 			int k = getRowTop(j);
 			int l = getRowBottom(j);
-			if (l >= top && k <= bottom) {
+			if (l >= getY() && k <= getBottom()) {
 				int j1 = this.itemHeight - 4;
 				StructureSearchEntry e = getEntry(j);
 				int k1 = getRowWidth();
 				if (/*renderSelection*/ true && isSelectedEntry(j)) {
-					final int insideLeft = left + width / 2 - getRowWidth() / 2 + 2;
+					final int insideLeft = getX() + width / 2 - getRowWidth() / 2 + 2;
 					context.fill(insideLeft - 4, k - 4, insideLeft + getRowWidth() + 4, k + itemHeight, 255 / 2 << 24);
 				}
 
@@ -64,14 +64,14 @@ public class StructureSearchList extends AlwaysSelectedEntryListWidget<Structure
 		if (getMaxScroll() > 0) {
 			int left = getScrollbarPositionX();
 			int right = left + 6;
-			int height = (int) ((float) ((bottom - top) * (bottom - top)) / (float) getMaxPosition());
-			height = MathHelper.clamp(height, 32, bottom - top - 8);
-			int scrollbarTop = (int) getScrollAmount() * (bottom - top - height) / getMaxScroll() + top;
-			if (scrollbarTop < top) {
-				scrollbarTop = top;
+			int height = (int) ((float) ((getBottom() - getY()) * (getBottom() - getY())) / (float) getMaxPosition());
+			height = MathHelper.clamp(height, 32, getBottom() - getY() - 8);
+			int scrollbarTop = (int) getScrollAmount() * (getBottom() - getY() - height) / getMaxScroll() + getY();
+			if (scrollbarTop < getY()) {
+				scrollbarTop = getY();
 			}
 			
-			context.fill(left, scrollbarTop, right, bottom, (int) (2.35F * 255.0F) / 2 << 24);
+			context.fill(left, scrollbarTop, right, getBottom(), (int) (2.35F * 255.0F) / 2 << 24);
 			context.fill(left, scrollbarTop, right, scrollbarTop + height, (int) (1.9F * 255.0F) / 2 << 24);
 		}
 	}
