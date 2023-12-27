@@ -74,7 +74,7 @@ public class ExplorersCompassScreen extends Screen {
 			removeWidget(selectionList);
 			allowedStructureKeys = new ArrayList<ResourceLocation>(ExplorersCompass.allowedStructureKeys);
 			structureKeysMatchingSearch = new ArrayList<ResourceLocation>(allowedStructureKeys);
-			selectionList = new StructureSearchList(this, minecraft, width + 110, height, 40, height, 45);
+			selectionList = new StructureSearchList(this, minecraft, width + 110, height - 40, 40, 45);
 			addRenderableWidget(selectionList);
 		}
 	}
@@ -181,7 +181,7 @@ public class ExplorersCompassScreen extends Screen {
 		addRenderableWidget(searchTextField);
 		
 		if (selectionList == null) {
-			selectionList = new StructureSearchList(this, minecraft, width + 110, height, 40, height, 45);
+			selectionList = new StructureSearchList(this, minecraft, width + 110, height - 40, 40, 45);
 		}
 		addRenderableWidget(selectionList);
 	}
