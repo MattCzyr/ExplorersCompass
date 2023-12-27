@@ -21,6 +21,6 @@ issueTrackerURL="https://github.com/MattCzyr/ExplorersCompass/issues"
 [[dependencies.explorerscompass]]
     modId="minecraft"
     mandatory=true
-    versionRange="[1.20.3,)"
+    versionRange="[1.20.4,)"
     ordering="NONE"
     side="BOTH"
