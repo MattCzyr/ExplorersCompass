@@ -11,7 +11,7 @@
       "conditions": {
         "items": [
           {
-            "items": ["minecraft:cracked_stone_bricks"]
+            "item": "minecraft:cracked_stone_bricks"
           }
         ]
       }
