@@ -22,11 +22,11 @@
     "string.explorerscompass.name": "Название",
     "string.explorerscompass.notFound": "Не найдено",
     "string.explorerscompass.radius": "Радиус",
-    "string.explorerscompass.samples": "Образцы",
+    "string.explorerscompass.samples": "Список",
     "string.explorerscompass.search": "Поиск",
-    "string.explorerscompass.searching": "Идёт поиск...",
-    "string.explorerscompass.sortBy": "Сортировать по",
-    "string.explorerscompass.source": "Источник",
+    "string.explorerscompass.searching": "Идёт поиск…",
+    "string.explorerscompass.sortBy": "Сортировка",
+    "string.explorerscompass.source": "Добавлен",
     "string.explorerscompass.status": "Статус",
 
     "_comment": "STRINGS - CATEGORIES",
@@ -49,7 +49,7 @@
     "structure.minecraft.end_city": "Город Энда",
     "structure.minecraft.fortress": "Крепость Незера",
     "structure.minecraft.igloo": "Иглу",
-    "structure.minecraft.jungle_pyramid": "Тропическая пирамида",
+    "structure.minecraft.jungle_pyramid": "Пирамида в джунглях",
     "structure.minecraft.mansion": "Особняк",
     "structure.minecraft.mineshaft": "Заброшенная шахта",
     "structure.minecraft.mineshaft_mesa": "Шахты в бесплодных землях",
@@ -77,3 +77,4 @@
     "structure.minecraft.village_snowy": "Заснеженная деревня",
     "structure.minecraft.village_taiga": "Таёжная деревня"
  }
+ 
