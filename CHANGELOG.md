@@ -1,3 +1,9 @@
+## Version 1.3.5
+#### Forge 1.20.4, 1.20.2
+- Fixed clients not being allowed to connect to servers that did not have Explorer's Compass installed
+- Added Portuguese translations
+- Added simplified Chinese translations
+
 ## Version 1.3.4
 #### Forge 1.20.4, 1.20.3, 1.20.2
 - Updated to Forge 1.20.4
