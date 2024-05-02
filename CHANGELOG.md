@@ -1,3 +1,7 @@
+## Version 1.3.6
+#### Forge 1.20.4, 1.20.2
+- Fixed compass HUD info being rendered twice when certain mods are installed
+
 ## Version 1.3.5
 #### Forge 1.20.4, 1.20.2
 - Fixed clients not being allowed to connect to servers that did not have Explorer's Compass installed
