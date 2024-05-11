@@ -80,7 +80,7 @@ public abstract class StructureSearchWorker<T extends StructurePlacement> implem
 
 	protected Pair<BlockPos, Structure> getStructureGeneratingAt(ChunkPos chunkPos) {
 		for (Structure structure : structureSet) {
-			StructurePresence result = level.getStructureAccessor().getStructurePresence(chunkPos, structure, false);
+			StructurePresence result = level.getStructureAccessor().getStructurePresence(chunkPos, structure, placement, false);
 			if (result != StructurePresence.START_NOT_PRESENT) {
 				if (result == StructurePresence.START_PRESENT) {
 					return Pair.of(placement.getLocatePos(chunkPos), structure);

@@ -21,7 +21,7 @@ public class ExplorersCompassClient implements ClientModInitializer {
 	
 	@Override
 	public void onInitializeClient() {
-		ClientPlayNetworking.registerGlobalReceiver(SyncPacket.ID, SyncPacket::apply);
+		ClientPlayNetworking.registerGlobalReceiver(SyncPacket.PACKET_ID, SyncPacket::apply);
 		
 		ModelPredicateProviderRegistry.register(ExplorersCompass.EXPLORERS_COMPASS_ITEM, new Identifier("angle"), new ClampedModelPredicateProvider() {
 			private double rotation;

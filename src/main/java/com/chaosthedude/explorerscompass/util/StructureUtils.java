@@ -85,7 +85,7 @@ public class StructureUtils {
 	public static List<Identifier> getAllowedStructureIDs(ServerWorld world) {
 		final List<Identifier> structureIDs = new ArrayList<Identifier>();
 		for (Structure structure : getStructureRegistry(world)) {
-			if (structure != null && getIDForStructure(world, structure) != null && !getIDForStructure(world, structure).getNamespace().isEmpty() && !getIDForStructure(world, structure).getPath().isEmpty() && !structureIsBlacklisted(world, structure)) {
+			if (structure != null && getIDForStructure(world, structure) != null && !getIDForStructure(world, structure).getNamespace().isEmpty() && !getIDForStructure(world, structure).getPath().isEmpty() && !structureIsBlacklisted(world, structure) && !structureIsHidden(world, structure)) {
 				structureIDs.add(getIDForStructure(world, structure));
 			}
 		}
@@ -99,6 +99,15 @@ public class StructureUtils {
 			if (getIDForStructure(world, structure).toString().matches(convertToRegex(structureKey))) {
 				return true;
 			}
+		}
+		return false;
+	}
+	
+	public static boolean structureIsHidden(ServerWorld world, Structure structure) {
+		final Registry<Structure> structureRegistry = getStructureRegistry(world);
+		if (structureRegistry.getKey(structure).isPresent() && structureRegistry.getEntry(structureRegistry.getKey(structure).get()).isPresent()) {
+			final RegistryEntry<Structure> structureHolder = structureRegistry.getEntry(structureRegistry.getKey(structure).get()).get();
+			return structureHolder.streamTags().anyMatch(tag -> tag.id().getPath().equals("c:hidden_from_locator_selection"));
 		}
 		return false;
 	}

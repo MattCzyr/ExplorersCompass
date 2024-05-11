@@ -22,8 +22,8 @@ public class StructureSearchList extends AlwaysSelectedEntryListWidget<Structure
 	}
 
 	@Override
-	protected int getScrollbarPositionX() {
-		return super.getScrollbarPositionX() + 20;
+	protected int getDefaultScrollbarX() {
+		return super.getDefaultScrollbarX() - 2;
 	}
 
 	@Override
@@ -43,6 +43,10 @@ public class StructureSearchList extends AlwaysSelectedEntryListWidget<Structure
 
 	@Override
 	protected void renderList(DrawContext context, int mouseX, int mouseY, float partialTicks) {
+		context.fill(getRowLeft() - 4, getY(), getRowLeft() + getRowWidth() + 4, getY() + getHeight() + 4, 255 / 2 << 24);
+		
+		enableScissor(context);
+		
 		int i = getEntryCount();
 		for (int j = 0; j < i; ++j) {
 			int k = getRowTop(j);
@@ -60,9 +64,10 @@ public class StructureSearchList extends AlwaysSelectedEntryListWidget<Structure
 				e.render(context, j, k, j2, k1, j1, mouseX, mouseY, isMouseOver((double) mouseX, (double) mouseY) && Objects .equals(getEntryAtPosition((double) mouseX, (double) mouseY), e), partialTicks);
 			}
 		}
+		context.disableScissor();
 
 		if (getMaxScroll() > 0) {
-			int left = getScrollbarPositionX();
+			int left = getDefaultScrollbarX();
 			int right = left + 6;
 			int height = (int) ((float) ((getBottom() - getY()) * (getBottom() - getY())) / (float) getMaxPosition());
 			height = MathHelper.clamp(height, 32, getBottom() - getY() - 8);
@@ -75,7 +80,13 @@ public class StructureSearchList extends AlwaysSelectedEntryListWidget<Structure
 			context.fill(left, scrollbarTop, right, scrollbarTop + height, (int) (1.9F * 255.0F) / 2 << 24);
 		}
 	}
+	
+	@Override
+	protected void enableScissor(DrawContext context) {
+		context.enableScissor(getX(), getY(), getRight(), getBottom());
+	}
 
+	@Override
 	protected int getRowBottom(int index) {
 		return getRowTop(index) + itemHeight;
 	}

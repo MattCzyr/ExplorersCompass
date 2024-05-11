@@ -7,32 +7,21 @@ import com.chaosthedude.explorerscompass.ExplorersCompass;
 import com.chaosthedude.explorerscompass.items.ExplorersCompassItem;
 import com.chaosthedude.explorerscompass.util.ItemUtils;
 
-import io.netty.buffer.Unpooled;
-import net.fabricmc.fabric.api.networking.v1.PacketSender;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayNetworkHandler;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
 
-public class SearchPacket extends PacketByteBuf {
+public record SearchPacket(Identifier groupID, List<Identifier> structureIDs, BlockPos pos) implements CustomPayload {
 	
-	public static final Identifier ID = new Identifier(ExplorersCompass.MODID, "search");
+	public static final CustomPayload.Id<SearchPacket> PACKET_ID = new CustomPayload.Id<>(new Identifier(ExplorersCompass.MODID, "search"));
 	
-	public SearchPacket(Identifier groupID, List<Identifier> structureIDs, BlockPos pos) {
-		super(Unpooled.buffer());
-		writeIdentifier(groupID);
-		writeInt(structureIDs.size());
-		for (Identifier id : structureIDs) {
-			writeIdentifier(id);
-		}
-		writeBlockPos(pos);
-	}
-
-	public static void apply(MinecraftServer server, ServerPlayerEntity player, ServerPlayNetworkHandler handler, PacketByteBuf buf, PacketSender responseSender) {
+	public static final PacketCodec<RegistryByteBuf, SearchPacket> PACKET_CODEC = PacketCodec.of(SearchPacket::write, SearchPacket::read);
+	
+	public static SearchPacket read(RegistryByteBuf buf) {
 		final Identifier groupID = buf.readIdentifier();
 		final int numStructures = buf.readInt();
 		final List<Identifier> structureIDs = new ArrayList<Identifier>();
@@ -40,13 +29,29 @@ public class SearchPacket extends PacketByteBuf {
 			structureIDs.add(buf.readIdentifier());
 		}
 		final BlockPos pos = buf.readBlockPos();
-		
-		server.execute(() -> {
-			final ItemStack stack = ItemUtils.getHeldItem(player, ExplorersCompass.EXPLORERS_COMPASS_ITEM);
+		return new SearchPacket(groupID, structureIDs, pos);
+	}
+	
+	public void write(RegistryByteBuf buf) {
+		buf.writeIdentifier(groupID);
+		buf.writeInt(structureIDs.size());
+		for (Identifier id : structureIDs) {
+			buf.writeIdentifier(id);
+		}
+		buf.writeBlockPos(pos);
+	}
+	
+	@Override
+	public Id<? extends CustomPayload> getId() {
+		return PACKET_ID;
+	}
+
+	public static void apply(SearchPacket packet, ServerPlayNetworking.Context context) {
+		context.player().getServer().execute(() -> {
+			final ItemStack stack = ItemUtils.getHeldItem(context.player(), ExplorersCompass.EXPLORERS_COMPASS_ITEM);
 			if (!stack.isEmpty()) {
 				final ExplorersCompassItem explorersCompass = (ExplorersCompassItem) stack.getItem();
-				final World world = player.getEntityWorld();
-				explorersCompass.searchForStructure(world, player, groupID, structureIDs, pos, stack);
+				explorersCompass.searchForStructure(context.player().getEntityWorld(), context.player(), packet.groupID, packet.structureIDs, packet.pos, stack);
 			}
 		});
 	}

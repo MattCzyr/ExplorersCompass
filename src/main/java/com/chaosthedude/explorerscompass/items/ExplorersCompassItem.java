@@ -15,7 +15,6 @@ import com.chaosthedude.explorerscompass.util.StructureUtils;
 import com.chaosthedude.explorerscompass.workers.SearchWorkerManager;
 import com.google.common.collect.ListMultimap;
 
-import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
@@ -36,7 +35,7 @@ public class ExplorersCompassItem extends Item {
 	private SearchWorkerManager workerManager;
 
 	public ExplorersCompassItem() {
-		super(new FabricItemSettings().maxCount(1));
+		super(new Settings().maxCount(1));
 		workerManager = new SearchWorkerManager();
 	}
 
@@ -54,7 +53,7 @@ public class ExplorersCompassItem extends Item {
 				final ListMultimap<Identifier, Identifier> dimensionsForAllowedStructures = StructureUtils.getGeneratingDimensionIDsForAllowedStructures(serverWorld);
 				final Map<Identifier, Identifier> structureIDsToGroupIDs = StructureUtils.getStructureIDsToGroupIDs(serverWorld);
 				final ListMultimap<Identifier, Identifier> groupIDsToStructureIDs = StructureUtils.getGroupIDsToStructureIDs(serverWorld);
-				ServerPlayNetworking.send(serverPlayer, SyncPacket.ID, new SyncPacket(canTeleport, allowedStructures, dimensionsForAllowedStructures, structureIDsToGroupIDs, groupIDsToStructureIDs));
+				ServerPlayNetworking.send(serverPlayer, new SyncPacket(canTeleport, allowedStructures, dimensionsForAllowedStructures, structureIDsToGroupIDs, groupIDsToStructureIDs));
 			}
 		} else {
 			workerManager.stop();
@@ -98,7 +97,7 @@ public class ExplorersCompassItem extends Item {
 	}
 
 	public boolean isActive(ItemStack stack) {
-		if (ItemUtils.verifyNBT(stack)) {
+		if (ItemUtils.isCompass(stack)) {
 			return getState(stack) != CompassState.INACTIVE;
 		}
 
@@ -106,121 +105,121 @@ public class ExplorersCompassItem extends Item {
 	}
 
 	public void setSearching(ItemStack stack, Identifier structureID) {
-		if (ItemUtils.verifyNBT(stack)) {
-			stack.getNbt().putString("StructureID", structureID.toString());
-			stack.getNbt().putInt("State", CompassState.SEARCHING.getID());
+		if (ItemUtils.isCompass(stack)) {
+			stack.set(ExplorersCompass.STRUCTURE_ID_COMPONENT, structureID.toString());
+			stack.set(ExplorersCompass.COMPASS_STATE_COMPONENT, CompassState.SEARCHING.getID());
 		}
 	}
 
 	public void setFound(ItemStack stack, Identifier structureID, int x, int z, int samples) {
-		if (ItemUtils.verifyNBT(stack)) {
-			stack.getNbt().putString("StructureID", structureID.toString());
-			stack.getNbt().putInt("State", CompassState.FOUND.getID());
-			stack.getNbt().putInt("FoundX", x);
-			stack.getNbt().putInt("FoundZ", z);
-			stack.getNbt().putInt("Samples", samples);
+		if (ItemUtils.isCompass(stack)) {
+			stack.set(ExplorersCompass.STRUCTURE_ID_COMPONENT, structureID.toString());
+			stack.set(ExplorersCompass.COMPASS_STATE_COMPONENT, CompassState.FOUND.getID());
+			stack.set(ExplorersCompass.FOUND_X_COMPONENT, x);
+			stack.set(ExplorersCompass.FOUND_Z_COMPONENT, z);
+			stack.set(ExplorersCompass.SAMPLES_COMPONENT, samples);
 		}
 	}
 
 	public void setNotFound(ItemStack stack, int searchRadius, int samples) {
-		if (ItemUtils.verifyNBT(stack)) {
-			stack.getNbt().putInt("State", CompassState.NOT_FOUND.getID());
-			stack.getNbt().putInt("SearchRadius", searchRadius);
-			stack.getNbt().putInt("Samples", samples);
+		if (ItemUtils.isCompass(stack)) {
+			stack.set(ExplorersCompass.COMPASS_STATE_COMPONENT, CompassState.NOT_FOUND.getID());
+			stack.set(ExplorersCompass.SEARCH_RADIUS_COMPONENT, searchRadius);
+			stack.set(ExplorersCompass.SAMPLES_COMPONENT, samples);
 		}
 	}
 
 	public void setInactive(ItemStack stack) {
-		if (ItemUtils.verifyNBT(stack)) {
-			stack.getNbt().putInt("State", CompassState.INACTIVE.getID());
+		if (ItemUtils.isCompass(stack)) {
+			stack.set(ExplorersCompass.COMPASS_STATE_COMPONENT, CompassState.INACTIVE.getID());
 		}
 	}
 
 	public void setState(ItemStack stack, BlockPos pos, CompassState state) {
-		if (ItemUtils.verifyNBT(stack)) {
-			stack.getNbt().putInt("State", state.getID());
+		if (ItemUtils.isCompass(stack)) {
+			stack.set(ExplorersCompass.COMPASS_STATE_COMPONENT, state.getID());
 		}
 	}
 
 	public void setFoundStructureX(ItemStack stack, int x) {
-		if (ItemUtils.verifyNBT(stack)) {
-			stack.getNbt().putInt("FoundX", x);
+		if (ItemUtils.isCompass(stack)) {
+			stack.set(ExplorersCompass.FOUND_X_COMPONENT, x);
 		}
 	}
 
 	public void setFoundStructureZ(ItemStack stack, int z) {
-		if (ItemUtils.verifyNBT(stack)) {
-			stack.getNbt().putInt("FoundZ", z);
+		if (ItemUtils.isCompass(stack)) {
+			stack.set(ExplorersCompass.FOUND_Z_COMPONENT, z);
 		}
 	}
 
 	public void setStructureKey(ItemStack stack, Identifier structureID) {
-		if (ItemUtils.verifyNBT(stack)) {
-			stack.getNbt().putString("StructureID", structureID.toString());
+		if (ItemUtils.isCompass(stack)) {
+			stack.set(ExplorersCompass.STRUCTURE_ID_COMPONENT, structureID.toString());
 		}
 	}
 
 	public void setSearchRadius(ItemStack stack, int searchRadius) {
-		if (ItemUtils.verifyNBT(stack)) {
-			stack.getNbt().putInt("SearchRadius", searchRadius);
+		if (ItemUtils.isCompass(stack)) {
+			stack.set(ExplorersCompass.SEARCH_RADIUS_COMPONENT, searchRadius);
 		}
 	}
 
 	public void setSamples(ItemStack stack, int samples) {
-		if (ItemUtils.verifyNBT(stack)) {
-			stack.getNbt().putInt("Samples", samples);
+		if (ItemUtils.isCompass(stack)) {
+			stack.set(ExplorersCompass.SAMPLES_COMPONENT, samples);
 		}
 	}
 	
 	public void setDisplayCoordinates(ItemStack stack, boolean displayPosition) {
-		if (ItemUtils.verifyNBT(stack)) {
-			stack.getNbt().putBoolean("DisplayCoordinates", displayPosition);
+		if (ItemUtils.isCompass(stack)) {
+			stack.set(ExplorersCompass.DISPLAY_COORDS_COMPONENT, displayPosition);
 		}
 	}
 
 	public CompassState getState(ItemStack stack) {
-		if (ItemUtils.verifyNBT(stack)) {
-			return CompassState.fromID(stack.getNbt().getInt("State"));
+		if (ItemUtils.isCompass(stack) && stack.contains(ExplorersCompass.COMPASS_STATE_COMPONENT)) {
+			return CompassState.fromID(stack.get(ExplorersCompass.COMPASS_STATE_COMPONENT));
 		}
 
 		return null;
 	}
 
 	public int getFoundStructureX(ItemStack stack) {
-		if (ItemUtils.verifyNBT(stack)) {
-			return stack.getNbt().getInt("FoundX");
+		if (ItemUtils.isCompass(stack) && stack.contains(ExplorersCompass.FOUND_X_COMPONENT)) {
+			return stack.get(ExplorersCompass.FOUND_X_COMPONENT);
 		}
 
 		return 0;
 	}
 
 	public int getFoundStructureZ(ItemStack stack) {
-		if (ItemUtils.verifyNBT(stack)) {
-			return stack.getNbt().getInt("FoundZ");
+		if (ItemUtils.isCompass(stack) && stack.contains(ExplorersCompass.FOUND_Z_COMPONENT)) {
+			return stack.get(ExplorersCompass.FOUND_Z_COMPONENT);
 		}
 
 		return 0;
 	}
 
 	public Identifier getStructureID(ItemStack stack) {
-		if (ItemUtils.verifyNBT(stack)) {
-			return new Identifier(stack.getNbt().getString("StructureID"));
+		if (ItemUtils.isCompass(stack) && stack.contains(ExplorersCompass.STRUCTURE_ID_COMPONENT)) {
+			return new Identifier(stack.get(ExplorersCompass.STRUCTURE_ID_COMPONENT));
 		}
 
 		return new Identifier("");
 	}
 
 	public int getSearchRadius(ItemStack stack) {
-		if (ItemUtils.verifyNBT(stack)) {
-			return stack.getNbt().getInt("SearchRadius");
+		if (ItemUtils.isCompass(stack) && stack.contains(ExplorersCompass.SEARCH_RADIUS_COMPONENT)) {
+			return stack.get(ExplorersCompass.SEARCH_RADIUS_COMPONENT);
 		}
 
 		return -1;
 	}
 
 	public int getSamples(ItemStack stack) {
-		if (ItemUtils.verifyNBT(stack)) {
-			return stack.getNbt().getInt("Samples");
+		if (ItemUtils.isCompass(stack) && stack.contains(ExplorersCompass.SAMPLES_COMPONENT)) {
+			return stack.get(ExplorersCompass.SAMPLES_COMPONENT);
 		}
 
 		return -1;
@@ -231,8 +230,8 @@ public class ExplorersCompassItem extends Item {
 	}
 	
 	public boolean shouldDisplayCoordinates(ItemStack stack) {
-		if (ItemUtils.verifyNBT(stack) && stack.getNbt().contains("DisplayCoordinates")) {
-			return stack.getNbt().getBoolean("DisplayCoordinates");
+		if (ItemUtils.isCompass(stack) && stack.contains(ExplorersCompass.DISPLAY_COORDS_COMPONENT)) {
+			return stack.get(ExplorersCompass.DISPLAY_COORDS_COMPONENT);
 		}
 
 		return true;

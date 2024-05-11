@@ -87,10 +87,8 @@ public class ExplorersCompassScreen extends Screen {
 
 	@Override
 	public void render(DrawContext context, int mouseX, int mouseY, float partialTicks) {
-		selectionList.render(context, mouseX, mouseY, partialTicks);
-		searchTextField.render(context, mouseX, mouseY, partialTicks);
-		context.drawCenteredTextWithShadow(textRenderer, title, 65, 15, 0xffffff);
 		super.render(context, mouseX, mouseY, partialTicks);
+		context.drawCenteredTextWithShadow(textRenderer, title, 65, 15, 0xffffff);
 	}
 
 	@Override
@@ -120,17 +118,17 @@ public class ExplorersCompassScreen extends Screen {
 	}
 
 	public void searchForStructure(Identifier structureID) {
-		ClientPlayNetworking.send(SearchPacket.ID, new SearchPacket(structureID, List.of(structureID), player.getBlockPos()));
+		ClientPlayNetworking.send(new SearchPacket(structureID, List.of(structureID), player.getBlockPos()));
 		client.setScreen(null);
 	}
 	
 	public void searchForStructureGroup(Identifier structureID) {
-		ClientPlayNetworking.send(SearchPacket.ID, new SearchPacket(structureID, ExplorersCompass.groupIDsToStructureIDs.get(structureID), player.getBlockPos()));
+		ClientPlayNetworking.send(new SearchPacket(structureID, ExplorersCompass.groupIDsToStructureIDs.get(structureID), player.getBlockPos()));
 		client.setScreen(null);
 	}
 
 	public void teleport() {
-		ClientPlayNetworking.send(TeleportPacket.ID, new TeleportPacket());
+		ClientPlayNetworking.send(new TeleportPacket());
 		client.setScreen(null);
 	}
 	
