@@ -2,13 +2,12 @@ package com.chaosthedude.explorerscompass.util;
 
 import com.chaosthedude.explorerscompass.client.OverlaySide;
 import com.chaosthedude.explorerscompass.config.ConfigHandler;
-import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public class RenderUtils {

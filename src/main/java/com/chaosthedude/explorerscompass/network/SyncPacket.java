@@ -11,7 +11,7 @@ import com.google.common.collect.ListMultimap;
 
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.event.network.CustomPayloadEvent;
+import net.neoforged.neoforge.network.NetworkEvent.ClientCustomPayloadEvent;
 
 public class SyncPacket {
 
@@ -90,7 +90,7 @@ public class SyncPacket {
 		}
 	}
 
-	public static void handle(SyncPacket packet, CustomPayloadEvent.Context ctx) {
+	public static void handle(SyncPacket packet, ClientCustomPayloadEvent.Context ctx) {
 		ctx.enqueueWork(() -> {
 			ExplorersCompass.canTeleport = packet.canTeleport;
 			ExplorersCompass.allowedStructureKeys = packet.allowedStructureKeys;

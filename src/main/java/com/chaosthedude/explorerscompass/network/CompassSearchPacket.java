@@ -11,7 +11,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.event.network.CustomPayloadEvent;
+import net.neoforged.neoforge.network.NetworkEvent.ServerCustomPayloadEvent;
 
 public class CompassSearchPacket {
 
@@ -59,7 +59,7 @@ public class CompassSearchPacket {
 		buf.writeInt(z);
 	}
 
-	public static void handle(CompassSearchPacket packet, CustomPayloadEvent.Context ctx) {
+	public static void handle(CompassSearchPacket packet, ServerCustomPayloadEvent.Context ctx) {
 		ctx.enqueueWork(() -> {
 			final ItemStack stack = ItemUtils.getHeldItem(ctx.getSender(), ExplorersCompass.explorersCompass);
 			if (!stack.isEmpty()) {

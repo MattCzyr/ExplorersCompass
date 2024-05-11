@@ -32,10 +32,10 @@ import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureSet;
 import net.minecraft.world.level.levelgen.structure.StructureSet.StructureSelectionEntry;
 import net.minecraft.world.level.levelgen.structure.StructureType;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.ModContainer;
-import net.minecraftforge.fml.ModList;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.ModList;
 
 public class StructureUtils {
 
@@ -59,7 +59,7 @@ public class StructureUtils {
 		Registry<StructureSet> registry = getStructureSetRegistry(level);
 		for (StructureSet set : registry) {
 			for (StructureSelectionEntry entry : set.structures()) {
-				if (entry.structure().get().equals(structure)) {
+				if (entry.structure().value().equals(structure)) {
 					return registry.getKey(set);
 				}
 			}

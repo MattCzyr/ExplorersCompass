@@ -21,9 +21,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.network.PacketDistributor;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 @OnlyIn(Dist.CLIENT)
 public class ExplorersCompassScreen extends Screen {
@@ -112,17 +112,17 @@ public class ExplorersCompassScreen extends Screen {
 	}
 
 	public void searchForStructure(ResourceLocation key) {
-		ExplorersCompass.network.send(new CompassSearchPacket(key, List.of(key), player.blockPosition()), PacketDistributor.SERVER.noArg());
+		ExplorersCompass.network.send(PacketDistributor.SERVER.noArg(), new CompassSearchPacket(key, List.of(key), player.blockPosition()));
 		minecraft.setScreen(null);
 	}
 	
 	public void searchForGroup(ResourceLocation key) {
-		ExplorersCompass.network.send(new CompassSearchPacket(key, ExplorersCompass.typeKeysToStructureKeys.get(key), player.blockPosition()), PacketDistributor.SERVER.noArg());
+		ExplorersCompass.network.send(PacketDistributor.SERVER.noArg(), new CompassSearchPacket(key, ExplorersCompass.typeKeysToStructureKeys.get(key), player.blockPosition()));
 		minecraft.setScreen(null);
 	}
 
 	public void teleport() {
-		ExplorersCompass.network.send(new TeleportPacket(), PacketDistributor.SERVER.noArg());
+		ExplorersCompass.network.send(PacketDistributor.SERVER.noArg(), new TeleportPacket());
 		minecraft.setScreen(null);
 	}
 

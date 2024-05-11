@@ -19,15 +19,14 @@ import com.google.common.collect.ListMultimap;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.network.Channel;
-import net.minecraftforge.network.ChannelBuilder;
-import net.minecraftforge.network.SimpleChannel;
+import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
+import net.neoforged.neoforge.network.NetworkRegistry.ChannelBuilder;
+import net.neoforged.neoforge.network.simple.SimpleChannel;
 
 @Mod(ExplorersCompass.MODID)
 public class ExplorersCompass {
@@ -54,14 +53,15 @@ public class ExplorersCompass {
 	}
 
 	private void commonSetup(FMLCommonSetupEvent event) {
-		network = ChannelBuilder.named(new ResourceLocation(ExplorersCompass.MODID, ExplorersCompass.MODID)).networkProtocolVersion(1).optionalClient().clientAcceptedVersions(Channel.VersionTest.exact(1)).simpleChannel();
+		String networkVersion = "1";
+		network = ChannelBuilder.named(new ResourceLocation(ExplorersCompass.MODID, ExplorersCompass.MODID)).networkProtocolVersion(() -> networkVersion).clientAcceptedVersions(networkVersion::equals).serverAcceptedVersions(networkVersion::equals).simpleChannel();
 
 		// Server packets
-		network.messageBuilder(CompassSearchPacket.class).encoder(CompassSearchPacket::toBytes).decoder(CompassSearchPacket::new).consumerMainThread(CompassSearchPacket::handle).add();
-		network.messageBuilder(TeleportPacket.class).encoder(TeleportPacket::toBytes).decoder(TeleportPacket::new).consumerMainThread(TeleportPacket::handle).add();
+		network.messageBuilder(CompassSearchPacket.class, 0).encoder(CompassSearchPacket::toBytes).decoder(CompassSearchPacket::new).consumerMainThread(CompassSearchPacket::handle).add();
+		network.messageBuilder(TeleportPacket.class, 1).encoder(TeleportPacket::toBytes).decoder(TeleportPacket::new).consumerMainThread(TeleportPacket::handle).add();
 
 		// Client packet
-		network.messageBuilder(SyncPacket.class).encoder(SyncPacket::toBytes).decoder(SyncPacket::new).consumerMainThread(SyncPacket::handle).add();
+		network.messageBuilder(SyncPacket.class, 2).encoder(SyncPacket::toBytes).decoder(SyncPacket::new).consumerMainThread(SyncPacket::handle).add();
 
 		allowedStructureKeys = new ArrayList<ResourceLocation>();
 		dimensionKeysForAllowedStructureKeys = ArrayListMultimap.create();
