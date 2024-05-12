@@ -1,3 +1,25 @@
+## Version 3.0.1
+#### Forge 1.20.6, 1.20.5
+- Updated to NeoForge 1.20.6
+- Updated to NeoForge 1.20.5
+- Hid structures with the c:hidden_from_locator_selection from appearing in the compass GUI
+
+## Version 2.2.4
+#### Fabric 1.20.6, 1.20.5
+- Updated to Fabric 1.20.6
+- Updated to Fabric 1.20.5
+- Hid structures with the c:hidden_from_locator_selection from appearing in the compass GUI
+
+## Version 1.3.7
+#### Forge 1.20.6
+- Updated to Forge 1.20.6
+- Hid structures with the c:hidden_from_locator_selection from appearing in the compass GUI
+
+## Version 3.0.0
+#### Forge 1.20.4, 1.20.2
+- Updated to NeoForge 1.20.4
+- Updated to NeoForge 1.20.2
+
 ## Version 1.3.6
 #### Forge 1.20.4, 1.20.2
 - Fixed compass HUD info being rendered twice when certain mods are installed
