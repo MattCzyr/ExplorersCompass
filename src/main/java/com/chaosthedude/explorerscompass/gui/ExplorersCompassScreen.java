@@ -6,7 +6,7 @@ import java.util.List;
 
 import com.chaosthedude.explorerscompass.ExplorersCompass;
 import com.chaosthedude.explorerscompass.items.ExplorersCompassItem;
-import com.chaosthedude.explorerscompass.network.CompassSearchPacket;
+import com.chaosthedude.explorerscompass.network.SearchPacket;
 import com.chaosthedude.explorerscompass.network.TeleportPacket;
 import com.chaosthedude.explorerscompass.sorting.ISorting;
 import com.chaosthedude.explorerscompass.sorting.NameSorting;
@@ -74,7 +74,7 @@ public class ExplorersCompassScreen extends Screen {
 			removeWidget(selectionList);
 			allowedStructureKeys = new ArrayList<ResourceLocation>(ExplorersCompass.allowedStructureKeys);
 			structureKeysMatchingSearch = new ArrayList<ResourceLocation>(allowedStructureKeys);
-			selectionList = new StructureSearchList(this, minecraft, width + 110, height, 40, height, 45);
+			selectionList = new StructureSearchList(this, minecraft, width + 110, height - 40, 40, 45);
 			addRenderableWidget(selectionList);
 		}
 	}
@@ -112,17 +112,17 @@ public class ExplorersCompassScreen extends Screen {
 	}
 
 	public void searchForStructure(ResourceLocation key) {
-		ExplorersCompass.network.send(PacketDistributor.SERVER.noArg(), new CompassSearchPacket(key, List.of(key), player.blockPosition()));
+		PacketDistributor.SERVER.noArg().send(new SearchPacket(key, List.of(key), player.blockPosition()));
 		minecraft.setScreen(null);
 	}
 	
 	public void searchForGroup(ResourceLocation key) {
-		ExplorersCompass.network.send(PacketDistributor.SERVER.noArg(), new CompassSearchPacket(key, ExplorersCompass.typeKeysToStructureKeys.get(key), player.blockPosition()));
+		PacketDistributor.SERVER.noArg().send(new SearchPacket(key, ExplorersCompass.typeKeysToStructureKeys.get(key), player.blockPosition()));
 		minecraft.setScreen(null);
 	}
 
 	public void teleport() {
-		ExplorersCompass.network.send(PacketDistributor.SERVER.noArg(), new TeleportPacket());
+		PacketDistributor.SERVER.noArg().send(new TeleportPacket());
 		minecraft.setScreen(null);
 	}
 
@@ -181,7 +181,7 @@ public class ExplorersCompassScreen extends Screen {
 		addRenderableWidget(searchTextField);
 		
 		if (selectionList == null) {
-			selectionList = new StructureSearchList(this, minecraft, width + 110, height, 40, height, 45);
+			selectionList = new StructureSearchList(this, minecraft, width + 110, height - 40, 40, 45);
 		}
 		addRenderableWidget(selectionList);
 	}

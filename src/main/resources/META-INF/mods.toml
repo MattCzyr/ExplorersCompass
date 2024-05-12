@@ -4,7 +4,7 @@ license="CC BY-NC-SA 4.0"
 issueTrackerURL="https://github.com/MattCzyr/ExplorersCompass/issues"
 [[mods]]
     modId="explorerscompass"
-    version="1.20.2-3.0.0-neoforge"
+    version="1.20.4-3.0.0-neoforge"
     displayName="Explorer's Compass"
     displayURL="https://github.com/MattCzyr/ExplorersCompass"
     authors="ChaosTheDude"
@@ -14,13 +14,13 @@ issueTrackerURL="https://github.com/MattCzyr/ExplorersCompass/issues"
 
 [[dependencies.explorerscompass]]
     modId="neoforge"
-    mandatory=true
+    type="required"
     versionRange="${neo_version_range}"
     ordering="NONE"
     side="BOTH"
 [[dependencies.explorerscompass]]
     modId="minecraft"
-    mandatory=true
+    type="required"
     versionRange="${minecraft_version_range}"
     ordering="NONE"
     side="BOTH"
