@@ -86,7 +86,7 @@ public class StructureUtils {
 	public static List<ResourceLocation> getAllowedStructureKeys(ServerLevel level) {
 		final List<ResourceLocation> structures = new ArrayList<ResourceLocation>();
 		for (Structure structure : getStructureRegistry(level)) {
-			if (structure != null && getKeyForStructure(level, structure) != null && !structureIsBlacklisted(level, structure)) {
+			if (structure != null && getKeyForStructure(level, structure) != null && !structureIsBlacklisted(level, structure) && !structureIsHidden(level, structure)) {
 				structures.add(getKeyForStructure(level, structure));
 			}
 		}
@@ -99,6 +99,15 @@ public class StructureUtils {
 			if (getKeyForStructure(level, structure).toString().matches(convertToRegex(structureKey))) {
 				return true;
 			}
+		}
+		return false;
+	}
+	
+	public static boolean structureIsHidden(ServerLevel level, Structure structure) {
+		final Registry<Structure> structureRegistry = getStructureRegistry(level);
+		if (structureRegistry.getKey(structure) != null && structureRegistry.getHolder(structureRegistry.getKey(structure)).isPresent()) {
+			final Holder<Structure> structureHolder = structureRegistry.getHolder(structureRegistry.getKey(structure)).get();
+			return structureHolder.getTagKeys().anyMatch(tag -> tag.location().getPath().equals("c:hidden_from_locator_selection"));
 		}
 		return false;
 	}

@@ -81,8 +81,8 @@ public class ExplorersCompassScreen extends Screen {
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
-		guiGraphics.drawCenteredString(font, title, 65, 15, 0xffffff);
 		super.render(guiGraphics, mouseX, mouseY, partialTicks);
+		guiGraphics.drawCenteredString(font, title, 65, 15, 0xffffff);
 	}
 
 	@Override
