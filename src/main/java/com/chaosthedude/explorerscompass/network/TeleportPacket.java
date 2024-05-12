@@ -9,33 +9,35 @@ import com.chaosthedude.explorerscompass.util.PlayerUtils;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.network.handling.PlayPayloadContext;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public record TeleportPacket() implements CustomPacketPayload {
 	
-	public static final ResourceLocation ID = new ResourceLocation(ExplorersCompass.MODID, "teleport");
+public static final Type<TeleportPacket> TYPE = new Type<TeleportPacket>(new ResourceLocation(ExplorersCompass.MODID, "teleport"));
+	
+	public static final StreamCodec<FriendlyByteBuf, TeleportPacket> CODEC = StreamCodec.ofMember(TeleportPacket::write, TeleportPacket::read);
 
 	public static TeleportPacket read(FriendlyByteBuf buf) {
 		return new TeleportPacket();
 	}
 
-	@Override
 	public void write(FriendlyByteBuf buf) {
 	}
 
-	public static void handle(TeleportPacket packet, PlayPayloadContext context) {
-		context.workHandler().submitAsync(() -> {
-			if (context.player().isPresent() && context.level().isPresent()) {
-				final ItemStack stack = ItemUtils.getHeldItem(context.player().get(), ExplorersCompass.explorersCompass);
+	public static void handle(TeleportPacket packet, IPayloadContext context) {
+		if (context.flow().isServerbound()) {
+			context.enqueueWork(() -> {
+				final ItemStack stack = ItemUtils.getHeldItem(context.player(), ExplorersCompass.explorersCompass);
 				if (!stack.isEmpty()) {
 					final ExplorersCompassItem explorersCompass = (ExplorersCompassItem) stack.getItem();
-					final ServerPlayer player = (ServerPlayer) context.player().get();
+					final ServerPlayer player = (ServerPlayer) context.player();
 					if (ConfigHandler.GENERAL.allowTeleport.get() && PlayerUtils.canTeleport(player.getServer(), player)) {
 						if (explorersCompass.getState(stack) == CompassState.FOUND) {
 							final int x = explorersCompass.getFoundStructureX(stack);
@@ -54,13 +56,13 @@ public record TeleportPacket() implements CustomPacketPayload {
 						ExplorersCompass.LOGGER.warn("Player " + player.getDisplayName().getString() + " tried to teleport but does not have permission.");
 					}
 				}
-			}
-		});
+			});
+		}
 	}
 	
 	@Override
-	public ResourceLocation id() {
-		return ID;
+	public Type<TeleportPacket> type() {
+		return TYPE;
 	}
 	
 	private int findValidTeleportHeight(Level level, int x, int z) {

@@ -38,11 +38,9 @@ public class StructureSearchList extends ObjectSelectionList<StructureSearchEntr
 
 	@Override
 	public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
-		renderList(guiGraphics, mouseX, mouseY, partialTicks);
-	}
-
-	@Override
-	protected void renderList(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+		guiGraphics.fill(getRowLeft() - 4, getY(), getRowLeft() + getRowWidth() + 4, getY() + getHeight() + 4, 255 / 2 << 24);
+		
+		enableScissor(guiGraphics);
 		for (int j = 0; j < getItemCount(); ++j) {
 			int rowTop = getRowTop(j);
 			int rowBottom = getRowBottom(j);
@@ -56,6 +54,7 @@ public class StructureSearchList extends ObjectSelectionList<StructureSearchEntr
 				entry.render(guiGraphics, j, rowTop, getRowLeft(), getRowWidth(), j1, mouseX, mouseY, isMouseOver((double) mouseX, (double) mouseY) && Objects.equals(getEntryAtPosition((double) mouseX, (double) mouseY), entry), partialTicks);
 			}
 		}
+		guiGraphics.disableScissor();
 
 		if (getMaxScroll() > 0) {
 			int left = getScrollbarPosition();
@@ -71,7 +70,13 @@ public class StructureSearchList extends ObjectSelectionList<StructureSearchEntr
 			guiGraphics.fill(left, top, right, top + height, (int) (1.9F * 255.0F) / 2 << 24);
 		}
 	}
+	
+	@Override
+	protected void enableScissor(GuiGraphics guiGraphics) {
+		guiGraphics.enableScissor(getX(), getY(), getRight(), getBottom());
+	}
 
+	@Override
 	protected int getRowBottom(int index) {
 		return getRowTop(index) + itemHeight;
 	}

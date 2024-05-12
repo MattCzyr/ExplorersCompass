@@ -10,13 +10,16 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.handling.PlayPayloadContext;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public record SyncPacket(boolean canTeleport, List<ResourceLocation> allowedStructureKeys, ListMultimap<ResourceLocation, ResourceLocation> dimensionKeysForAllowedStructureKeys, Map<ResourceLocation, ResourceLocation> structureKeysToTypeKeys, ListMultimap<ResourceLocation, ResourceLocation> typeKeysToStructureKeys) implements CustomPacketPayload {
 
-	public static final ResourceLocation ID = new ResourceLocation(ExplorersCompass.MODID, "sync");
+	public static final Type<SyncPacket> TYPE = new Type<SyncPacket>(new ResourceLocation(ExplorersCompass.MODID, "sync"));
+	
+	public static final StreamCodec<FriendlyByteBuf, SyncPacket> CODEC = StreamCodec.ofMember(SyncPacket::write, SyncPacket::read);
 	
 	public static SyncPacket read(FriendlyByteBuf buf) {
 		final boolean canTeleport = buf.readBoolean();
@@ -54,7 +57,6 @@ public record SyncPacket(boolean canTeleport, List<ResourceLocation> allowedStru
 		return new SyncPacket(canTeleport, allowedStructureKeys, dimensionKeysForAllowedStructureKeys, structureKeysToTypeKeys, typeKeysToStructureKeys);
 	}
 
-	@Override
 	public void write(FriendlyByteBuf buf) {
 		buf.writeBoolean(canTeleport);
 		buf.writeInt(allowedStructureKeys.size());
@@ -80,19 +82,21 @@ public record SyncPacket(boolean canTeleport, List<ResourceLocation> allowedStru
 		}
 	}
 
-	public static void handle(SyncPacket packet, PlayPayloadContext context) {
-		context.workHandler().submitAsync(() -> {
-			ExplorersCompass.canTeleport = packet.canTeleport;
-			ExplorersCompass.allowedStructureKeys = packet.allowedStructureKeys;
-			ExplorersCompass.dimensionKeysForAllowedStructureKeys = packet.dimensionKeysForAllowedStructureKeys;
-			ExplorersCompass.structureKeysToTypeKeys = packet.structureKeysToTypeKeys;
-			ExplorersCompass.typeKeysToStructureKeys = packet.typeKeysToStructureKeys;
-		});
+	public static void handle(SyncPacket packet, IPayloadContext  context) {
+		if (context.flow().isClientbound()) {
+			context.enqueueWork(() -> {
+				ExplorersCompass.canTeleport = packet.canTeleport;
+				ExplorersCompass.allowedStructureKeys = packet.allowedStructureKeys;
+				ExplorersCompass.dimensionKeysForAllowedStructureKeys = packet.dimensionKeysForAllowedStructureKeys;
+				ExplorersCompass.structureKeysToTypeKeys = packet.structureKeysToTypeKeys;
+				ExplorersCompass.typeKeysToStructureKeys = packet.typeKeysToStructureKeys;
+			});
+		}
 	}
 	
 	@Override
-	public ResourceLocation id() {
-		return ID;
+	public Type<SyncPacket> type() {
+		return TYPE;
 	}
 
 }

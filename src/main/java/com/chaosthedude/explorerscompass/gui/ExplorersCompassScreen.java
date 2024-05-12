@@ -81,8 +81,8 @@ public class ExplorersCompassScreen extends Screen {
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
-		guiGraphics.drawCenteredString(font, title, 65, 15, 0xffffff);
 		super.render(guiGraphics, mouseX, mouseY, partialTicks);
+		guiGraphics.drawCenteredString(font, title, 65, 15, 0xffffff);
 	}
 
 	@Override
@@ -112,17 +112,17 @@ public class ExplorersCompassScreen extends Screen {
 	}
 
 	public void searchForStructure(ResourceLocation key) {
-		PacketDistributor.SERVER.noArg().send(new SearchPacket(key, List.of(key), player.blockPosition()));
+		PacketDistributor.sendToServer(new SearchPacket(key, List.of(key), player.blockPosition()));
 		minecraft.setScreen(null);
 	}
 	
 	public void searchForGroup(ResourceLocation key) {
-		PacketDistributor.SERVER.noArg().send(new SearchPacket(key, ExplorersCompass.typeKeysToStructureKeys.get(key), player.blockPosition()));
+		PacketDistributor.sendToServer(new SearchPacket(key, ExplorersCompass.typeKeysToStructureKeys.get(key), player.blockPosition()));
 		minecraft.setScreen(null);
 	}
 
 	public void teleport() {
-		PacketDistributor.SERVER.noArg().send(new TeleportPacket());
+		PacketDistributor.sendToServer(new TeleportPacket());
 		minecraft.setScreen(null);
 	}
 

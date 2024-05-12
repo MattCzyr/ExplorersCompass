@@ -15,7 +15,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureCheckResult;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
@@ -81,7 +81,7 @@ public abstract class StructureSearchWorker<T extends StructurePlacement> implem
 
 	protected Pair<BlockPos, Structure> getStructureGeneratingAt(ChunkPos chunkPos) {
 		for (Structure structure : structureSet) {
-			StructureCheckResult result = level.structureManager().checkStructurePresence(chunkPos, structure, false);
+			StructureCheckResult result = level.structureManager().checkStructurePresence(chunkPos, structure, placement, false);
 			if (result != StructureCheckResult.START_NOT_PRESENT) {
 				if (result == StructureCheckResult.START_PRESENT) {
 					return Pair.of(placement.getLocatePos(chunkPos), structure);

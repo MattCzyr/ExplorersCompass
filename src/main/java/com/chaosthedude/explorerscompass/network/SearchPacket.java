@@ -9,15 +9,18 @@ import com.chaosthedude.explorerscompass.util.ItemUtils;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.network.handling.PlayPayloadContext;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public record SearchPacket(ResourceLocation groupKey, List<ResourceLocation> structureKeys, BlockPos pos) implements CustomPacketPayload {
 	
-	public static final ResourceLocation ID = new ResourceLocation(ExplorersCompass.MODID, "search");
+	public static final Type<SearchPacket> TYPE = new Type<SearchPacket>(new ResourceLocation(ExplorersCompass.MODID, "search"));
+	
+	public static final StreamCodec<FriendlyByteBuf, SearchPacket> CODEC = StreamCodec.ofMember(SearchPacket::write, SearchPacket::read);
 
 	public static SearchPacket read(FriendlyByteBuf buf) {
 		final ResourceLocation groupKey = buf.readResourceLocation();
@@ -30,7 +33,6 @@ public record SearchPacket(ResourceLocation groupKey, List<ResourceLocation> str
 		return new SearchPacket(groupKey, structureKeys, pos);
 	}
 
-	@Override
 	public void write(FriendlyByteBuf buf) {
 		buf.writeResourceLocation(groupKey);
 		buf.writeInt(structureKeys.size());
@@ -40,21 +42,20 @@ public record SearchPacket(ResourceLocation groupKey, List<ResourceLocation> str
 		buf.writeBlockPos(pos);
 	}
 
-	public static void handle(SearchPacket packet, PlayPayloadContext context) {
-		context.workHandler().submitAsync(() -> {
-			if (context.player().isPresent() && context.level().isPresent()) {
-				final ItemStack stack = ItemUtils.getHeldItem(context.player().get(), ExplorersCompass.explorersCompass);
+	public static void handle(SearchPacket packet, IPayloadContext context) {
+		if (context.flow().isServerbound()) {
+			context.enqueueWork(() -> {
+				final ItemStack stack = ItemUtils.getHeldItem(context.player(), ExplorersCompass.explorersCompass);
 				if (!stack.isEmpty()) {
 					final ExplorersCompassItem explorersCompass = (ExplorersCompassItem) stack.getItem();
-					explorersCompass.searchForStructure((ServerLevel) context.level().get(), context.player().get(), packet.groupKey, packet.structureKeys, packet.pos, stack);
+					explorersCompass.searchForStructure((ServerLevel) context.player().level(), context.player(), packet.groupKey, packet.structureKeys, packet.pos, stack);
 				}
-			}
-		});
+			});
+		}
 	}
 	
 	@Override
-	public ResourceLocation id() {
-		return ID;
+	public Type<SearchPacket> type() {
+		return TYPE;
 	}
-
 }
