@@ -1,3 +1,42 @@
+## Version 3.0.1
+#### Forge 1.20.6, 1.20.5
+- Updated to NeoForge 1.20.6
+- Updated to NeoForge 1.20.5
+- Hid structures with the c:hidden_from_locator_selection from appearing in the compass GUI
+
+## Version 2.2.4
+#### Fabric 1.20.6, 1.20.5
+- Updated to Fabric 1.20.6
+- Updated to Fabric 1.20.5
+- Hid structures with the c:hidden_from_locator_selection from appearing in the compass GUI
+
+## Version 1.3.7
+#### Forge 1.20.6
+- Updated to Forge 1.20.6
+- Hid structures with the c:hidden_from_locator_selection from appearing in the compass GUI
+
+## Version 3.0.0
+#### Forge 1.20.4, 1.20.2
+- Updated to NeoForge 1.20.4
+- Updated to NeoForge 1.20.2
+
+## Version 1.3.6
+#### Forge 1.20.4, 1.20.2
+- Fixed compass HUD info being rendered twice when certain mods are installed
+
+## Version 1.3.5
+#### Forge 1.20.4, 1.20.2
+- Fixed clients not being allowed to connect to servers that did not have Explorer's Compass installed
+- Added Portuguese translations
+- Added simplified Chinese translations
+
+## Version 1.3.4
+#### Forge 1.20.4, 1.20.3, 1.20.2
+- Updated to Forge 1.20.4
+- Updated to Forge 1.20.3
+- Fixed clients not being allowed to connect to servers that did not have Explorer's Compass installed
+- Fixed some Russian translations
+
 ## Version 1.3.3
 #### Forge 1.20.2, 1.20.1
 - Updated to Forge 1.20.2
@@ -6,7 +45,9 @@
 - Fixed a server hang and eventual crash that occurred when using the compass to teleport to coordinates with no blocks to stand on
 
 ## Version 2.2.3
-#### Fabric 1.20.2, 1.20.1
+#### Fabric 1.20.4, 1.20.3, 1.20.2, 1.20.1
+- Updated to Fabric 1.20.4
+- Updated to Fabric 1.20.3
 - Updated to Fabric 1.20.2
 - Added the compass to the minecraft:compasses tag
 - Fixed compass spinning when player's yaw goes from positive to negative or vice versa
