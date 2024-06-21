@@ -17,7 +17,7 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public record SyncPacket(boolean canTeleport, List<ResourceLocation> allowedStructureKeys, ListMultimap<ResourceLocation, ResourceLocation> dimensionKeysForAllowedStructureKeys, Map<ResourceLocation, ResourceLocation> structureKeysToTypeKeys, ListMultimap<ResourceLocation, ResourceLocation> typeKeysToStructureKeys) implements CustomPacketPayload {
 
-	public static final Type<SyncPacket> TYPE = new Type<SyncPacket>(new ResourceLocation(ExplorersCompass.MODID, "sync"));
+	public static final Type<SyncPacket> TYPE = new Type<SyncPacket>(ResourceLocation.fromNamespaceAndPath(ExplorersCompass.MODID, "sync"));
 	
 	public static final StreamCodec<FriendlyByteBuf, SyncPacket> CODEC = StreamCodec.ofMember(SyncPacket::write, SyncPacket::read);
 	

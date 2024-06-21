@@ -1,17 +1,20 @@
 ## Version 3.0.1
-#### NeoForge 1.20.6, 1.20.5
+#### NeoForge 1.21, 1.20.6, 1.20.5
+- Updated to NeoForge 1.21
 - Updated to NeoForge 1.20.6
 - Updated to NeoForge 1.20.5
 - Hid structures with the c:hidden_from_locator_selection from appearing in the compass GUI
 
 ## Version 2.2.4
-#### Fabric 1.20.6, 1.20.5
+#### Fabric 1.21, 1.20.6, 1.20.5
+- Updated to Fabric 1.21
 - Updated to Fabric 1.20.6
 - Updated to Fabric 1.20.5
 - Hid structures with the c:hidden_from_locator_selection from appearing in the compass GUI
 
 ## Version 1.3.7
-#### Forge 1.20.6
+#### Forge 1.21, 1.20.6
+- Updated to Forge 1.21
 - Updated to Forge 1.20.6
 - Hid structures with the c:hidden_from_locator_selection from appearing in the compass GUI
 

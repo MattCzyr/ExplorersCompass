@@ -29,7 +29,7 @@ public class ExplorersCompassClient {
 	@SubscribeEvent
 	public static void clientInit(FMLClientSetupEvent event) {
 		event.enqueueWork(() -> {
-			ItemProperties.register(ExplorersCompass.explorersCompass, new ResourceLocation("angle"), new ClampedItemPropertyFunction() {
+			ItemProperties.register(ExplorersCompass.explorersCompass, ResourceLocation.fromNamespaceAndPath(ExplorersCompass.MODID, "angle"), new ClampedItemPropertyFunction() {
 				@OnlyIn(Dist.CLIENT)
 				private double rotation;
 				@OnlyIn(Dist.CLIENT)
@@ -104,7 +104,7 @@ public class ExplorersCompassClient {
 	
 	@SubscribeEvent
     public static void registerOverlay(RegisterGuiLayersEvent event) {
-        event.registerAbove(VanillaGuiLayers.BOSS_OVERLAY, new ResourceLocation(ExplorersCompass.MODID, "explorers_compass"), new ExplorersCompassOverlay());
+        event.registerAbove(VanillaGuiLayers.BOSS_OVERLAY, ResourceLocation.fromNamespaceAndPath(ExplorersCompass.MODID, "explorers_compass"), new ExplorersCompassOverlay());
     }
 
 }

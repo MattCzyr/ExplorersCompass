@@ -64,7 +64,7 @@ public class StructureUtils {
 				}
 			}
 		}
-		return new ResourceLocation(ExplorersCompass.MODID, "none");
+		return ResourceLocation.fromNamespaceAndPath(ExplorersCompass.MODID, "none");
 	}
 
 	public static ResourceLocation getKeyForStructure(ServerLevel level, Structure structure) {
@@ -123,7 +123,7 @@ public class StructureUtils {
 		}
 		// Fix empty dimensions for stronghold
 		if (structure == StructureType.STRONGHOLD && dimensions.isEmpty()) {
-			dimensions.add(new ResourceLocation("minecraft:overworld"));
+			dimensions.add(ResourceLocation.parse("minecraft:overworld"));
 		}
 		return dimensions;
 	}
