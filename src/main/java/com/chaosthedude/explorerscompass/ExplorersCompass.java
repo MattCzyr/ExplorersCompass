@@ -21,7 +21,7 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.component.DataComponentType;
+import net.minecraft.component.ComponentType;
 import net.minecraft.item.ItemGroups;
 import net.minecraft.network.codec.PacketCodecs;
 import net.minecraft.registry.Registries;
@@ -36,13 +36,13 @@ public class ExplorersCompass implements ModInitializer {
 	
 	public static final ExplorersCompassItem EXPLORERS_COMPASS_ITEM = new ExplorersCompassItem();
 	
-	public static final DataComponentType<String> STRUCTURE_ID_COMPONENT = DataComponentType.<String>builder().codec(Codec.STRING).packetCodec(PacketCodecs.STRING).build();
-	public static final DataComponentType<Integer> COMPASS_STATE_COMPONENT = DataComponentType.<Integer>builder().codec(Codec.INT).packetCodec(PacketCodecs.INTEGER).build();
-	public static final DataComponentType<Integer> FOUND_X_COMPONENT = DataComponentType.<Integer>builder().codec(Codec.INT).packetCodec(PacketCodecs.INTEGER).build();
-	public static final DataComponentType<Integer> FOUND_Z_COMPONENT = DataComponentType.<Integer>builder().codec(Codec.INT).packetCodec(PacketCodecs.INTEGER).build();
-	public static final DataComponentType<Integer> SEARCH_RADIUS_COMPONENT = DataComponentType.<Integer>builder().codec(Codec.INT).packetCodec(PacketCodecs.INTEGER).build();
-	public static final DataComponentType<Integer> SAMPLES_COMPONENT = DataComponentType.<Integer>builder().codec(Codec.INT).packetCodec(PacketCodecs.INTEGER).build();
-	public static final DataComponentType<Boolean> DISPLAY_COORDS_COMPONENT = DataComponentType.<Boolean>builder().codec(Codec.BOOL).packetCodec(PacketCodecs.BOOL).build();
+	public static final ComponentType<String> STRUCTURE_ID_COMPONENT = ComponentType.<String>builder().codec(Codec.STRING).packetCodec(PacketCodecs.STRING).build();
+	public static final ComponentType<Integer> COMPASS_STATE_COMPONENT = ComponentType.<Integer>builder().codec(Codec.INT).packetCodec(PacketCodecs.INTEGER).build();
+	public static final ComponentType<Integer> FOUND_X_COMPONENT = ComponentType.<Integer>builder().codec(Codec.INT).packetCodec(PacketCodecs.INTEGER).build();
+	public static final ComponentType<Integer> FOUND_Z_COMPONENT = ComponentType.<Integer>builder().codec(Codec.INT).packetCodec(PacketCodecs.INTEGER).build();
+	public static final ComponentType<Integer> SEARCH_RADIUS_COMPONENT = ComponentType.<Integer>builder().codec(Codec.INT).packetCodec(PacketCodecs.INTEGER).build();
+	public static final ComponentType<Integer> SAMPLES_COMPONENT = ComponentType.<Integer>builder().codec(Codec.INT).packetCodec(PacketCodecs.INTEGER).build();
+	public static final ComponentType<Boolean> DISPLAY_COORDS_COMPONENT = ComponentType.<Boolean>builder().codec(Codec.BOOL).packetCodec(PacketCodecs.BOOL).build();
 	
 	public static boolean canTeleport;
 	public static List<Identifier> allowedStructureIDs;
@@ -54,15 +54,15 @@ public class ExplorersCompass implements ModInitializer {
 	public void onInitialize() {
 		ExplorersCompassConfig.load();
 		
-		Registry.register(Registries.ITEM, new Identifier(MODID, "explorerscompass"), EXPLORERS_COMPASS_ITEM);
+		Registry.register(Registries.ITEM, Identifier.of(MODID, "explorerscompass"), EXPLORERS_COMPASS_ITEM);
 		
-		Registry.register(Registries.DATA_COMPONENT_TYPE, new Identifier(MODID, "structure_id"), STRUCTURE_ID_COMPONENT);
-		Registry.register(Registries.DATA_COMPONENT_TYPE, new Identifier(MODID, "compass_state"), COMPASS_STATE_COMPONENT);
-		Registry.register(Registries.DATA_COMPONENT_TYPE, new Identifier(MODID, "found_x"), FOUND_X_COMPONENT);
-		Registry.register(Registries.DATA_COMPONENT_TYPE, new Identifier(MODID, "found_z"), FOUND_Z_COMPONENT);
-		Registry.register(Registries.DATA_COMPONENT_TYPE, new Identifier(MODID, "search_radius"), SEARCH_RADIUS_COMPONENT);
-		Registry.register(Registries.DATA_COMPONENT_TYPE, new Identifier(MODID, "samples"), SAMPLES_COMPONENT);
-		Registry.register(Registries.DATA_COMPONENT_TYPE, new Identifier(MODID, "display_coords"), DISPLAY_COORDS_COMPONENT);
+		Registry.register(Registries.DATA_COMPONENT_TYPE, Identifier.of(MODID, "structure_id"), STRUCTURE_ID_COMPONENT);
+		Registry.register(Registries.DATA_COMPONENT_TYPE, Identifier.of(MODID, "compass_state"), COMPASS_STATE_COMPONENT);
+		Registry.register(Registries.DATA_COMPONENT_TYPE, Identifier.of(MODID, "found_x"), FOUND_X_COMPONENT);
+		Registry.register(Registries.DATA_COMPONENT_TYPE, Identifier.of(MODID, "found_z"), FOUND_Z_COMPONENT);
+		Registry.register(Registries.DATA_COMPONENT_TYPE, Identifier.of(MODID, "search_radius"), SEARCH_RADIUS_COMPONENT);
+		Registry.register(Registries.DATA_COMPONENT_TYPE, Identifier.of(MODID, "samples"), SAMPLES_COMPONENT);
+		Registry.register(Registries.DATA_COMPONENT_TYPE, Identifier.of(MODID, "display_coords"), DISPLAY_COORDS_COMPONENT);
 		
 		ItemGroupEvents.modifyEntriesEvent(ItemGroups.TOOLS).register(entries -> entries.add(EXPLORERS_COMPASS_ITEM));
 		

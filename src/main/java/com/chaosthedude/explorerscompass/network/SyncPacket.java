@@ -17,7 +17,7 @@ import net.minecraft.util.Identifier;
 
 public record SyncPacket(boolean canTeleport, List<Identifier> allowedStructureIDs, ListMultimap<Identifier, Identifier> allowedStructureIDsToDimensionIDs, Map<Identifier, Identifier> structureIDsToGroupIDs, ListMultimap<Identifier, Identifier> groupIDsToStructureIDs) implements CustomPayload {
 
-	public static final CustomPayload.Id<SyncPacket> PACKET_ID = new CustomPayload.Id<>(new Identifier(ExplorersCompass.MODID, "sync"));
+	public static final CustomPayload.Id<SyncPacket> PACKET_ID = new CustomPayload.Id<>(Identifier.of(ExplorersCompass.MODID, "sync"));
 	
 	public static final PacketCodec<RegistryByteBuf, SyncPacket> PACKET_CODEC = PacketCodec.of(SyncPacket::write, SyncPacket::read);
 	

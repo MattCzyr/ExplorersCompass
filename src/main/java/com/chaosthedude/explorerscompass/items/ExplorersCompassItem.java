@@ -203,10 +203,10 @@ public class ExplorersCompassItem extends Item {
 
 	public Identifier getStructureID(ItemStack stack) {
 		if (ItemUtils.isCompass(stack) && stack.contains(ExplorersCompass.STRUCTURE_ID_COMPONENT)) {
-			return new Identifier(stack.get(ExplorersCompass.STRUCTURE_ID_COMPONENT));
+			return Identifier.of(stack.get(ExplorersCompass.STRUCTURE_ID_COMPONENT));
 		}
 
-		return new Identifier("");
+		return Identifier.of("", "");
 	}
 
 	public int getSearchRadius(ItemStack stack) {

@@ -17,7 +17,7 @@ import net.minecraft.util.math.BlockPos;
 
 public record SearchPacket(Identifier groupID, List<Identifier> structureIDs, BlockPos pos) implements CustomPayload {
 	
-	public static final CustomPayload.Id<SearchPacket> PACKET_ID = new CustomPayload.Id<>(new Identifier(ExplorersCompass.MODID, "search"));
+	public static final CustomPayload.Id<SearchPacket> PACKET_ID = new CustomPayload.Id<>(Identifier.of(ExplorersCompass.MODID, "search"));
 	
 	public static final PacketCodec<RegistryByteBuf, SearchPacket> PACKET_CODEC = PacketCodec.of(SearchPacket::write, SearchPacket::read);
 	

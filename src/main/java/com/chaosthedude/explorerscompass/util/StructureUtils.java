@@ -63,7 +63,7 @@ public class StructureUtils {
 				}
 			}
 		}
-		return new Identifier(ExplorersCompass.MODID, "none");
+		return Identifier.of(ExplorersCompass.MODID, "none");
 	}
 
 	public static Identifier getIDForStructure(ServerWorld world, Structure structure) {
@@ -123,7 +123,7 @@ public class StructureUtils {
 		}
 		// Fix empty dimensions for stronghold
 		if (structure == StructureType.STRONGHOLD && dimensions.isEmpty()) {
-			dimensions.add(new Identifier("minecraft:overworld"));
+			dimensions.add(Identifier.of("minecraft:overworld"));
 		}
 		return dimensions;
 	}

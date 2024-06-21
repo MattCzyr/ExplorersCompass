@@ -23,7 +23,7 @@ public class ExplorersCompassClient implements ClientModInitializer {
 	public void onInitializeClient() {
 		ClientPlayNetworking.registerGlobalReceiver(SyncPacket.PACKET_ID, SyncPacket::apply);
 		
-		ModelPredicateProviderRegistry.register(ExplorersCompass.EXPLORERS_COMPASS_ITEM, new Identifier("angle"), new ClampedModelPredicateProvider() {
+		ModelPredicateProviderRegistry.register(ExplorersCompass.EXPLORERS_COMPASS_ITEM, Identifier.of(ExplorersCompass.MODID, "angle"), new ClampedModelPredicateProvider() {
 			private double rotation;
 			private double rota;
 			private long lastUpdateTick;

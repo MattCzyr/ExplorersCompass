@@ -23,7 +23,7 @@ public class StructureSearchList extends AlwaysSelectedEntryListWidget<Structure
 
 	@Override
 	protected int getDefaultScrollbarX() {
-		return super.getDefaultScrollbarX() - 2;
+		return getRowLeft() + getRowWidth() - 2;
 	}
 
 	@Override

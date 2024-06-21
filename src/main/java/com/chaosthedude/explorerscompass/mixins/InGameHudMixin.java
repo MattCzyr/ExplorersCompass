@@ -21,6 +21,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.InGameHud;
 import net.minecraft.client.gui.screen.ChatScreen;
+import net.minecraft.client.render.RenderTickCounter;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -33,8 +34,8 @@ public class InGameHudMixin {
 	@Final
 	private MinecraftClient client;
 
-	@Inject(method = "render(Lnet/minecraft/client/gui/DrawContext;F)V", at = @At(value = "TAIL"))
-	private void renderCompassInfo(DrawContext context, float tickDelta, CallbackInfo info) {
+	@Inject(method = "render(Lnet/minecraft/client/gui/DrawContext;Lnet/minecraft/client/render/RenderTickCounter;)V", at = @At(value = "TAIL"))
+	private void renderCompassInfo(DrawContext context, RenderTickCounter tickCounter, CallbackInfo info) {
 		if (client.player != null && !client.options.hudHidden && !client.getDebugHud().shouldShowDebugHud() && (client.currentScreen == null || (ExplorersCompassConfig.displayWithChatOpen && client.currentScreen instanceof ChatScreen))) {
 			final PlayerEntity player = client.player;
 			final ItemStack stack = ItemUtils.getHeldItem(player, ExplorersCompass.EXPLORERS_COMPASS_ITEM);
