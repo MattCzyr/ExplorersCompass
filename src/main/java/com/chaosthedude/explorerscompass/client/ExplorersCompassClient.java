@@ -35,7 +35,7 @@ public class ExplorersCompassClient {
 	@SubscribeEvent
 	public static void clientInit(FMLClientSetupEvent event) {
 		event.enqueueWork(() -> {
-			ItemProperties.register(ExplorersCompass.explorersCompass, new ResourceLocation("angle"), new ClampedItemPropertyFunction() {
+			ItemProperties.register(ExplorersCompass.explorersCompass, ResourceLocation.fromNamespaceAndPath(ExplorersCompass.MODID, "angle"), new ClampedItemPropertyFunction() {
 				@OnlyIn(Dist.CLIENT)
 				private double rotation;
 				@OnlyIn(Dist.CLIENT)

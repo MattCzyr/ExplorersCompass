@@ -65,7 +65,7 @@ public class ExplorersCompass {
 	}
 
 	private void commonSetup(FMLCommonSetupEvent event) {
-		network = ChannelBuilder.named(new ResourceLocation(ExplorersCompass.MODID, ExplorersCompass.MODID)).networkProtocolVersion(1).optionalClient().clientAcceptedVersions(Channel.VersionTest.exact(1)).simpleChannel();
+		network = ChannelBuilder.named(ResourceLocation.fromNamespaceAndPath(ExplorersCompass.MODID, ExplorersCompass.MODID)).networkProtocolVersion(1).optionalClient().clientAcceptedVersions(Channel.VersionTest.exact(1)).simpleChannel();
 
 		// Server packets
 		network.messageBuilder(CompassSearchPacket.class).encoder(CompassSearchPacket::toBytes).decoder(CompassSearchPacket::new).consumerMainThread(CompassSearchPacket::handle).add();
