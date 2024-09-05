@@ -1,10 +1,10 @@
 modLoader="javafml"
-loaderVersion="[51,)"
+loaderVersion="[52,)"
 license="CC BY-NC-SA 4.0"
 issueTrackerURL="https://github.com/MattCzyr/ExplorersCompass/issues"
 [[mods]]
     modId="explorerscompass"
-    version="1.21-1.3.8-forge"
+    version="1.21.1-1.3.8-forge"
     displayName="Explorer's Compass"
     displayURL="https://github.com/MattCzyr/ExplorersCompass"
     authors="ChaosTheDude"
@@ -15,12 +15,12 @@ issueTrackerURL="https://github.com/MattCzyr/ExplorersCompass/issues"
 [[dependencies.explorerscompass]]
     modId="forge"
     mandatory=true
-    versionRange="[51,)"
+    versionRange="[52,)"
     ordering="NONE"
     side="BOTH"
 [[dependencies.explorerscompass]]
     modId="minecraft"
     mandatory=true
-    versionRange="[1.21,)"
+    versionRange="[1.21.1,)"
     ordering="NONE"
     side="BOTH"
