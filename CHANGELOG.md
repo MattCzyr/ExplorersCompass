@@ -1,3 +1,7 @@
+## Version 3.0.3
+#### NeoForge 1.21.1
+- Fixed uncraftable Explorer's Compass recipe
+
 ## Version 3.0.2
 #### NeoForge 1.21.1, 1.21
 - Updated to NeoForge 1.21.1
