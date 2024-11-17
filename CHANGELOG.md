@@ -1,4 +1,4 @@
-## Version 3.0.3
+## Version 3.0.4
 #### NeoForge 1.21.3
 - Updated to NeoForge 1.21.3
 - Added French translations
