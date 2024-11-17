@@ -54,7 +54,7 @@ public class ExplorersCompass implements ModInitializer {
 	public void onInitialize() {
 		ExplorersCompassConfig.load();
 		
-		Registry.register(Registries.ITEM, Identifier.of(MODID, "explorerscompass"), EXPLORERS_COMPASS_ITEM);
+		Registry.register(Registries.ITEM, ExplorersCompassItem.KEY, EXPLORERS_COMPASS_ITEM);
 		
 		Registry.register(Registries.DATA_COMPONENT_TYPE, Identifier.of(MODID, "structure_id"), STRUCTURE_ID_COMPONENT);
 		Registry.register(Registries.DATA_COMPONENT_TYPE, Identifier.of(MODID, "compass_state"), COMPASS_STATE_COMPONENT);

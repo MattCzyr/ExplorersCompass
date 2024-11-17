@@ -21,7 +21,6 @@ import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.world.ServerWorld;
@@ -40,26 +39,32 @@ public class StructureUtils {
 	
 	public static ListMultimap<Identifier, Identifier> getGroupIDsToStructureIDs(ServerWorld world) {
 		ListMultimap<Identifier, Identifier> groupIDsToStructureIDs = ArrayListMultimap.create();
-		for (Structure structure : getStructureRegistry(world)) {
-			groupIDsToStructureIDs.put(getGroupForStructure(world, structure), getIDForStructure(world, structure));
+		if (getStructureRegistry(world).isPresent()) {
+			for (Structure structure : getStructureRegistry(world).get()) {
+				groupIDsToStructureIDs.put(getGroupForStructure(world, structure), getIDForStructure(world, structure));
+			}
 		}
 		return groupIDsToStructureIDs;
 	}
 	
 	public static Map<Identifier, Identifier> getStructureIDsToGroupIDs(ServerWorld world) {
 		Map<Identifier, Identifier> structureIDsToGroupIDs = new HashMap<Identifier, Identifier>();
-		for (Structure structure : getStructureRegistry(world)) {
-			structureIDsToGroupIDs.put(getIDForStructure(world, structure), getGroupForStructure(world, structure));
+		if (getStructureRegistry(world).isPresent()) {
+			for (Structure structure : getStructureRegistry(world).get()) {
+				structureIDsToGroupIDs.put(getIDForStructure(world, structure), getGroupForStructure(world, structure));
+			}
 		}
 		return structureIDsToGroupIDs;
 	}
 	
 	public static Identifier getGroupForStructure(ServerWorld world, Structure structure) {
-		Registry<StructureSet> registry = getStructureSetRegistry(world);
-		for (StructureSet set : registry) {
-			for (WeightedEntry entry : set.structures()) {
-				if (entry.structure().value().equals(structure)) {
-					return registry.getId(set);
+		if (getStructureRegistry(world).isPresent()) {
+			Registry<StructureSet> registry = getStructureSetRegistry(world).get();
+			for (StructureSet set : registry) {
+				for (WeightedEntry entry : set.structures()) {
+					if (entry.structure().value().equals(structure)) {
+						return registry.getId(set);
+					}
 				}
 			}
 		}
@@ -67,26 +72,36 @@ public class StructureUtils {
 	}
 
 	public static Identifier getIDForStructure(ServerWorld world, Structure structure) {
-		return getStructureRegistry(world).getId(structure);
+		if (getStructureRegistry(world).isPresent()) {
+			return getStructureRegistry(world).get().getId(structure);
+		}
+		return null;
 	}
 
 	public static Structure getStructureForID(ServerWorld world, Identifier id) {
-		return getStructureRegistry(world).get(id);
+		if (getStructureRegistry(world).isPresent()) {
+			return getStructureRegistry(world).get().get(id);
+		}
+		return null;
 	}
 	
 	public static RegistryEntry<Structure> getEntryForStructure(ServerWorld world, Structure structure) {
-		Optional<RegistryKey<Structure>> optional = getStructureRegistry(world).getKey(structure);
-		if (optional.isPresent()) {
-			return getStructureRegistry(world).getEntry(optional.get()).get();
+		if (getStructureRegistry(world).isPresent()) {
+			final Identifier structureID = getIDForStructure(world, structure);
+			if (structureID != null) {
+				return getStructureRegistry(world).get().getEntry(structureID).get();
+			}
 		}
 		return null;
 	}
 
 	public static List<Identifier> getAllowedStructureIDs(ServerWorld world) {
 		final List<Identifier> structureIDs = new ArrayList<Identifier>();
-		for (Structure structure : getStructureRegistry(world)) {
-			if (structure != null && getIDForStructure(world, structure) != null && !getIDForStructure(world, structure).getNamespace().isEmpty() && !getIDForStructure(world, structure).getPath().isEmpty() && !structureIsBlacklisted(world, structure) && !structureIsHidden(world, structure)) {
-				structureIDs.add(getIDForStructure(world, structure));
+		if (getStructureRegistry(world).isPresent()) {
+			for (Structure structure : getStructureRegistry(world).get()) {
+				if (structure != null && getIDForStructure(world, structure) != null && !getIDForStructure(world, structure).getNamespace().isEmpty() && !getIDForStructure(world, structure).getPath().isEmpty() && !structureIsBlacklisted(world, structure) && !structureIsHidden(world, structure)) {
+					structureIDs.add(getIDForStructure(world, structure));
+				}
 			}
 		}
 
@@ -104,10 +119,13 @@ public class StructureUtils {
 	}
 	
 	public static boolean structureIsHidden(ServerWorld world, Structure structure) {
-		final Registry<Structure> structureRegistry = getStructureRegistry(world);
-		if (structureRegistry.getKey(structure).isPresent() && structureRegistry.getEntry(structureRegistry.getKey(structure).get()).isPresent()) {
-			final RegistryEntry<Structure> structureHolder = structureRegistry.getEntry(structureRegistry.getKey(structure).get()).get();
-			return structureHolder.streamTags().anyMatch(tag -> tag.id().getPath().equals("c:hidden_from_locator_selection"));
+		if (getStructureRegistry(world).isPresent()) {
+			final Registry<Structure> structureRegistry = getStructureRegistry(world).get();
+			final Identifier structureID = getIDForStructure(world, structure);
+			if (structureID != null && structureRegistry.getEntry(structureID).isPresent()) {
+				final RegistryEntry<Structure> structureEntry = structureRegistry.getEntry(structureID).get();
+				return structureEntry.streamTags().anyMatch(tag -> tag.id().getPath().equals("c:hidden_from_locator_selection"));
+			}
 		}
 		return false;
 	}
@@ -206,12 +224,12 @@ public class StructureUtils {
 		return name;
 	}
 	
-	private static Registry<Structure> getStructureRegistry(ServerWorld world) {
-		return world.getRegistryManager().get(RegistryKeys.STRUCTURE);
+	private static Optional<Registry<Structure>> getStructureRegistry(ServerWorld world) {
+		return world.getRegistryManager().getOptional(RegistryKeys.STRUCTURE);
 	}
 	
-	private static Registry<StructureSet> getStructureSetRegistry(ServerWorld world) {
-		return world.getRegistryManager().get(RegistryKeys.STRUCTURE_SET);
+	private static Optional<Registry<StructureSet>> getStructureSetRegistry(ServerWorld world) {
+		return world.getRegistryManager().getOptional(RegistryKeys.STRUCTURE_SET);
 	}
 
 	private static String convertToRegex(String glob) {

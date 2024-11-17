@@ -1,3 +1,18 @@
+## Version 3.0.3
+#### NeoForge 1.21.3
+- Updated to NeoForge 1.21.3
+- Added French translations
+
+## Version 2.2.6
+#### Fabric 1.21.3
+- Updated to Fabric 1.21.3
+- Added French translations
+
+## Version 1.3.9
+#### Forge 1.21.3
+- Updated to Forge 1.21.3
+- Added French translations
+
 ## Version 3.0.2
 #### NeoForge 1.21.1, 1.21
 - Updated to NeoForge 1.21.1

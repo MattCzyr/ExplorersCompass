@@ -19,11 +19,13 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.Structure;
@@ -32,15 +34,17 @@ public class ExplorersCompassItem extends Item {
 
 	public static final String NAME = "explorerscompass";
 	
+	public static final RegistryKey<Item> KEY = RegistryKey.of(RegistryKeys.ITEM, Identifier.of(ExplorersCompass.MODID, NAME));
+	
 	private SearchWorkerManager workerManager;
 
 	public ExplorersCompassItem() {
-		super(new Settings().maxCount(1));
+		super(new Settings().registryKey(KEY).maxCount(1));
 		workerManager = new SearchWorkerManager();
 	}
 
 	@Override
-	public TypedActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
+	public ActionResult use(World world, PlayerEntity player, Hand hand) {
 		if (!player.isSneaking()) {
 			if (world.isClient) {
 				final ItemStack stack = ItemUtils.getHeldItem(player, ExplorersCompass.EXPLORERS_COMPASS_ITEM);
@@ -61,7 +65,7 @@ public class ExplorersCompassItem extends Item {
 			setState(player.getStackInHand(hand), null, CompassState.INACTIVE);
 		}
 
-		return TypedActionResult.pass(player.getStackInHand(hand));
+		return ActionResult.CONSUME;
 	}
 
 	public void searchForStructure(World world, PlayerEntity player, Identifier structureID, List<Identifier> structureIDs, BlockPos pos, ItemStack stack) {
