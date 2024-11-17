@@ -14,12 +14,13 @@ import com.chaosthedude.explorerscompass.util.StructureUtils;
 import com.chaosthedude.explorerscompass.worker.SearchWorkerManager;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -31,15 +32,17 @@ public class ExplorersCompassItem extends Item {
 
 	public static final String NAME = "explorerscompass";
 	
+	public static final ResourceKey<Item> KEY = ResourceKey.create(BuiltInRegistries.ITEM.key(), ResourceLocation.fromNamespaceAndPath(ExplorersCompass.MODID, NAME));
+	
 	private SearchWorkerManager workerManager;
 
 	public ExplorersCompassItem() {
-		super(new Properties().stacksTo(1));
+		super(new Properties().setId(KEY).stacksTo(1));
 		workerManager = new SearchWorkerManager();
 	}
 
 	@Override
-	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+	public InteractionResult use(Level level, Player player, InteractionHand hand) {
 		if (!player.isCrouching()) {
 			if (level.isClientSide()) {
 				final ItemStack stack = ItemUtils.getHeldItem(player, ExplorersCompass.explorersCompass);
@@ -55,7 +58,7 @@ public class ExplorersCompassItem extends Item {
 			workerManager.clear();
 			setState(player.getItemInHand(hand), null, CompassState.INACTIVE, player);
 		}
-		return new InteractionResultHolder<ItemStack>(InteractionResult.PASS, player.getItemInHand(hand));
+		return InteractionResult.CONSUME;
 	}
 	
 	@Override
