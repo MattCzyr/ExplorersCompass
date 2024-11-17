@@ -21,7 +21,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
@@ -72,15 +71,11 @@ public class StructureUtils {
 	}
 
 	public static Structure getStructureForKey(ServerLevel level, ResourceLocation key) {
-		return getStructureRegistry(level).get(key);
+		return getStructureRegistry(level).getValue(key);
 	}
 	
 	public static Holder<Structure> getHolderForStructure(ServerLevel level, Structure structure) {
-		Optional<ResourceKey<Structure>> optional = getStructureRegistry(level).getResourceKey(structure);
-		if (optional.isPresent()) {
-			return getStructureRegistry(level).getHolderOrThrow(optional.get());
-		}
-		return null;
+		return getStructureRegistry(level).wrapAsHolder(structure);
 	}
 
 	public static List<ResourceLocation> getAllowedStructureKeys(ServerLevel level) {
@@ -105,11 +100,7 @@ public class StructureUtils {
 	
 	public static boolean structureIsHidden(ServerLevel level, Structure structure) {
 		final Registry<Structure> structureRegistry = getStructureRegistry(level);
-		if (structureRegistry.getKey(structure) != null && structureRegistry.getHolder(structureRegistry.getKey(structure)).isPresent()) {
-			final Holder<Structure> structureHolder = structureRegistry.getHolder(structureRegistry.getKey(structure)).get();
-			return structureHolder.getTagKeys().anyMatch(tag -> tag.location().getPath().equals("c:hidden_from_locator_selection"));
-		}
-		return false;
+		return structureRegistry.wrapAsHolder(structure).getTagKeys().anyMatch(tag -> tag.location().getPath().equals("c:hidden_from_locator_selection"));
 	}
 
 	public static List<ResourceLocation> getGeneratingDimensionKeys(ServerLevel serverLevel, Structure structure) {
@@ -199,11 +190,11 @@ public class StructureUtils {
 	}
 
 	private static Registry<Structure> getStructureRegistry(ServerLevel level) {
-		return level.registryAccess().registryOrThrow(Registries.STRUCTURE);
+		return level.registryAccess().lookupOrThrow(Registries.STRUCTURE);
 	}
 
 	private static Registry<StructureSet> getStructureSetRegistry(ServerLevel level) {
-		return level.registryAccess().registryOrThrow(Registries.STRUCTURE_SET);
+		return level.registryAccess().lookupOrThrow(Registries.STRUCTURE_SET);
 	}
 
 	private static String convertToRegex(String glob) {

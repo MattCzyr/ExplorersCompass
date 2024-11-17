@@ -77,7 +77,7 @@ public class StructureSearchList extends ObjectSelectionList<StructureSearchEntr
 	}
 
 	@Override
-	protected int getRowBottom(int index) {
+	public int getRowBottom(int index) {
 		return getRowTop(index) + itemHeight;
 	}
 
