@@ -1,17 +1,20 @@
 ## Version 3.0.4
 #### NeoForge 1.21.3
+- Updated to NeoForge 1.21.4
 - Updated to NeoForge 1.21.3
 - Added French translations
 - Fixed compass also performing offhand item action after opening GUI
 
 ## Version 2.2.6
 #### Fabric 1.21.3
+- Updated to Fabric 1.21.4
 - Updated to Fabric 1.21.3
 - Added French translations
 - Fixed compass also performing offhand item action after opening GUI
 
 ## Version 1.3.9
 #### Forge 1.21.3
+- Updated to Forge 1.21.4
 - Updated to Forge 1.21.3
 - Added French translations
 - Fixed compass also performing offhand item action after opening GUI
