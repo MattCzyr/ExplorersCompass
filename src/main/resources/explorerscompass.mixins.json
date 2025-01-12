@@ -7,7 +7,8 @@
   ],
   "client": [
     "HeldItemRendererMixin",
-    "InGameHudMixin"
+    "InGameHudMixin",
+    "NumericPropertiesMixin"
   ],
   "injectors": {
     "defaultRequire": 1
