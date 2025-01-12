@@ -4,7 +4,7 @@ license="CC BY-NC-SA 4.0"
 issueTrackerURL="https://github.com/MattCzyr/ExplorersCompass/issues"
 [[mods]]
     modId="explorerscompass"
-    version="1.21.3-3.0.4-neoforge"
+    version="1.21.4-3.0.4-neoforge"
     displayName="Explorer's Compass"
     displayURL="https://github.com/MattCzyr/ExplorersCompass"
     authors="ChaosTheDude"
