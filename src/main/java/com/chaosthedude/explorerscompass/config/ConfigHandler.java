@@ -24,6 +24,7 @@ public class ConfigHandler {
 		public final ForgeConfigSpec.BooleanValue displayCoordinates;
 		public final ForgeConfigSpec.IntValue maxRadius;
 		public final ForgeConfigSpec.ConfigValue<List<String>> structureBlacklist;
+		public final ForgeConfigSpec.ConfigValue<List<String>> structureWhitelist;
 		public final ForgeConfigSpec.IntValue maxSamples;
 
 		General(ForgeConfigSpec.Builder builder) {
@@ -41,6 +42,9 @@ public class ConfigHandler {
 
 			desc = "A list of structures that the compass will not display in the GUI and will not be able to search for. Wildcard character * can be used to match any number of characters, and ? can be used to match one character. Ex: [\"minecraft:stronghold\", \"minecraft:endcity\", \"minecraft:*village*\"]";
 			structureBlacklist = builder.comment(desc).define("structureBlacklist", new ArrayList<String>());
+
+			desc = "A list of the only structures that the compass will display in the GUI and will be able to search for, if empty all structures (except for black listed ones) are enabled. Wildcard character * can be used to match any number of characters, and ? can be used to match one character. Ex: [\"minecraft:stronghold\", \"minecraft:endcity\", \"minecraft:*village*\"]";
+			structureWhitelist = builder.comment(desc).define("structureWhitelist", new ArrayList<String>());
 
 			desc = "The maximum number of samples to be taken when searching for a structure.";
 			maxSamples = builder.comment(desc).defineInRange("maxSamples", 100000, 0, 100000000);
