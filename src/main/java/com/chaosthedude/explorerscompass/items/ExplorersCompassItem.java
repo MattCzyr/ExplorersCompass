@@ -250,4 +250,12 @@ public class ExplorersCompassItem extends Item {
 		return true;
 	}
 
+	@Override
+	public boolean isFoil(ItemStack stack) {
+		if (ConfigHandler.GENERAL.singleUse.get()) {
+			return stack.getOrDefault(ExplorersCompass.LOCKED_COMPONENT, false);
+		}
+
+		return super.isFoil(stack);
+	}
 }
