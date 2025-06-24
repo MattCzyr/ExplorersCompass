@@ -44,14 +44,22 @@ public class ExplorersCompassItem extends Item {
 	@Override
 	public InteractionResult use(Level level, Player player, InteractionHand hand) {
 		if (!player.isCrouching()) {
-			if (level.isClientSide()) {
-				final ItemStack stack = ItemUtils.getHeldItem(player, ExplorersCompass.explorersCompass);
-				GuiWrapper.openGUI(level, player, stack);
-			} else {
-				final ServerLevel serverLevel = (ServerLevel) level;
-				final ServerPlayer serverPlayer = (ServerPlayer) player;
-				final boolean canTeleport = ConfigHandler.GENERAL.allowTeleport.get() && PlayerUtils.canTeleport(player.getServer(), player);
-				ExplorersCompass.network.send(new SyncPacket(canTeleport, StructureUtils.getAllowedStructureKeys(serverLevel), StructureUtils.getGeneratingDimensionsForAllowedStructures(serverLevel), StructureUtils.getStructureKeysToTypeKeys(serverLevel), StructureUtils.getTypeKeysToStructureKeys(serverLevel)), PacketDistributor.PLAYER.with(serverPlayer));
+			final ItemStack stack = ItemUtils.getHeldItem(player, ExplorersCompass.explorersCompass);
+			final boolean singleUse = ConfigHandler.GENERAL.singleUse.get();
+
+			if (!singleUse || !stack.getOrDefault(ExplorersCompass.LOCKED_COMPONENT, false)) {
+				if (level.isClientSide()) {
+					GuiWrapper.openGUI(level, player, stack);
+				} else {
+					final ServerLevel serverLevel = (ServerLevel) level;
+					final ServerPlayer serverPlayer = (ServerPlayer) player;
+					final boolean canTeleport = ConfigHandler.GENERAL.allowTeleport.get() && PlayerUtils.canTeleport(player.getServer(), player);
+					ExplorersCompass.network.send(new SyncPacket(canTeleport, StructureUtils.getAllowedStructureKeys(serverLevel), StructureUtils.getGeneratingDimensionsForAllowedStructures(serverLevel), StructureUtils.getStructureKeysToTypeKeys(serverLevel), StructureUtils.getTypeKeysToStructureKeys(serverLevel)), PacketDistributor.PLAYER.with(serverPlayer));
+				}
+
+				if (singleUse) {
+					stack.set(ExplorersCompass.LOCKED_COMPONENT, true);
+				}
 			}
 		} else {
 			workerManager.stop();

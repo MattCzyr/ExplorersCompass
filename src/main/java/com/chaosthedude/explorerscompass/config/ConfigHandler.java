@@ -25,6 +25,7 @@ public class ConfigHandler {
 		public final ForgeConfigSpec.IntValue maxRadius;
 		public final ForgeConfigSpec.ConfigValue<List<String>> structureBlacklist;
 		public final ForgeConfigSpec.IntValue maxSamples;
+		public final ForgeConfigSpec.BooleanValue singleUse;
 
 		General(ForgeConfigSpec.Builder builder) {
 			String desc;
@@ -44,6 +45,9 @@ public class ConfigHandler {
 
 			desc = "The maximum number of samples to be taken when searching for a structure.";
 			maxSamples = builder.comment(desc).defineInRange("maxSamples", 100000, 0, 100000000);
+
+			desc = "Limit the compass to single use per item";
+			singleUse = builder.comment(desc).define("singleUse", false);
 
 			builder.pop();
 		}
