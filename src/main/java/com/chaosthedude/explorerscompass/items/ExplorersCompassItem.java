@@ -44,9 +44,10 @@ public class ExplorersCompassItem extends Item {
 
 	@Override
 	public InteractionResult use(Level level, Player player, InteractionHand hand) {
+		final boolean singleUse = ConfigHandler.GENERAL.singleUse.get();
+
 		if (!player.isCrouching()) {
 			final ItemStack stack = ItemUtils.getHeldItem(player, ExplorersCompass.explorersCompass);
-			final boolean singleUse = ConfigHandler.GENERAL.singleUse.get();
 
 			if (!singleUse || !stack.getOrDefault(ExplorersCompass.LOCKED_COMPONENT, false)) {
 				if (level.isClientSide()) {
@@ -64,7 +65,7 @@ public class ExplorersCompassItem extends Item {
 			} else {
         		player.displayClientMessage(Component.translatable("string.explorerscompass.locked"), true);
 			}
-		} else {
+		} else if (!singleUse) {
 			workerManager.stop();
 			workerManager.clear();
 			setState(player.getItemInHand(hand), null, CompassState.INACTIVE, player);
