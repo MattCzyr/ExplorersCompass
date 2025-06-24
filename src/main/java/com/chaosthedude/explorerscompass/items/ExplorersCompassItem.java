@@ -15,6 +15,7 @@ import com.chaosthedude.explorerscompass.worker.SearchWorkerManager;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -60,6 +61,8 @@ public class ExplorersCompassItem extends Item {
 				if (singleUse) {
 					stack.set(ExplorersCompass.LOCKED_COMPONENT, true);
 				}
+			} else {
+        		player.displayClientMessage(Component.translatable("string.explorerscompass.locked"), true);
 			}
 		} else {
 			workerManager.stop();

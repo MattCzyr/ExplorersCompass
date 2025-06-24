@@ -75,5 +75,8 @@
     "structure.minecraft.village_plains": "Village Plains",
     "structure.minecraft.village_savanna": "Village Savanna",
     "structure.minecraft.village_snowy": "Village Snowy",
-    "structure.minecraft.village_taiga": "Village Taiga"
+    "structure.minecraft.village_taiga": "Village Taiga",
+
+    "_comment": "STRINGS - MESSAGES",
+    "string.explorerscompass.locked": "Compass is locked, disable single use mode to enable multiple searches per item."
 }
