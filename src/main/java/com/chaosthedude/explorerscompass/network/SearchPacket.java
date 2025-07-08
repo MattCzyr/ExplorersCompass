@@ -51,7 +51,7 @@ public record SearchPacket(Identifier groupID, List<Identifier> structureIDs, Bl
 			final ItemStack stack = ItemUtils.getHeldItem(context.player(), ExplorersCompass.EXPLORERS_COMPASS_ITEM);
 			if (!stack.isEmpty()) {
 				final ExplorersCompassItem explorersCompass = (ExplorersCompassItem) stack.getItem();
-				explorersCompass.searchForStructure(context.player().getEntityWorld(), context.player(), packet.groupID, packet.structureIDs, packet.pos, stack);
+				explorersCompass.searchForStructure(context.player().getWorld(), context.player(), packet.groupID, packet.structureIDs, packet.pos, stack);
 			}
 		});
 	}

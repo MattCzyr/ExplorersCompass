@@ -42,37 +42,37 @@ public class InGameHudMixin {
 			if (stack != null && stack.getItem() instanceof ExplorersCompassItem) {
 				final ExplorersCompassItem compass = (ExplorersCompassItem) stack.getItem();
 				if (compass.getState(stack) == CompassState.SEARCHING) {
-					RenderUtils.drawConfiguredStringOnHUD(context, I18n.translate("string.explorerscompass.status"), client.textRenderer, 5, 5, 0xFFFFFF, 0);
-					RenderUtils.drawConfiguredStringOnHUD(context, I18n.translate("string.explorerscompass.searching"), client.textRenderer, 5, 5, 0xAAAAAA, 1);
+					RenderUtils.drawConfiguredStringOnHUD(context, I18n.translate("string.explorerscompass.status"), client.textRenderer, 5, 5, 0xffffffff, 0);
+					RenderUtils.drawConfiguredStringOnHUD(context, I18n.translate("string.explorerscompass.searching"), client.textRenderer, 5, 5, 0xffaaaaaa, 1);
 
-					RenderUtils.drawConfiguredStringOnHUD(context, I18n.translate("string.explorerscompass.structure"), client.textRenderer, 5, 5, 0xFFFFFF, 3);
-					RenderUtils.drawConfiguredStringOnHUD(context, StructureUtils.getStructureName(compass.getStructureID(stack)), client.textRenderer, 5, 5, 0xAAAAAA, 4);
+					RenderUtils.drawConfiguredStringOnHUD(context, I18n.translate("string.explorerscompass.structure"), client.textRenderer, 5, 5, 0xffffffff, 3);
+					RenderUtils.drawConfiguredStringOnHUD(context, StructureUtils.getStructureName(compass.getStructureID(stack)), client.textRenderer, 5, 5, 0xffaaaaaa, 4);
 					
-					RenderUtils.drawConfiguredStringOnHUD(context, I18n.translate("string.explorerscompass.radius"), client.textRenderer, 5, 5, 0xFFFFFF, 6);
- 					RenderUtils.drawConfiguredStringOnHUD(context, String.valueOf(compass.getSearchRadius(stack)), client.textRenderer, 5, 5, 0xAAAAAA, 7);
+					RenderUtils.drawConfiguredStringOnHUD(context, I18n.translate("string.explorerscompass.radius"), client.textRenderer, 5, 5, 0xffffffff, 6);
+ 					RenderUtils.drawConfiguredStringOnHUD(context, String.valueOf(compass.getSearchRadius(stack)), client.textRenderer, 5, 5, 0xffaaaaaa, 7);
 				} else if (compass.getState(stack) == CompassState.FOUND) {
-					RenderUtils.drawConfiguredStringOnHUD(context, I18n.translate("string.explorerscompass.status"), client.textRenderer, 5, 5, 0xFFFFFF, 0);
-					RenderUtils.drawConfiguredStringOnHUD(context, I18n.translate("string.explorerscompass.found"), client.textRenderer, 5, 5, 0xAAAAAA, 1);
+					RenderUtils.drawConfiguredStringOnHUD(context, I18n.translate("string.explorerscompass.status"), client.textRenderer, 5, 5, 0xffffffff, 0);
+					RenderUtils.drawConfiguredStringOnHUD(context, I18n.translate("string.explorerscompass.found"), client.textRenderer, 5, 5, 0xffaaaaaa, 1);
 
-					RenderUtils.drawConfiguredStringOnHUD(context, I18n.translate("string.explorerscompass.structure"), client.textRenderer, 5, 5, 0xFFFFFF, 3);
-					RenderUtils.drawConfiguredStringOnHUD(context, StructureUtils.getStructureName(compass.getStructureID(stack)), client.textRenderer, 5, 5, 0xAAAAAA, 4);
+					RenderUtils.drawConfiguredStringOnHUD(context, I18n.translate("string.explorerscompass.structure"), client.textRenderer, 5, 5, 0xffffffff, 3);
+					RenderUtils.drawConfiguredStringOnHUD(context, StructureUtils.getStructureName(compass.getStructureID(stack)), client.textRenderer, 5, 5, 0xffaaaaaa, 4);
 
 					if (compass.shouldDisplayCoordinates(stack)) {
-						RenderUtils.drawConfiguredStringOnHUD(context, I18n.translate("string.explorerscompass.coordinates"), client.textRenderer, 5, 5, 0xFFFFFF, 6);
-						RenderUtils.drawConfiguredStringOnHUD(context, compass.getFoundStructureX(stack) + ", " + compass.getFoundStructureZ(stack), client.textRenderer, 5, 5, 0xAAAAAA, 7);
+						RenderUtils.drawConfiguredStringOnHUD(context, I18n.translate("string.explorerscompass.coordinates"), client.textRenderer, 5, 5, 0xffffffff, 6);
+						RenderUtils.drawConfiguredStringOnHUD(context, compass.getFoundStructureX(stack) + ", " + compass.getFoundStructureZ(stack), client.textRenderer, 5, 5, 0xffaaaaaa, 7);
 
-						RenderUtils.drawConfiguredStringOnHUD(context, I18n.translate("string.explorerscompass.distance"), client.textRenderer, 5, 5, 0xFFFFFF, 9);
-						RenderUtils.drawConfiguredStringOnHUD(context, String.valueOf(StructureUtils.getHorizontalDistanceToLocation(player, compass.getFoundStructureX(stack), compass.getFoundStructureZ(stack))), client.textRenderer, 5, 5, 0xAAAAAA, 10);
+						RenderUtils.drawConfiguredStringOnHUD(context, I18n.translate("string.explorerscompass.distance"), client.textRenderer, 5, 5, 0xffffffff, 9);
+						RenderUtils.drawConfiguredStringOnHUD(context, String.valueOf(StructureUtils.getHorizontalDistanceToLocation(player, compass.getFoundStructureX(stack), compass.getFoundStructureZ(stack))), client.textRenderer, 5, 5, 0xffaaaaaa, 10);
 					}
 				} else if (compass.getState(stack) == CompassState.NOT_FOUND) {
-					RenderUtils.drawConfiguredStringOnHUD(context, I18n.translate("string.explorerscompass.status"), client.textRenderer, 5, 5, 0xFFFFFF, 0);
-					RenderUtils.drawConfiguredStringOnHUD(context, I18n.translate("string.explorerscompass.notFound"), client.textRenderer, 5, 5, 0xAAAAAA, 1);
+					RenderUtils.drawConfiguredStringOnHUD(context, I18n.translate("string.explorerscompass.status"), client.textRenderer, 5, 5, 0xffffffff, 0);
+					RenderUtils.drawConfiguredStringOnHUD(context, I18n.translate("string.explorerscompass.notFound"), client.textRenderer, 5, 5, 0xffaaaaaa, 1);
 
-					RenderUtils.drawConfiguredStringOnHUD(context, I18n.translate("string.explorerscompass.structure"), client.textRenderer, 5, 5, 0xFFFFFF, 3);
-					RenderUtils.drawConfiguredStringOnHUD(context, StructureUtils.getStructureName(compass.getStructureID(stack)), client.textRenderer, 5, 5, 0xAAAAAA, 4);
+					RenderUtils.drawConfiguredStringOnHUD(context, I18n.translate("string.explorerscompass.structure"), client.textRenderer, 5, 5, 0xffffffff, 3);
+					RenderUtils.drawConfiguredStringOnHUD(context, StructureUtils.getStructureName(compass.getStructureID(stack)), client.textRenderer, 5, 5, 0xffaaaaaa, 4);
 
-					RenderUtils.drawConfiguredStringOnHUD(context, I18n.translate("string.explorerscompass.radius"), client.textRenderer, 5, 5, 0xFFFFFF, 6);
-					RenderUtils.drawConfiguredStringOnHUD(context, String.valueOf(compass.getSearchRadius(stack)), client.textRenderer, 5, 5, 0xAAAAAA, 7);
+					RenderUtils.drawConfiguredStringOnHUD(context, I18n.translate("string.explorerscompass.radius"), client.textRenderer, 5, 5, 0xffffffff, 6);
+					RenderUtils.drawConfiguredStringOnHUD(context, String.valueOf(compass.getSearchRadius(stack)), client.textRenderer, 5, 5, 0xffaaaaaa, 7);
 				}
 			}
 		}

@@ -88,7 +88,7 @@ public class ExplorersCompassScreen extends Screen {
 	@Override
 	public void render(DrawContext context, int mouseX, int mouseY, float partialTicks) {
 		super.render(context, mouseX, mouseY, partialTicks);
-		context.drawCenteredTextWithShadow(textRenderer, title, 65, 15, 0xffffff);
+		context.drawCenteredTextWithShadow(textRenderer, title, 65, 15, 0xffffffff);
 	}
 
 	@Override

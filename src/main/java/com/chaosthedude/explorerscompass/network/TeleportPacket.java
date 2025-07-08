@@ -1,7 +1,5 @@
 package com.chaosthedude.explorerscompass.network;
 
-import java.util.Collections;
-
 import com.chaosthedude.explorerscompass.ExplorersCompass;
 import com.chaosthedude.explorerscompass.config.ExplorersCompassConfig;
 import com.chaosthedude.explorerscompass.items.ExplorersCompassItem;
@@ -41,7 +39,7 @@ public record TeleportPacket() implements CustomPayload {
 					if (explorersCompass.getState(stack) == CompassState.FOUND) {
 						final int x = explorersCompass.getFoundStructureX(stack);
 						final int z = explorersCompass.getFoundStructureZ(stack);
-						final int y = findValidTeleportHeight(context.player().getEntityWorld(), x, z);
+						final int y = findValidTeleportHeight(context.player().getWorld(), x, z);
 
 						context.player().stopRiding();
 						context.player().networkHandler.requestTeleport(x, y, z, context.player().getYaw(), context.player().getPitch());
