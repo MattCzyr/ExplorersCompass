@@ -179,7 +179,7 @@ public class TransparentTextField extends EditBox {
 			startX = getX() + getWidth();
 		}
 
-		guiGraphics.textHighlight(startX, startY, endX, endY);
+		guiGraphics.fill(startX, startY, endX, endY, 0xff0000ff);
 	}
 
 }
