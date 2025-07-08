@@ -31,8 +31,6 @@ import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureSet;
 import net.minecraft.world.level.levelgen.structure.StructureSet.StructureSelectionEntry;
 import net.minecraft.world.level.levelgen.structure.StructureType;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
 
@@ -136,7 +134,6 @@ public class StructureUtils {
 		return (int) Mth.sqrt((float) startPos.distSqr(new BlockPos(x, startPos.getY(), z)));
 	}
 
-	@OnlyIn(Dist.CLIENT)
 	public static String getPrettyStructureName(ResourceLocation key) {
 		String name = key.toString();
 		if (ConfigHandler.CLIENT.translateStructureNames.get()) {
@@ -152,7 +149,6 @@ public class StructureUtils {
 		return name;
 	}
 
-	@OnlyIn(Dist.CLIENT)
 	public static String getPrettyStructureSource(ResourceLocation key) {
 		if (key == null) {
 			return "";
@@ -169,14 +165,12 @@ public class StructureUtils {
 		return modid;
 	}
 
-	@OnlyIn(Dist.CLIENT)
 	public static String dimensionKeysToString(List<ResourceLocation> dimensions) {
 		Set<String> dimensionNames = new HashSet<String>();
 		dimensions.forEach((key) -> dimensionNames.add(getDimensionName(key)));
 		return String.join(", ", dimensionNames);
 	}
 
-	@OnlyIn(Dist.CLIENT)
 	private static String getDimensionName(ResourceLocation dimensionKey) {
 		String name = I18n.get(Util.makeDescriptionId("dimension", dimensionKey));
 		if (name.equals(Util.makeDescriptionId("dimension", dimensionKey))) {

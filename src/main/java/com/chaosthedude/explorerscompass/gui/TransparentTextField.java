@@ -4,25 +4,21 @@ import net.minecraft.Util;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
-@OnlyIn(Dist.CLIENT)
 public class TransparentTextField extends EditBox {
 
 	private Font font;
 	private Component label;
-	private int labelColor = 0x808080;
+	private int labelColor = 0xff808080;
 
 	private boolean pseudoIsEnabled = true;
 	private boolean pseudoEnableBackgroundDrawing = true;
 	private int pseudoMaxStringLength = 32;
 	private int pseudoLineScrollOffset;
-	private int pseudoEnabledColor = 14737632;
-	private int pseudoDisabledColor = 7368816;
+	private int pseudoEnabledColor = 0xffe0e0e0;
+	private int pseudoDisabledColor = 0xff707070;
 	private int pseudoSelectionEnd;
 	private long pseudoFocusedTime;
 
@@ -56,7 +52,8 @@ public class TransparentTextField extends EditBox {
 
 			if (!s.isEmpty()) {
 				String s1 = flag ? s.substring(0, j) : s;
-				j1 = guiGraphics.drawString(font, s1, (float) l, (float) i1, i, true);
+				guiGraphics.drawString(font, s1, l, i1, i, true);
+				j1 += font.width(s1);
 			}
 
 			boolean flag2 = getCursorPosition() < getValue().length() || getValue().length() >= pseudoMaxStringLength;
@@ -70,14 +67,14 @@ public class TransparentTextField extends EditBox {
 			}
 
 			if (!s.isEmpty() && flag && j < s.length()) {
-				j1 = guiGraphics.drawString(font, s.substring(j), (float) j1, (float) i1, i, true);
+				guiGraphics.drawString(font, s.substring(j), j1, i1, i, true);
 			}
 
 			if (flag1) {
 				if (flag2) {
-					guiGraphics.fill(RenderType.guiOverlay(), k1, i1 - 1, k1 + 1, i1 + 1 + font.lineHeight, -3092272);
+					guiGraphics.fill(k1, i1 - 1, k1 + 1, i1 + 1 + font.lineHeight, -3092272);
 				} else {
-					guiGraphics.drawString(font, "_", (float) k1, (float) i1, i, true);
+					guiGraphics.drawString(font, "_", k1, i1, i, true);
 				}
 			}
 
@@ -182,7 +179,7 @@ public class TransparentTextField extends EditBox {
 			startX = getX() + getWidth();
 		}
 
-		guiGraphics.fill(RenderType.guiTextHighlight(), startX, startY, endX, endY, -16776961);
+		guiGraphics.textHighlight(startX, startY, endX, endY);
 	}
 
 }

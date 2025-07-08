@@ -21,11 +21,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
-@OnlyIn(Dist.CLIENT)
 public class ExplorersCompassScreen extends Screen {
 
 	private Level level;
@@ -82,7 +79,7 @@ public class ExplorersCompassScreen extends Screen {
 	@Override
 	public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
 		super.render(guiGraphics, mouseX, mouseY, partialTicks);
-		guiGraphics.drawCenteredString(font, title, 65, 15, 0xffffff);
+		guiGraphics.drawCenteredString(font, title, 65, 15, 0xffffffff);
 	}
 
 	@Override
@@ -112,17 +109,17 @@ public class ExplorersCompassScreen extends Screen {
 	}
 
 	public void searchForStructure(ResourceLocation key) {
-		PacketDistributor.sendToServer(new SearchPacket(key, List.of(key), player.blockPosition()));
+		ClientPacketDistributor.sendToServer(new SearchPacket(key, List.of(key), player.blockPosition()));
 		minecraft.setScreen(null);
 	}
 	
 	public void searchForGroup(ResourceLocation key) {
-		PacketDistributor.sendToServer(new SearchPacket(key, ExplorersCompass.typeKeysToStructureKeys.get(key), player.blockPosition()));
+		ClientPacketDistributor.sendToServer(new SearchPacket(key, ExplorersCompass.typeKeysToStructureKeys.get(key), player.blockPosition()));
 		minecraft.setScreen(null);
 	}
 
 	public void teleport() {
-		PacketDistributor.sendToServer(new TeleportPacket());
+		ClientPacketDistributor.sendToServer(new TeleportPacket());
 		minecraft.setScreen(null);
 	}
 

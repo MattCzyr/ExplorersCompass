@@ -9,7 +9,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.registries.RegisterEvent;
 
-@EventBusSubscriber(modid = ExplorersCompass.MODID, bus = EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(modid = ExplorersCompass.MODID)
 public class ExplorersCompassRegistry {
 
 	@SubscribeEvent
