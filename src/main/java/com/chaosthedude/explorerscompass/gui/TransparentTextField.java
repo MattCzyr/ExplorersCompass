@@ -53,7 +53,7 @@ public class TransparentTextField extends EditBox {
 			if (!s.isEmpty()) {
 				String s1 = flag ? s.substring(0, j) : s;
 				guiGraphics.drawString(font, s1, l, i1, i, true);
-				j1 += font.width(s1);
+				j1 += font.width(s1) + 1;
 			}
 
 			boolean flag2 = getCursorPosition() < getValue().length() || getValue().length() >= pseudoMaxStringLength;
