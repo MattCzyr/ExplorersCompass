@@ -9,7 +9,7 @@
     "string.explorerscompass.back": "Назад",
     "string.explorerscompass.searchForGroup": "Пошук за групами",
     "string.explorerscompass.selectStructure": "Вибрати структуру",
-    "string.explorerscompass.teleport": "Телепор",
+    "string.explorerscompass.teleport": "Телепортуватися",
 
     "_comment": "STRINGS - GUI",
     "string.explorerscompass.structure": "Структура",
