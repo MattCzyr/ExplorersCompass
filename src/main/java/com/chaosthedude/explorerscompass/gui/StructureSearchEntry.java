@@ -6,13 +6,13 @@ import com.chaosthedude.explorerscompass.util.StructureUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.widget.AlwaysSelectedEntryListWidget;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.Util;
 
 @Environment(EnvType.CLIENT)
 public class StructureSearchEntry extends AlwaysSelectedEntryListWidget.Entry<StructureSearchEntry> {
@@ -21,7 +21,6 @@ public class StructureSearchEntry extends AlwaysSelectedEntryListWidget.Entry<St
 	private final ExplorersCompassScreen parentScreen;
 	private final Identifier structureID;
 	private final StructureSearchList structuresList;
-	private long lastClickTime;
 
 	public StructureSearchEntry(StructureSearchList structuresList, Identifier structureID) {
 		this.structuresList = structuresList;
@@ -29,28 +28,22 @@ public class StructureSearchEntry extends AlwaysSelectedEntryListWidget.Entry<St
 		parentScreen = structuresList.getParentScreen();
 		client = MinecraftClient.getInstance();
 	}
-
+	
 	@Override
-	public void render(DrawContext context, int par1, int par2, int par3, int par4, int par5, int par6, int par7, boolean par8, float par9) {
-		context.drawText(client.textRenderer, Text.literal(StructureUtils.getStructureName(structureID)), par3 + 1, par2 + 1, 0xffffffff, false);
-		context.drawText(client.textRenderer, Text.translatable("string.explorerscompass.source").append(": " + StructureUtils.getStructureSource(structureID)), par3 + 1, par2 + client.textRenderer.fontHeight + 3, 0xff808080, false);
-		context.drawText(client.textRenderer, Text.translatable("string.explorerscompass.group").append(": " + StructureUtils.getStructureName(ExplorersCompass.structureIDsToGroupIDs.get(structureID))), par3 + 1, par2 + client.textRenderer.fontHeight + 14, 0xff808080, false);
-		context.drawText(client.textRenderer, Text.translatable("string.explorerscompass.dimension").append(": " + StructureUtils.structureDimensionsToString(ExplorersCompass.allowedStructureIDsToDimensionIDs.get(structureID))), par3 + 1, par2 + client.textRenderer.fontHeight + 25, 0xff808080, false);
+	public void render(DrawContext context, int mouseX, int mouseY, boolean hovered, float deltaTicks) {
+		context.drawText(client.textRenderer, Text.literal(StructureUtils.getStructureName(structureID)), getX() + 1, getY() + 1, 0xffffffff, false);
+		context.drawText(client.textRenderer, Text.translatable("string.explorerscompass.source").append(": " + StructureUtils.getStructureSource(structureID)), getX() + 1, getY() + client.textRenderer.fontHeight + 3, 0xff808080, false);
+		context.drawText(client.textRenderer, Text.translatable("string.explorerscompass.group").append(": " + StructureUtils.getStructureName(ExplorersCompass.structureIDsToGroupIDs.get(structureID))), getX() + 1, getY() + client.textRenderer.fontHeight + 14, 0xff808080, false);
+		context.drawText(client.textRenderer, Text.translatable("string.explorerscompass.dimension").append(": " + StructureUtils.structureDimensionsToString(ExplorersCompass.allowedStructureIDsToDimensionIDs.get(structureID))), getX() + 1, getY() + client.textRenderer.fontHeight + 25, 0xff808080, false);
 	}
-
+	
 	@Override
-	public boolean mouseClicked(double mouseX, double mouseY, int button) {
-		if (button == 0) {
-			structuresList.selectStructure(this);
-			if (Util.getMeasuringTimeMs() - lastClickTime < 250L) {
-				searchForStructure();
-				return true;
-			} else {
-				lastClickTime = Util.getMeasuringTimeMs();
-				return false;
-			}
+	public boolean mouseClicked(Click click, boolean doubleClick) {
+		structuresList.selectStructure(this);
+		if (doubleClick) {
+			searchForStructure();
 		}
-		return false;
+		return true;
 	}
 
 	public void searchForStructure() {

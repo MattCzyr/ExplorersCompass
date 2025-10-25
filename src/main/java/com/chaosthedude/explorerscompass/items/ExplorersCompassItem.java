@@ -46,7 +46,7 @@ public class ExplorersCompassItem extends Item {
 	@Override
 	public ActionResult use(World world, PlayerEntity player, Hand hand) {
 		if (!player.isSneaking()) {
-			if (world.isClient) {
+			if (world.isClient()) {
 				final ItemStack stack = ItemUtils.getHeldItem(player, ExplorersCompass.EXPLORERS_COMPASS_ITEM);
 				GuiWrapper.openGUI(world, player, stack);
 			} else {

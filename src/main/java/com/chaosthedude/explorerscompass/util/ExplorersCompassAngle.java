@@ -8,8 +8,8 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.render.item.property.numeric.NumericProperty;
 import net.minecraft.client.world.ClientWorld;
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.HeldItemContext;
 
 @Environment(EnvType.CLIENT)
 public class ExplorersCompassAngle implements NumericProperty {
@@ -26,8 +26,8 @@ public class ExplorersCompassAngle implements NumericProperty {
 	}
 
 	@Override
-	public float getValue(ItemStack stack, @Nullable ClientWorld level, @Nullable LivingEntity entity, int seed) {
-		return state.getValue(stack, level, entity, seed);
+	public float getValue(ItemStack stack, @Nullable ClientWorld level, @Nullable HeldItemContext context, int seed) {
+		return state.getValue(stack, level, context, seed);
 	}
 
 	@Override

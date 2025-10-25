@@ -31,7 +31,7 @@ public record TeleportPacket() implements CustomPayload {
 	}
 
 	public static void apply(TeleportPacket packet, ServerPlayNetworking.Context context) {
-		context.player().getServer().execute(() -> {
+		context.server().execute(() -> {
 			final ItemStack stack = ItemUtils.getHeldItem(context.player(), ExplorersCompass.EXPLORERS_COMPASS_ITEM);
 			if (!stack.isEmpty()) {
 				final ExplorersCompassItem explorersCompass = (ExplorersCompassItem) stack.getItem();
@@ -39,7 +39,7 @@ public record TeleportPacket() implements CustomPayload {
 					if (explorersCompass.getState(stack) == CompassState.FOUND) {
 						final int x = explorersCompass.getFoundStructureX(stack);
 						final int z = explorersCompass.getFoundStructureZ(stack);
-						final int y = findValidTeleportHeight(context.player().getWorld(), x, z);
+						final int y = findValidTeleportHeight(context.player().getEntityWorld(), x, z);
 
 						context.player().stopRiding();
 						context.player().networkHandler.requestTeleport(x, y, z, context.player().getYaw(), context.player().getPitch());

@@ -1,7 +1,5 @@
 package com.chaosthedude.explorerscompass.gui;
 
-import java.util.Objects;
-
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
@@ -32,11 +30,6 @@ public class StructureSearchList extends AlwaysSelectedEntryListWidget<Structure
 	}
 
 	@Override
-	protected boolean isSelectedEntry(int slotIndex) {
-		return slotIndex >= 0 && slotIndex < children().size() ? children().get(slotIndex).equals(getSelectedOrNull()) : false;
-	}
-
-	@Override
 	public void renderWidget(DrawContext context, int mouseX, int mouseY, float partialTicks) {
 		renderList(context, mouseX, mouseY, partialTicks);
 	}
@@ -49,19 +42,13 @@ public class StructureSearchList extends AlwaysSelectedEntryListWidget<Structure
 		
 		int i = getEntryCount();
 		for (int j = 0; j < i; ++j) {
-			int k = getRowTop(j);
-			int l = getRowBottom(j);
-			if (l >= getY() && k <= getBottom()) {
-				int j1 = this.itemHeight - 4;
-				StructureSearchEntry e = getEntry(j);
-				int k1 = getRowWidth();
-				if (/*renderSelection*/ true && isSelectedEntry(j)) {
-					final int insideLeft = getX() + width / 2 - getRowWidth() / 2 + 2;
-					context.fill(insideLeft - 4, k - 4, insideLeft + getRowWidth() + 4, k + itemHeight, 255 / 2 << 24);
+			if (getRowBottom(j) >= getY() && getRowTop(j) <= getBottom()) {
+				StructureSearchEntry e = children().get(j);
+				if (e == getSelectedOrNull()) {
+					context.fill(getRowLeft() - 4, getRowTop(j) - 4, getRowLeft() + getRowWidth() + 4, getRowTop(j) + itemHeight, 255 / 2 << 24);
 				}
 
-				int j2 = getRowLeft();
-				e.render(context, j, k, j2, k1, j1, mouseX, mouseY, isMouseOver((double) mouseX, (double) mouseY) && Objects .equals(getEntryAtPosition((double) mouseX, (double) mouseY), e), partialTicks);
+				e.render(context, mouseX, mouseY, e == getHoveredEntry(), partialTicks);
 			}
 		}
 		context.disableScissor();
