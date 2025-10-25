@@ -1,7 +1,5 @@
 package com.chaosthedude.explorerscompass.gui;
 
-import java.util.Objects;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ObjectSelectionList;
@@ -11,10 +9,12 @@ import net.minecraft.util.Mth;
 public class StructureSearchList extends ObjectSelectionList<StructureSearchEntry> {
 
 	private final ExplorersCompassScreen parentScreen;
+	private int itemHeight;
 
 	public StructureSearchList(ExplorersCompassScreen parentScreen, Minecraft mc, int width, int height, int y, int itemHeight) {
 		super(mc, width, height, y, itemHeight);
 		this.parentScreen = parentScreen;
+		this.itemHeight = itemHeight;
 		refreshList();
 	}
 
@@ -29,26 +29,17 @@ public class StructureSearchList extends ObjectSelectionList<StructureSearchEntr
 	}
 
 	@Override
-	protected boolean isSelectedItem(int slotIndex) {
-		return slotIndex >= 0 && slotIndex < children().size() ? children().get(slotIndex).equals(getSelected()) : false;
-	}
-
-	@Override
 	public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
 		guiGraphics.fill(getRowLeft() - 4, getY(), getRowLeft() + getRowWidth() + 4, getY() + getHeight() + 4, 255 / 2 << 24);
 		
 		enableScissor(guiGraphics);
-		for (int j = 0; j < getItemCount(); ++j) {
-			int rowTop = getRowTop(j);
-			int rowBottom = getRowBottom(j);
-			if (rowBottom >= getY() && rowTop <= getBottom()) {
-				int j1 = itemHeight - 4;
-				StructureSearchEntry entry = getEntry(j);
-				if (/*renderSelection*/ true && isSelectedItem(j)) {
-					final int insideLeft = getX() + width / 2 - getRowWidth() / 2 + 2;
-					guiGraphics.fill(insideLeft - 4, rowTop - 4, insideLeft + getRowWidth() + 4, rowTop + itemHeight, 255 / 2 << 24);
+		for (int i = 0; i < getItemCount(); ++i) {
+			if (getRowBottom(i) >= getY() && getRowTop(i) <= getBottom()) {
+				StructureSearchEntry entry = children().get(i);
+				if (entry == getSelected()) {
+					guiGraphics.fill(getRowLeft() - 4, getRowTop(i) - 4, getRowLeft() + getRowWidth() + 4, getRowTop(i) + itemHeight, 255 / 2 << 24);
 				}
-				entry.render(guiGraphics, j, rowTop, getRowLeft(), getRowWidth(), j1, mouseX, mouseY, isMouseOver((double) mouseX, (double) mouseY) && Objects.equals(getEntryAtPosition((double) mouseX, (double) mouseY), entry), partialTicks);
+				entry.renderContent(guiGraphics, mouseX, mouseY, entry == getHovered(), partialTicks);
 			}
 		}
 		guiGraphics.disableScissor();

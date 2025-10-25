@@ -13,6 +13,7 @@ import com.chaosthedude.explorerscompass.items.ExplorersCompassItem;
 import com.chaosthedude.explorerscompass.network.SearchPacket;
 import com.chaosthedude.explorerscompass.network.SyncPacket;
 import com.chaosthedude.explorerscompass.network.TeleportPacket;
+import com.chaosthedude.explorerscompass.worker.WorldWorkerManager;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.mojang.serialization.Codec;
@@ -22,11 +23,15 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
+import net.neoforged.neoforge.event.server.ServerStoppingEvent;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
@@ -60,6 +65,8 @@ public class ExplorersCompass {
 		
 		modContainer.registerConfig(ModConfig.Type.COMMON, ConfigHandler.GENERAL_SPEC);
 		modContainer.registerConfig(ModConfig.Type.CLIENT, ConfigHandler.CLIENT_SPEC);
+		
+		NeoForge.EVENT_BUS.register(this);
 	}
 
 	private void commonSetup(FMLCommonSetupEvent event) {
@@ -81,5 +88,20 @@ public class ExplorersCompass {
 	    registrar.playToServer(TeleportPacket.TYPE, TeleportPacket.CODEC, TeleportPacket::handle);
 	    registrar.playToClient(SyncPacket.TYPE, SyncPacket.CODEC, SyncPacket::handle);
 	}
+	
+	@SubscribeEvent
+	public void preServerTick(ServerTickEvent.Pre event) {
+		WorldWorkerManager.tick(true);
+	}
+
+	@SubscribeEvent
+	public void postServerTick(ServerTickEvent.Post event) {
+		WorldWorkerManager.tick(false);
+	}
+
+	@SubscribeEvent
+	public void serverStopping(ServerStoppingEvent evt) {
+		WorldWorkerManager.clear();
+    }
 
 }

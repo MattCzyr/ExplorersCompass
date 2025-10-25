@@ -16,6 +16,7 @@ import com.chaosthedude.explorerscompass.util.StructureUtils;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
@@ -81,20 +82,10 @@ public class ExplorersCompassScreen extends Screen {
 		super.render(guiGraphics, mouseX, mouseY, partialTicks);
 		guiGraphics.drawCenteredString(font, title, 65, 15, 0xffffffff);
 	}
-
+	
 	@Override
-	public boolean keyPressed(int par1, int par2, int par3) {
-		boolean ret = super.keyPressed(par1, par2, par3);
-		if (searchTextField.isFocused()) {
-			processSearchTerm();
-			return true;
-		}
-		return ret;
-	}
-
-	@Override
-	public boolean charTyped(char typedChar, int keyCode) {
-		boolean ret = super.charTyped(typedChar, keyCode);
+	public boolean keyPressed(KeyEvent event) {
+		boolean ret = super.keyPressed(event);
 		if (searchTextField.isFocused()) {
 			processSearchTerm();
 			return true;

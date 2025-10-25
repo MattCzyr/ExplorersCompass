@@ -1,12 +1,14 @@
 ## Version 3.0.5
-#### NeoForge 1.21.8, 1.21.7, 1.21.6
+#### NeoForge 1.21.10, 1.21.8, 1.21.7, 1.21.6
+- Updated to NeoForge 1.21.10
 - Updated to NeoForge 1.21.8
 - Updated to NeoForge 1.21.7
 - Updated to NeoForge 1.21.6
 - Fixed compass recipe not unlocking when an ingredient is picked up
 
 ## Version 2.2.7
-#### Fabric 1.21.8, 1.21.7, 1.21.6
+#### Fabric 1.21.10, 1.21.8, 1.21.7, 1.21.6
+- Updated to Fabric 1.21.10
 - Updated to Fabric 1.21.8
 - Updated to Fabric 1.21.7
 - Updated to Fabric 1.21.6

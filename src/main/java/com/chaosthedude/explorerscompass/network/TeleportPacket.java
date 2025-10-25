@@ -38,7 +38,7 @@ public static final Type<TeleportPacket> TYPE = new Type<TeleportPacket>(Resourc
 				if (!stack.isEmpty()) {
 					final ExplorersCompassItem explorersCompass = (ExplorersCompassItem) stack.getItem();
 					final ServerPlayer player = (ServerPlayer) context.player();
-					if (ConfigHandler.GENERAL.allowTeleport.get() && PlayerUtils.canTeleport(player.getServer(), player)) {
+					if (ConfigHandler.GENERAL.allowTeleport.get() && PlayerUtils.canTeleport(player.level().getServer(), player)) {
 						if (explorersCompass.getState(stack) == CompassState.FOUND) {
 							final int x = explorersCompass.getFoundStructureX(stack);
 							final int z = explorersCompass.getFoundStructureZ(stack);
