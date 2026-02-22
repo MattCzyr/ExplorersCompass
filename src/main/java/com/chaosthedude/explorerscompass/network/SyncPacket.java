@@ -12,72 +12,79 @@ import com.google.common.collect.ListMultimap;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-public record SyncPacket(boolean canTeleport, List<ResourceLocation> allowedStructureKeys, ListMultimap<ResourceLocation, ResourceLocation> dimensionKeysForAllowedStructureKeys, Map<ResourceLocation, ResourceLocation> structureKeysToTypeKeys, ListMultimap<ResourceLocation, ResourceLocation> typeKeysToStructureKeys) implements CustomPacketPayload {
+public record SyncPacket(boolean canTeleport, boolean infiniteXp, List<Identifier> allowedStructures, Map<Identifier, Integer> xpLevelsForAllowedStructures, ListMultimap<Identifier, Identifier> dimensionsForAllowedStructures, Map<Identifier, Identifier> structureIdsToGroupIds, ListMultimap<Identifier, Identifier> groupIdsToStructureIds) implements CustomPacketPayload {
 
-	public static final Type<SyncPacket> TYPE = new Type<SyncPacket>(ResourceLocation.fromNamespaceAndPath(ExplorersCompass.MODID, "sync"));
-	
+	public static final Type<SyncPacket> TYPE = new Type<SyncPacket>(Identifier.fromNamespaceAndPath(ExplorersCompass.MODID, "sync"));
+
 	public static final StreamCodec<FriendlyByteBuf, SyncPacket> CODEC = StreamCodec.ofMember(SyncPacket::write, SyncPacket::read);
-	
+
 	public static SyncPacket read(FriendlyByteBuf buf) {
 		final boolean canTeleport = buf.readBoolean();
-		final List<ResourceLocation> allowedStructureKeys = new ArrayList<ResourceLocation>();
-		final ListMultimap<ResourceLocation, ResourceLocation> dimensionKeysForAllowedStructureKeys = ArrayListMultimap.create();
-		final Map<ResourceLocation, ResourceLocation> structureKeysToTypeKeys = new HashMap<ResourceLocation, ResourceLocation>();
-		final ListMultimap<ResourceLocation, ResourceLocation> typeKeysToStructureKeys = ArrayListMultimap.create();
-		
+		final boolean infiniteXp = buf.readBoolean();
+		final List<Identifier> allowedStructureIds = new ArrayList<Identifier>();
+		final Map<Identifier, Integer> xpLevelsForAllowedStructures = new HashMap<Identifier, Integer>();
+		final ListMultimap<Identifier, Identifier> dimensionsForAllowedStructures = ArrayListMultimap.create();
+		final Map<Identifier, Identifier> structureIdsToGroupIds = new HashMap<Identifier, Identifier>();
+		final ListMultimap<Identifier, Identifier> groupIdsToStructureIds = ArrayListMultimap.create();
+
 		final int numStructures = buf.readInt();
 		for (int i = 0; i < numStructures; i++) {
-			final ResourceLocation structureKey = buf.readResourceLocation();
+			final Identifier structureId = buf.readIdentifier();
 			final int numDimensions = buf.readInt();
-			final List<ResourceLocation> dimensions = new ArrayList<ResourceLocation>();
+			final List<Identifier> dimensions = new ArrayList<Identifier>();
 			for (int j = 0; j < numDimensions; j++) {
-				dimensions.add(buf.readResourceLocation());
+				dimensions.add(buf.readIdentifier());
 			}
-			final ResourceLocation typeKey = buf.readResourceLocation();
-			if (structureKey != null) {
-				allowedStructureKeys.add(structureKey);
-				dimensionKeysForAllowedStructureKeys.putAll(structureKey, dimensions);
-				structureKeysToTypeKeys.put(structureKey, typeKey);
+			final Identifier typeId = buf.readIdentifier();
+			final int xpLevels = buf.readInt();
+			if (structureId != null) {
+				allowedStructureIds.add(structureId);
+				dimensionsForAllowedStructures.putAll(structureId, dimensions);
+				structureIdsToGroupIds.put(structureId, typeId);
+				xpLevelsForAllowedStructures.put(structureId, xpLevels);
 			}
 		}
-		
+
 		final int numTypes = buf.readInt();
 		for (int i = 0; i < numTypes; i++) {
-			final ResourceLocation typeKey = buf.readResourceLocation();
+			final Identifier typeKey = buf.readIdentifier();
 			final int numStructuresToAdd = buf.readInt();
 			for (int j = 0; j < numStructuresToAdd; j++) {
-				final ResourceLocation structureKey = buf.readResourceLocation();
-				typeKeysToStructureKeys.put(typeKey, structureKey);
+				final Identifier structureKey = buf.readIdentifier();
+				groupIdsToStructureIds.put(typeKey, structureKey);
 			}
 		}
-		
-		return new SyncPacket(canTeleport, allowedStructureKeys, dimensionKeysForAllowedStructureKeys, structureKeysToTypeKeys, typeKeysToStructureKeys);
+
+		return new SyncPacket(canTeleport, infiniteXp, allowedStructureIds, xpLevelsForAllowedStructures, dimensionsForAllowedStructures, structureIdsToGroupIds, groupIdsToStructureIds);
 	}
 
 	public void write(FriendlyByteBuf buf) {
 		buf.writeBoolean(canTeleport);
-		buf.writeInt(allowedStructureKeys.size());
-		for (ResourceLocation structureKey : allowedStructureKeys) {
-			buf.writeResourceLocation(structureKey);
-			List<ResourceLocation> dimensions = dimensionKeysForAllowedStructureKeys.get(structureKey);
+		buf.writeBoolean(infiniteXp);
+		buf.writeInt(allowedStructures.size());
+		for (Identifier structureKey : allowedStructures) {
+			buf.writeIdentifier(structureKey);
+			List<Identifier> dimensions = dimensionsForAllowedStructures.get(structureKey);
 			buf.writeInt(dimensions.size());
-			for (ResourceLocation dimensionKey : dimensions) {
-				buf.writeResourceLocation(dimensionKey);
+			for (Identifier dimensionKey : dimensions) {
+				buf.writeIdentifier(dimensionKey);
 			}
-			ResourceLocation typeKey = structureKeysToTypeKeys.get(structureKey);
-			buf.writeResourceLocation(typeKey);
+			Identifier typeKey = structureIdsToGroupIds.get(structureKey);
+			buf.writeIdentifier(typeKey);
+			int xpLevels = xpLevelsForAllowedStructures.get(structureKey);
+			buf.writeInt(xpLevels);
 		}
-		
-		buf.writeInt(typeKeysToStructureKeys.keySet().size());
-		for (ResourceLocation typeKey : typeKeysToStructureKeys.keySet()) {
-			buf.writeResourceLocation(typeKey);
-			List<ResourceLocation> structureKeys = typeKeysToStructureKeys.get(typeKey);
+
+		buf.writeInt(groupIdsToStructureIds.keySet().size());
+		for (Identifier typeKey : groupIdsToStructureIds.keySet()) {
+			buf.writeIdentifier(typeKey);
+			List<Identifier> structureKeys = groupIdsToStructureIds.get(typeKey);
 			buf.writeInt(structureKeys.size());
-			for (ResourceLocation structureKey : structureKeys) {
-				buf.writeResourceLocation(structureKey);
+			for (Identifier structureKey : structureKeys) {
+				buf.writeIdentifier(structureKey);
 			}
 		}
 	}
@@ -86,14 +93,16 @@ public record SyncPacket(boolean canTeleport, List<ResourceLocation> allowedStru
 		if (context.flow().isClientbound()) {
 			context.enqueueWork(() -> {
 				ExplorersCompass.canTeleport = packet.canTeleport;
-				ExplorersCompass.allowedStructureKeys = packet.allowedStructureKeys;
-				ExplorersCompass.dimensionKeysForAllowedStructureKeys = packet.dimensionKeysForAllowedStructureKeys;
-				ExplorersCompass.structureKeysToTypeKeys = packet.structureKeysToTypeKeys;
-				ExplorersCompass.typeKeysToStructureKeys = packet.typeKeysToStructureKeys;
+				ExplorersCompass.infiniteXp = packet.infiniteXp;
+				ExplorersCompass.allowedStructures = packet.allowedStructures;
+				ExplorersCompass.xpLevelsForAllowedStructures = packet.xpLevelsForAllowedStructures;
+				ExplorersCompass.dimensionsForAllowedStructures = packet.dimensionsForAllowedStructures;
+				ExplorersCompass.structureIdsToGroupIds = packet.structureIdsToGroupIds;
+				ExplorersCompass.groupIdsToStructureIds = packet.groupIdsToStructureIds;
 			});
 		}
 	}
-	
+
 	@Override
 	public Type<SyncPacket> type() {
 		return TYPE;

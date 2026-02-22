@@ -23,6 +23,8 @@ public class ConfigHandler {
 		public final ModConfigSpec.BooleanValue displayCoordinates;
 		public final ModConfigSpec.IntValue maxRadius;
 		public final ModConfigSpec.ConfigValue<List<String>> structureBlacklist;
+		public final ModConfigSpec.IntValue defaultXpLevels;
+		public final ModConfigSpec.ConfigValue<List<String>> xpLevelOverrides;
 		public final ModConfigSpec.IntValue maxSamples;
 
 		General(ModConfigSpec.Builder builder) {
@@ -38,8 +40,14 @@ public class ConfigHandler {
 			desc = "The maximum radius that will be searched for a structure. Raising this value will increase search accuracy but will potentially make the process more resource intensive.";
 			maxRadius = builder.comment(desc).defineInRange("maxRadius", 10000, 0, 1000000);
 
-			desc = "A list of structures that the compass will not display in the GUI and will not be able to search for. Wildcard character * can be used to match any number of characters, and ? can be used to match one character. Ex: [\"minecraft:stronghold\", \"minecraft:endcity\", \"minecraft:*village*\"]";
+			desc = "A list of structures that the compass will not display in the GUI and will not be able to search for. Wildcard character * can be used to match any number of characters, and ? can be used to match one character. Ex: [\"minecraft:buried_treasure\", \"minecraft:end*\", \"minecraft:*village*\"]";
 			structureBlacklist = builder.comment(desc).define("structureBlacklist", new ArrayList<String>());
+
+			desc = "The default number of XP levels consumed when searching for a structure. Individual structures can be configured via xpLevelOverrides.";
+			defaultXpLevels = builder.comment(desc).defineInRange("defaultXpLevels", 0, 0, 3);
+
+			desc = "A list of structure-specific XP level costs that override defaultXpLevels, specified as comma-separated \"structure_id,num_levels\" pairs. Structures not listed here use defaultXpLevels. Max of 3 levels. The wildcard character * can be used to match any number of characters, and ? can be used to match one character. Ex: [\"minecraft:buried_treasure,3\", \"minecraft:end*,2\", \"minecraft:*village*,1\"]";
+			xpLevelOverrides = builder.comment(desc).define("xpLevelOverrides", new ArrayList<String>());
 
 			desc = "The maximum number of samples to be taken when searching for a structure.";
 			maxSamples = builder.comment(desc).defineInRange("maxSamples", 100000, 0, 100000000);

@@ -20,7 +20,7 @@ import com.mojang.serialization.Codec;
 
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -53,10 +53,12 @@ public class ExplorersCompass {
 	public static final DataComponentType<Boolean> DISPLAY_COORDS_COMPONENT = DataComponentType.<Boolean>builder().persistent(Codec.BOOL).networkSynchronized(ByteBufCodecs.BOOL).build();
 
 	public static boolean canTeleport;
-	public static List<ResourceLocation> allowedStructureKeys;
-	public static ListMultimap<ResourceLocation, ResourceLocation> dimensionKeysForAllowedStructureKeys;
-	public static Map<ResourceLocation, ResourceLocation> structureKeysToTypeKeys;
-	public static ListMultimap<ResourceLocation, ResourceLocation> typeKeysToStructureKeys;
+	public static boolean infiniteXp;
+	public static List<Identifier> allowedStructures;
+	public static Map<Identifier, Integer> xpLevelsForAllowedStructures;
+	public static ListMultimap<Identifier, Identifier> dimensionsForAllowedStructures;
+	public static Map<Identifier, Identifier> structureIdsToGroupIds;
+	public static ListMultimap<Identifier, Identifier> groupIdsToStructureIds;
 	
 	public ExplorersCompass(ModContainer modContainer) {
 		modContainer.getEventBus().addListener(this::commonSetup);
@@ -70,10 +72,11 @@ public class ExplorersCompass {
 	}
 
 	private void commonSetup(FMLCommonSetupEvent event) {
-		allowedStructureKeys = new ArrayList<ResourceLocation>();
-		dimensionKeysForAllowedStructureKeys = ArrayListMultimap.create();
-		structureKeysToTypeKeys = new HashMap<ResourceLocation, ResourceLocation>();
-		typeKeysToStructureKeys = ArrayListMultimap.create();
+		allowedStructures = new ArrayList<Identifier>();
+		xpLevelsForAllowedStructures = new HashMap<Identifier, Integer>();
+		dimensionsForAllowedStructures = ArrayListMultimap.create();
+		structureIdsToGroupIds = new HashMap<Identifier, Identifier>();
+		groupIdsToStructureIds = ArrayListMultimap.create();
 	}
 	
 	private void buildCreativeTabContents(BuildCreativeModeTabContentsEvent event) {

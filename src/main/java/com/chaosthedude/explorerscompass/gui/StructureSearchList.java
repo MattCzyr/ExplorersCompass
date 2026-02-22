@@ -1,44 +1,46 @@
 package com.chaosthedude.explorerscompass.gui;
 
+import com.chaosthedude.explorerscompass.util.RenderUtils;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ObjectSelectionList;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.player.Player;
 
 public class StructureSearchList extends ObjectSelectionList<StructureSearchEntry> {
 
 	private final ExplorersCompassScreen parentScreen;
+	private Player player;
 	private int itemHeight;
 
-	public StructureSearchList(ExplorersCompassScreen parentScreen, Minecraft mc, int width, int height, int y, int itemHeight) {
+	public StructureSearchList(ExplorersCompassScreen parentScreen, Minecraft mc, Player player, int width, int height, int y, int itemHeight) {
 		super(mc, width, height, y, itemHeight);
 		this.parentScreen = parentScreen;
+		this.player = player;
 		this.itemHeight = itemHeight;
 		refreshList();
 	}
 
 	@Override
 	protected int scrollBarX() {
-		return getRowLeft() + getRowWidth() - 2;
+		return getRowLeft() + getRowWidth();
 	}
 
 	@Override
 	public int getRowWidth() {
-		return super.getRowWidth() + 50;
+		return 270;
 	}
 
 	@Override
 	public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
-		guiGraphics.fill(getRowLeft() - 4, getY(), getRowLeft() + getRowWidth() + 4, getY() + getHeight() + 4, 255 / 2 << 24);
-		
 		enableScissor(guiGraphics);
 		for (int i = 0; i < getItemCount(); ++i) {
 			if (getRowBottom(i) >= getY() && getRowTop(i) <= getBottom()) {
 				StructureSearchEntry entry = children().get(i);
-				if (entry == getSelected()) {
-					guiGraphics.fill(getRowLeft() - 4, getRowTop(i) - 4, getRowLeft() + getRowWidth() + 4, getRowTop(i) + itemHeight, 255 / 2 << 24);
-				}
+				int fillColor = RenderUtils.getBackgroundColor(entry.isEnabled(), entry == getSelected());
+				guiGraphics.fill(getRowLeft(), getRowTop(i), getRowLeft() + getRowWidth(), getRowTop(i) + itemHeight, fillColor);
 				entry.renderContent(guiGraphics, mouseX, mouseY, entry == getHovered(), partialTicks);
 			}
 		}
@@ -53,12 +55,12 @@ public class StructureSearchList extends ObjectSelectionList<StructureSearchEntr
 			if (top < getY()) {
 				top = getY();
 			}
-			
+
 			guiGraphics.fill(left, getY(), right, getBottom(), (int) (2.35F * 255.0F) / 2 << 24);
 			guiGraphics.fill(left, top, right, top + height, (int) (1.9F * 255.0F) / 2 << 24);
 		}
 	}
-	
+
 	@Override
 	protected void enableScissor(GuiGraphics guiGraphics) {
 		guiGraphics.enableScissor(getX(), getY(), getRight(), getBottom());
@@ -71,16 +73,20 @@ public class StructureSearchList extends ObjectSelectionList<StructureSearchEntr
 
 	public void refreshList() {
 		clearEntries();
-		for (ResourceLocation key : parentScreen.sortStructures()) {
-			addEntry(new StructureSearchEntry(this, key));
+		for (Identifier structureId : parentScreen.sortStructures()) {
+			addEntry(new StructureSearchEntry(this, structureId, player));
 		}
 		selectStructure(null);
 		setScrollAmount(0);
 	}
 
-	public void selectStructure(StructureSearchEntry entry) {
-		setSelected(entry);
-		parentScreen.selectStructure(entry);
+	public boolean selectStructure(StructureSearchEntry entry) {
+		if (entry == null || entry.isEnabled()) {
+			setSelected(entry);
+			parentScreen.selectStructure(entry);
+			return true;
+		}
+		return false;
 	}
 
 	public boolean hasSelection() {

@@ -2,14 +2,14 @@ package com.chaosthedude.explorerscompass.sorting;
 
 import java.util.Comparator;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
-public interface ISorting extends Comparator<ResourceLocation> {
+public interface ISorting extends Comparator<Identifier> {
 
 	@Override
-	public int compare(ResourceLocation key1, ResourceLocation key2);
+	public int compare(Identifier key1, Identifier key2);
 
-	public Object getValue(ResourceLocation key);
+	public Object getValue(Identifier key);
 
 	public ISorting next();
 

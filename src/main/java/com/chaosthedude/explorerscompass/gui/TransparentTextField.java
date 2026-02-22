@@ -1,11 +1,11 @@
 package com.chaosthedude.explorerscompass.gui;
 
-import net.minecraft.Util;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
+import net.minecraft.util.Util;
 
 public class TransparentTextField extends EditBox {
 
@@ -179,7 +179,7 @@ public class TransparentTextField extends EditBox {
 			startX = getX() + getWidth();
 		}
 
-		guiGraphics.textHighlight(startX, startY, endX, endY);
+		guiGraphics.textHighlight(startX, startY, endX, endY, true);
 	}
 
 }

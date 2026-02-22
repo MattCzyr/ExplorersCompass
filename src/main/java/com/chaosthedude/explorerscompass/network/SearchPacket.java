@@ -11,33 +11,33 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-public record SearchPacket(ResourceLocation groupKey, List<ResourceLocation> structureKeys, BlockPos pos) implements CustomPacketPayload {
+public record SearchPacket(Identifier groupId, List<Identifier> structureIds, BlockPos pos) implements CustomPacketPayload {
 	
-	public static final Type<SearchPacket> TYPE = new Type<SearchPacket>(ResourceLocation.fromNamespaceAndPath(ExplorersCompass.MODID, "search"));
+	public static final Type<SearchPacket> TYPE = new Type<SearchPacket>(Identifier.fromNamespaceAndPath(ExplorersCompass.MODID, "search"));
 	
 	public static final StreamCodec<FriendlyByteBuf, SearchPacket> CODEC = StreamCodec.ofMember(SearchPacket::write, SearchPacket::read);
 
 	public static SearchPacket read(FriendlyByteBuf buf) {
-		final ResourceLocation groupKey = buf.readResourceLocation();
-		final List<ResourceLocation> structureKeys = new ArrayList<ResourceLocation>();
+		final Identifier groupId = buf.readIdentifier();
+		final List<Identifier> structureIds = new ArrayList<Identifier>();
 		int numStructures = buf.readInt();
 		for (int i = 0; i < numStructures; i++) {
-			structureKeys.add(buf.readResourceLocation());
+			structureIds.add(buf.readIdentifier());
 		}
 		final BlockPos pos = buf.readBlockPos();
-		return new SearchPacket(groupKey, structureKeys, pos);
+		return new SearchPacket(groupId, structureIds, pos);
 	}
 
 	public void write(FriendlyByteBuf buf) {
-		buf.writeResourceLocation(groupKey);
-		buf.writeInt(structureKeys.size());
-		for (ResourceLocation key : structureKeys) {
-			buf.writeResourceLocation(key);
+		buf.writeIdentifier(groupId);
+		buf.writeInt(structureIds.size());
+		for (Identifier key : structureIds) {
+			buf.writeIdentifier(key);
 		}
 		buf.writeBlockPos(pos);
 	}
@@ -48,7 +48,7 @@ public record SearchPacket(ResourceLocation groupKey, List<ResourceLocation> str
 				final ItemStack stack = ItemUtils.getHeldItem(context.player(), ExplorersCompass.explorersCompass);
 				if (!stack.isEmpty()) {
 					final ExplorersCompassItem explorersCompass = (ExplorersCompassItem) stack.getItem();
-					explorersCompass.searchForStructure((ServerLevel) context.player().level(), context.player(), packet.groupKey, packet.structureKeys, packet.pos, stack);
+					explorersCompass.searchForStructure((ServerLevel) context.player().level(), context.player(), packet.groupId, packet.structureIds, packet.pos, stack);
 				}
 			});
 		}

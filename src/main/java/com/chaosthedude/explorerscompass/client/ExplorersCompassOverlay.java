@@ -33,7 +33,7 @@ public class ExplorersCompassOverlay implements GuiLayer {
 					RenderUtils.drawConfiguredStringOnHUD(guiGraphics, I18n.get("string.explorerscompass.searching"), 5, 5, 0xffaaaaaa, 1);
 
 					RenderUtils.drawConfiguredStringOnHUD(guiGraphics, I18n.get("string.explorerscompass.structure"), 5, 5, 0xffffffff, 3);
-					RenderUtils.drawConfiguredStringOnHUD(guiGraphics, StructureUtils.getPrettyStructureName(compass.getStructureKey(stack)), 5, 5, 0xffaaaaaa, 4);
+					RenderUtils.drawConfiguredStringOnHUD(guiGraphics, StructureUtils.getStructureName(compass.getStructureId(stack)), 5, 5, 0xffaaaaaa, 4);
 					
 					RenderUtils.drawConfiguredStringOnHUD(guiGraphics, I18n.get("string.explorerscompass.radius"), 5, 5, 0xffffffff, 6);
  					RenderUtils.drawConfiguredStringOnHUD(guiGraphics, String.valueOf(compass.getSearchRadius(stack)), 5, 5, 0xffaaaaaa, 7);
@@ -42,7 +42,7 @@ public class ExplorersCompassOverlay implements GuiLayer {
 					RenderUtils.drawConfiguredStringOnHUD(guiGraphics, I18n.get("string.explorerscompass.found"), 5, 5, 0xffaaaaaa, 1);
 
 					RenderUtils.drawConfiguredStringOnHUD(guiGraphics, I18n.get("string.explorerscompass.structure"), 5, 5, 0xffffffff, 3);
-					RenderUtils.drawConfiguredStringOnHUD(guiGraphics, StructureUtils.getPrettyStructureName(compass.getStructureKey(stack)), 5, 5, 0xffaaaaaa, 4);
+					RenderUtils.drawConfiguredStringOnHUD(guiGraphics, StructureUtils.getStructureName(compass.getStructureId(stack)), 5, 5, 0xffaaaaaa, 4);
 
 					if (compass.shouldDisplayCoordinates(stack)) {
 						RenderUtils.drawConfiguredStringOnHUD(guiGraphics, I18n.get("string.explorerscompass.coordinates"), 5, 5, 0xffffffff, 6);
@@ -56,7 +56,7 @@ public class ExplorersCompassOverlay implements GuiLayer {
 					RenderUtils.drawConfiguredStringOnHUD(guiGraphics, I18n.get("string.explorerscompass.notFound"), 5, 5, 0xffaaaaaa, 1);
 
 					RenderUtils.drawConfiguredStringOnHUD(guiGraphics, I18n.get("string.explorerscompass.structure"), 5, 5, 0xffffffff, 3);
-					RenderUtils.drawConfiguredStringOnHUD(guiGraphics, StructureUtils.getPrettyStructureName(compass.getStructureKey(stack)), 5, 5, 0xffaaaaaa, 4);
+					RenderUtils.drawConfiguredStringOnHUD(guiGraphics, StructureUtils.getStructureName(compass.getStructureId(stack)), 5, 5, 0xffaaaaaa, 4);
 
 					RenderUtils.drawConfiguredStringOnHUD(guiGraphics, I18n.get("string.explorerscompass.radius"), 5, 5, 0xffffffff, 6);
 					RenderUtils.drawConfiguredStringOnHUD(guiGraphics, String.valueOf(compass.getSearchRadius(stack)), 5, 5, 0xffaaaaaa, 7);

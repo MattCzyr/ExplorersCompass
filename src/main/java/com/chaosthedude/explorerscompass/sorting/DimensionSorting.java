@@ -4,23 +4,23 @@ import com.chaosthedude.explorerscompass.ExplorersCompass;
 import com.chaosthedude.explorerscompass.util.StructureUtils;
 
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public class DimensionSorting implements ISorting {
 	
 	@Override
-	public int compare(ResourceLocation key1, ResourceLocation key2) {
-		return StructureUtils.dimensionKeysToString(ExplorersCompass.dimensionKeysForAllowedStructureKeys.get(key1)).compareTo(StructureUtils.dimensionKeysToString(ExplorersCompass.dimensionKeysForAllowedStructureKeys.get(key2)));
+	public int compare(Identifier key1, Identifier key2) {
+		return StructureUtils.dimensionIdsToString(ExplorersCompass.dimensionsForAllowedStructures.get(key1)).compareTo(StructureUtils.dimensionIdsToString(ExplorersCompass.dimensionsForAllowedStructures.get(key2)));
 	}
 
 	@Override
-	public Object getValue(ResourceLocation key) {
-		return StructureUtils.dimensionKeysToString(ExplorersCompass.dimensionKeysForAllowedStructureKeys.get(key));
+	public Object getValue(Identifier key) {
+		return StructureUtils.dimensionIdsToString(ExplorersCompass.dimensionsForAllowedStructures.get(key));
 	}
 
 	@Override
 	public ISorting next() {
-		return new GroupSorting();
+		return new XpLevelsSorting();
 	}
 
 	@Override
