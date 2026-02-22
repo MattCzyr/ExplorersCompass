@@ -13,13 +13,11 @@ public class StructureSearchList extends ObjectSelectionList<StructureSearchEntr
 
 	private final ExplorersCompassScreen parentScreen;
 	private Player player;
-	private int itemHeight;
 
 	public StructureSearchList(ExplorersCompassScreen parentScreen, Minecraft mc, Player player, int width, int height, int y, int itemHeight) {
 		super(mc, width, height, y, itemHeight);
 		this.parentScreen = parentScreen;
 		this.player = player;
-		this.itemHeight = itemHeight;
 		refreshList();
 	}
 
@@ -34,19 +32,33 @@ public class StructureSearchList extends ObjectSelectionList<StructureSearchEntr
 	}
 
 	@Override
-	public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
-		enableScissor(guiGraphics);
+    public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+        enableScissor(guiGraphics);
+        renderListBackground(guiGraphics);
+        renderListItems(guiGraphics, mouseX, mouseY, partialTicks);
+        guiGraphics.disableScissor();
+        renderScrollbar(guiGraphics, mouseX, mouseY);
+    }
+	
+	@Override
+	protected void renderListBackground(GuiGraphics guiGraphics) {
 		for (int i = 0; i < getItemCount(); ++i) {
 			if (getRowBottom(i) >= getY() && getRowTop(i) <= getBottom()) {
 				StructureSearchEntry entry = children().get(i);
 				int fillColor = RenderUtils.getBackgroundColor(entry.isEnabled(), entry == getSelected());
-				guiGraphics.fill(getRowLeft(), getRowTop(i), getRowLeft() + getRowWidth(), getRowTop(i) + itemHeight, fillColor);
-				entry.renderContent(guiGraphics, mouseX, mouseY, entry == getHovered(), partialTicks);
+				guiGraphics.fill(getRowLeft(), getRowTop(i), getRowLeft() + getRowWidth(), getRowTop(i) + defaultEntryHeight, fillColor);
 			}
 		}
-		guiGraphics.disableScissor();
-
-		if (maxScrollAmount() > 0) {
+	}
+	
+	@Override
+	protected void renderSelection(GuiGraphics guiGraphics, StructureSearchEntry entry, int backgroundColor) {
+		// Selection is rendered in renderListBackground()
+	}
+	
+	@Override
+	protected void renderScrollbar(GuiGraphics guiGraphics, int mouseX, int mouseY) {
+		if (scrollbarVisible()) {
 			int left = scrollBarX();
 			int right = left + 6;
 			int height = (int) ((float) ((getBottom() - getY()) * (getBottom() - getY())) / (float) contentHeight());
@@ -55,20 +67,12 @@ public class StructureSearchList extends ObjectSelectionList<StructureSearchEntr
 			if (top < getY()) {
 				top = getY();
 			}
-
-			guiGraphics.fill(left, getY(), right, getBottom(), (int) (2.35F * 255.0F) / 2 << 24);
-			guiGraphics.fill(left, top, right, top + height, (int) (1.9F * 255.0F) / 2 << 24);
+			
+			int backgroundFillColor = RenderUtils.getBackgroundColor(false, false);
+			int scrollbarFillColor = RenderUtils.getBackgroundColor(true, true);
+			guiGraphics.fill(left, getY(), right, getBottom(), backgroundFillColor);
+			guiGraphics.fill(left, top, right, top + height, scrollbarFillColor);
 		}
-	}
-
-	@Override
-	protected void enableScissor(GuiGraphics guiGraphics) {
-		guiGraphics.enableScissor(getX(), getY(), getRight(), getBottom());
-	}
-
-	@Override
-	public int getRowBottom(int index) {
-		return getRowTop(index) + itemHeight;
 	}
 
 	public void refreshList() {
