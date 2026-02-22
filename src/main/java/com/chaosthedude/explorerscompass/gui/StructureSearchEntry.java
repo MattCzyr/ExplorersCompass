@@ -55,17 +55,12 @@ public class StructureSearchEntry extends ObjectSelectionList.Entry<StructureSea
 
 	@Override
 	public void renderContent(GuiGraphics guiGraphics, int mouseX, int mouseY, boolean isHovering, float partialTick) {
-		int maxTextWidth = getWidth() - 10;
-
 		if (xpLevels > 0) {
 			int spriteSize = (int) (getHeight() * 0.4F);
 			int spriteBorder = (getHeight() - spriteSize) / 2;
 			int spriteIndex = xpLevels - 1;
 			Identifier spriteId = isEnabled() ? ENABLED_LEVEL_SPRITES[spriteIndex] : DISABLED_LEVEL_SPRITES[spriteIndex];
 			guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, spriteId, getX() + getWidth() - spriteSize - spriteBorder, getY() + spriteBorder, spriteSize, spriteSize);
-
-			// XP sprite is rendered, need extra room for it
-			maxTextWidth = getWidth() - getHeight() - 5;
 		}
 
 		int nameColor = isEnabled() ? 0xffffffff : 0xff808080;
