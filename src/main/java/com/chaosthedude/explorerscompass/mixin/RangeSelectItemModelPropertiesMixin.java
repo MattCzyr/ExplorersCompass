@@ -1,4 +1,4 @@
-package com.chaosthedude.explorerscompass.mixins;
+package com.chaosthedude.explorerscompass.mixin;
 
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;

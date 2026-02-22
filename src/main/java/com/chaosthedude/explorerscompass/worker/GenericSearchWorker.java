@@ -1,9 +1,9 @@
-package com.chaosthedude.explorerscompass.workers;
+package com.chaosthedude.explorerscompass.worker;
 
 import java.util.List;
 
 import com.chaosthedude.explorerscompass.ExplorersCompass;
-import com.chaosthedude.explorerscompass.items.ExplorersCompassItem;
+import com.chaosthedude.explorerscompass.item.ExplorersCompassItem;
 import com.mojang.datafixers.util.Pair;
 
 import net.minecraft.core.BlockPos;

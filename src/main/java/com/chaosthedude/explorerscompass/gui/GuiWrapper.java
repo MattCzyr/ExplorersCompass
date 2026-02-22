@@ -1,7 +1,7 @@
 package com.chaosthedude.explorerscompass.gui;
 
 import com.chaosthedude.explorerscompass.ExplorersCompass;
-import com.chaosthedude.explorerscompass.items.ExplorersCompassItem;
+import com.chaosthedude.explorerscompass.item.ExplorersCompassItem;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Player;

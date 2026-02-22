@@ -1,4 +1,4 @@
-package com.chaosthedude.explorerscompass.items;
+package com.chaosthedude.explorerscompass.item;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +12,7 @@ import com.chaosthedude.explorerscompass.util.CompassState;
 import com.chaosthedude.explorerscompass.util.ItemUtils;
 import com.chaosthedude.explorerscompass.util.PlayerUtils;
 import com.chaosthedude.explorerscompass.util.StructureUtils;
-import com.chaosthedude.explorerscompass.workers.SearchWorkerManager;
+import com.chaosthedude.explorerscompass.worker.SearchWorkerManager;
 import com.google.common.collect.ListMultimap;
 
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;

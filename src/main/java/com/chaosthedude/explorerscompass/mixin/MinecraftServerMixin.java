@@ -1,4 +1,4 @@
-package com.chaosthedude.explorerscompass.mixins;
+package com.chaosthedude.explorerscompass.mixin;
 
 import java.util.function.BooleanSupplier;
 
@@ -7,7 +7,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import com.chaosthedude.explorerscompass.workers.WorldWorkerManager;
+import com.chaosthedude.explorerscompass.worker.WorldWorkerManager;
 
 import net.minecraft.server.MinecraftServer;
 

@@ -1,6 +1,6 @@
 {
   "required": true,
-  "package": "com.chaosthedude.explorerscompass.mixins",
+  "package": "com.chaosthedude.explorerscompass.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
     "MinecraftServerMixin"

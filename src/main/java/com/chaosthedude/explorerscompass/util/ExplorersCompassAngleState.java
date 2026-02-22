@@ -3,7 +3,7 @@ package com.chaosthedude.explorerscompass.util;
 import org.jetbrains.annotations.Nullable;
 
 import com.chaosthedude.explorerscompass.ExplorersCompass;
-import com.chaosthedude.explorerscompass.items.ExplorersCompassItem;
+import com.chaosthedude.explorerscompass.item.ExplorersCompassItem;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
