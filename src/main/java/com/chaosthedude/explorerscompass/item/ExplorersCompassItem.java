@@ -1,4 +1,4 @@
-package com.chaosthedude.explorerscompass.items;
+package com.chaosthedude.explorerscompass.item;
 
 import java.util.ArrayList;
 import java.util.List;

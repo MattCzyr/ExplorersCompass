@@ -3,7 +3,7 @@ package com.chaosthedude.explorerscompass.client;
 import javax.annotation.Nullable;
 
 import com.chaosthedude.explorerscompass.ExplorersCompass;
-import com.chaosthedude.explorerscompass.items.ExplorersCompassItem;
+import com.chaosthedude.explorerscompass.item.ExplorersCompassItem;
 import com.chaosthedude.explorerscompass.util.CompassState;
 
 import net.minecraft.client.multiplayer.ClientLevel;

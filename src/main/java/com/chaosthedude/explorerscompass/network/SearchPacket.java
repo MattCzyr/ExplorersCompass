@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.chaosthedude.explorerscompass.ExplorersCompass;
-import com.chaosthedude.explorerscompass.items.ExplorersCompassItem;
+import com.chaosthedude.explorerscompass.item.ExplorersCompassItem;
 import com.chaosthedude.explorerscompass.util.ItemUtils;
 
 import net.minecraft.core.BlockPos;
