@@ -6,7 +6,9 @@ import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.chaosthedude.explorerscompass.ExplorersCompass;
 import com.chaosthedude.explorerscompass.util.OverlaySide;
@@ -24,6 +26,8 @@ public class ExplorersCompassConfig {
 	public static boolean displayCoordinates = true;
 	public static int maxRadius = 10000;
 	public static int maxSamples = 100000;
+	public static int defaultXpLevel = 0;
+	public static Map<String, Integer> xpLevelOverrides = new HashMap<String, Integer>();
 	public static List<String> structureBlacklist = new ArrayList<String>();
 	
 	public static boolean displayWithChatOpen = true;
@@ -43,6 +47,8 @@ public class ExplorersCompassConfig {
 				displayCoordinates = data.common.displayCoordinates;
 				maxRadius = data.common.maxRadius;
 				maxSamples = data.common.maxSamples;
+				defaultXpLevel = data.common.defaultXpLevel;
+				xpLevelOverrides = data.common.xpLevelOverrides;
 				structureBlacklist = data.common.structureBlacklist;
 				
 				displayWithChatOpen = data.client.displayWithChatOpen;
@@ -61,7 +67,7 @@ public class ExplorersCompassConfig {
 	public static void save() {
 		try {
 			Writer writer = Files.newBufferedWriter(getFilePath());
-			Data data = new Data(new Data.Common(allowTeleport, displayCoordinates, maxRadius, maxSamples, structureBlacklist), new Data.Client(displayWithChatOpen, translateStructureNames, overlayLineOffset, overlaySide));
+			Data data = new Data(new Data.Common(allowTeleport, displayCoordinates, maxRadius, maxSamples, defaultXpLevel, xpLevelOverrides, structureBlacklist), new Data.Client(displayWithChatOpen, translateStructureNames, overlayLineOffset, overlaySide));
 			gson.toJson(data, writer);
 			writer.close();
 		} catch (IOException e) {
@@ -99,6 +105,12 @@ public class ExplorersCompassConfig {
 			private final String maxSamplesComment = "The maximum number of samples to be taken when searching for a structure.";
 			private final int maxSamples;
 			
+			private final String defaultXpLevelComment = "The default number of XP levels consumed when searching for a structure. Individual structures can be configured via xpLevelOverrides. Max of 3 levels.";
+			private final int defaultXpLevel;
+			
+			private final String xpLevelOverridesComment = "A map of structure-specific XP level costs that override defaultXpLevels. Structures not listed here use defaultXpLevels. Max of 3 levels. The wildcard character * can be used to match any number of characters, and ? can be used to match one character. Ex: {\"minecraft:buried_treasure\":3, \"minecraft:end*\":2, \"minecraft:*village*\":1}";
+			private final Map<String, Integer> xpLevelOverrides;
+			
 			private final String structureBlacklistComment = "A list of structures that the compass will not display in the GUI and will not be able to search for. The wildcard character * can be used to match any number of characters, and ? can be used to match one character. Ex (ignore backslashes): [\"minecraft:stronghold\", \"minecraft:endcity\", \"minecraft:*village*\"]";
 			private final List<String> structureBlacklist;
 			
@@ -107,14 +119,18 @@ public class ExplorersCompassConfig {
 				displayCoordinates = true;
 				maxRadius = 10000;
 				maxSamples = 100000;
+				defaultXpLevel = 0;
+				xpLevelOverrides = new HashMap<String, Integer>();
 				structureBlacklist = new ArrayList<String>();
 			}
 			
-			private Common(boolean allowTeleport, boolean displayCoordinates, int maxRadius, int maxSamples, List<String> structureBlacklist) {
+			private Common(boolean allowTeleport, boolean displayCoordinates, int maxRadius, int maxSamples, int defaultXpLevel, Map<String, Integer> xpLevelOverrides, List<String> structureBlacklist) {
 				this.allowTeleport = allowTeleport;
 				this.displayCoordinates = displayCoordinates;
 				this.maxRadius = maxRadius;
 				this.maxSamples = maxSamples;
+				this.defaultXpLevel = defaultXpLevel;
+				this.xpLevelOverrides = xpLevelOverrides;
 				this.structureBlacklist = structureBlacklist;
 			}
 		}

@@ -6,9 +6,9 @@
     "MinecraftServerMixin"
   ],
   "client": [
-    "HeldItemRendererMixin",
-    "InGameHudMixin",
-    "NumericPropertiesMixin"
+    "GuiMixin",
+    "ItemInHandRendererMixin",
+    "RangeSelectItemModelPropertiesMixin"
   ],
   "injectors": {
     "defaultRequire": 1

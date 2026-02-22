@@ -2,49 +2,49 @@ package com.chaosthedude.explorerscompass.gui;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.text.Text;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
 import net.minecraft.util.Util;
-import net.minecraft.util.math.MathHelper;
 
 @Environment(EnvType.CLIENT)
-public class TransparentTextField extends TextFieldWidget {
+public class TransparentTextField extends EditBox {
 
-	private TextRenderer textRenderer;
-	private Text label;
+	private Font font;
+	private Component label;
 	private int labelColor = 0xff808080;
 
-	private boolean pseudoEditable = true;
+	private boolean pseudoIsEnabled = true;
 	private boolean pseudoEnableBackgroundDrawing = true;
-	private int pseudoMaxLength = 32;
+	private int pseudoMaxStringLength = 32;
 	private int pseudoLineScrollOffset;
-	private int pseudoEditableColor = 0xffe0e0e0;
-	private int pseudoUneditableColor = 0xff707070;
+	private int pseudoEnabledColor = 0xffe0e0e0;
+	private int pseudoDisabledColor = 0xff707070;
 	private int pseudoSelectionEnd;
 	private long pseudoFocusedTime;
 
-	public TransparentTextField(TextRenderer textRenderer, int x, int y, int width, int height, Text label) {
-		super(textRenderer, x, y, width, height, label);
-		this.textRenderer = textRenderer;
+	public TransparentTextField(Font font, int x, int y, int width, int height, Component label) {
+		super(font, x, y, width, height, label);
+		this.font = font;
 		this.label = label;
 	}
 
 	@Override
-	public void renderWidget(DrawContext context, int mouseX, int mouseY, float partialTicks) {
+	public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
 		if (isVisible()) {
 			if (pseudoEnableBackgroundDrawing) {
-				context.fill(getX(), getY(), getX() + getWidth(), getY() + getHeight(), 255 / 2 << 24);
+				guiGraphics.fill(getX(), getY(), getX() + width, getY() + height, 255 / 2 << 24);
 			}
-			boolean showLabel = !isFocused() && getText().isEmpty();
-            int i = showLabel ? labelColor : (pseudoEditable ? pseudoEditableColor : pseudoUneditableColor);
-			int j = getCursor() - pseudoLineScrollOffset;
+			boolean showLabel = !isFocused() && getValue().isEmpty();
+            int i = showLabel ? labelColor : (pseudoIsEnabled ? pseudoEnabledColor : pseudoDisabledColor);
+			int j = getCursorPosition() - pseudoLineScrollOffset;
 			int k = pseudoSelectionEnd - pseudoLineScrollOffset;
-			String text = showLabel ? label.getString() : getText();
-			String s = textRenderer.trimToWidth(text.substring(pseudoLineScrollOffset), getWidth());
+			String text = showLabel ? label.getString() : getValue();
+			String s = font.plainSubstrByWidth(text.substring(pseudoLineScrollOffset), getWidth());
 			boolean flag = j >= 0 && j <= s.length();
-			boolean flag1 = isFocused() && (Util.getMeasuringTimeMs() - pseudoFocusedTime) / 300L % 2L == 0L && flag;
+			boolean flag1 = isFocused() && (Util.getMillis() - pseudoFocusedTime) / 300L % 2L == 0L && flag;
 			int l = pseudoEnableBackgroundDrawing ? getX() + 4 : getX();
 			int i1 = pseudoEnableBackgroundDrawing ? getY() + (getHeight() - 8) / 2 : getY();
 			int j1 = l;
@@ -55,11 +55,11 @@ public class TransparentTextField extends TextFieldWidget {
 
 			if (!s.isEmpty()) {
 				String s1 = flag ? s.substring(0, j) : s;
-				context.drawTextWithShadow(textRenderer, s1, l, i1, i);
-				j1 += textRenderer.getWidth(s1) + 1;
+				guiGraphics.drawString(font, s1, l, i1, i, true);
+				j1 += font.width(s1) + 1;
 			}
 
-			boolean flag2 = getCursor() < getText().length() || getText().length() >= pseudoMaxLength;
+			boolean flag2 = getCursorPosition() < getValue().length() || getValue().length() >= pseudoMaxStringLength;
 			int k1 = j1;
 
 			if (!flag) {
@@ -70,77 +70,77 @@ public class TransparentTextField extends TextFieldWidget {
 			}
 
 			if (!s.isEmpty() && flag && j < s.length()) {
-				context.drawTextWithShadow(textRenderer, s.substring(j), j1, i1, i);
+				guiGraphics.drawString(font, s.substring(j), j1, i1, i, true);
 			}
 
 			if (flag1) {
 				if (flag2) {
-					context.fill(k1, i1 - 1, k1 + 1, i1 + 1 + textRenderer.fontHeight, -3092272);
+					guiGraphics.fill(k1, i1 - 1, k1 + 1, i1 + 1 + font.lineHeight, -3092272);
 				} else {
-					context.drawTextWithShadow(textRenderer, "_", k1, i1, i);
+					guiGraphics.drawString(font, "_", k1, i1, i, true);
 				}
 			}
 
 			if (k != j) {
-				int l1 = l + textRenderer.getWidth(s.substring(0, k));
-				drawSelectionBox(context, k1, i1 - 1, l1 - 1, i1 + 1 + textRenderer.fontHeight);
+				int l1 = l + font.width(s.substring(0, k));
+				drawSelectionBox(guiGraphics, k1, i1 - 1, l1 - 1, i1 + 1 + font.lineHeight);
 			}
 		}
 	}
 	
 	@Override
-	public void setEditable(boolean editable) {
-		super.setEditable(editable);
-		pseudoEditable = editable;
+	public void setEditable(boolean enabled) {
+		super.setEditable(enabled);
+		pseudoIsEnabled = enabled;
 	}
 
 	@Override
-	public void setEditableColor(int color) {
-		super.setEditableColor(color);
-		pseudoEditableColor = color;
+	public void setTextColor(int color) {
+		super.setTextColor(color);
+		pseudoEnabledColor = color;
 	}
 
 	@Override
-	public void setUneditableColor(int color) {
-		super.setUneditableColor(color);
-		pseudoUneditableColor = color;
+	public void setTextColorUneditable(int color) {
+		super.setTextColorUneditable(color);
+		pseudoDisabledColor = color;
 	}
 
 	@Override
 	public void setFocused(boolean isFocused) {
 		if (isFocused && !isFocused()) {
-			pseudoFocusedTime = Util.getMeasuringTimeMs();
+			pseudoFocusedTime = Util.getMillis();
 		}
 		super.setFocused(isFocused);
 	}
 	
 	@Override
-	public void setDrawsBackground(boolean drawsBackground) {
-		super.setDrawsBackground(drawsBackground);
-		pseudoEnableBackgroundDrawing = drawsBackground;
+	public void setBordered(boolean enableBackgroundDrawing) {
+		super.setBordered(enableBackgroundDrawing);
+		pseudoEnableBackgroundDrawing = enableBackgroundDrawing;
 	}
 	
 	@Override
 	public void setMaxLength(int length) {
 		super.setMaxLength(length);
-		pseudoMaxLength = length;
+		pseudoMaxStringLength = length;
 	}
 	
 	@Override
-	public void setSelectionEnd(int position) {
-		super.setSelectionEnd(position);
-		int i = getText().length();
-	      pseudoSelectionEnd = MathHelper.clamp(position, 0, i);
-	      if (textRenderer != null) {
+	public void setHighlightPos(int position) {
+		super.setHighlightPos(position);
+		int i = getValue().length();
+	      pseudoSelectionEnd = Mth.clamp(position, 0, i);
+	      if (font != null) {
 	         if (pseudoLineScrollOffset > i) {
 	            pseudoLineScrollOffset = i;
 	         }
 
 	         int j = getInnerWidth();
-	         String s = textRenderer.trimToWidth(getText().substring(pseudoLineScrollOffset), j, false);
+	         String s = font.plainSubstrByWidth(getValue().substring(this.pseudoLineScrollOffset), j, false);
 	         int k = s.length() + pseudoLineScrollOffset;
 	         if (pseudoSelectionEnd == pseudoLineScrollOffset) {
-	            pseudoLineScrollOffset -= textRenderer.trimToWidth(getText(), j, true).length();
+	            pseudoLineScrollOffset -= font.plainSubstrByWidth(getValue(), j, true).length();
 	         }
 
 	         if (pseudoSelectionEnd > k) {
@@ -149,11 +149,11 @@ public class TransparentTextField extends TextFieldWidget {
 	        	 pseudoLineScrollOffset -= pseudoLineScrollOffset - pseudoSelectionEnd;
 	         }
 
-	         pseudoLineScrollOffset = MathHelper.clamp(pseudoLineScrollOffset, 0, i);
+	         pseudoLineScrollOffset = Mth.clamp(pseudoLineScrollOffset, 0, i);
 	      }
 	}
 
-	public void setLabel(Text label) {
+	public void setLabel(Component label) {
 		this.label = label;
 	}
 
@@ -161,7 +161,7 @@ public class TransparentTextField extends TextFieldWidget {
 		this.labelColor = labelColor;
 	}
 
-	private void drawSelectionBox(DrawContext context, int startX, int startY, int endX, int endY) {
+	private void drawSelectionBox(GuiGraphics guiGraphics, int startX, int startY, int endX, int endY) {
 		if (startX < endX) {
 			int i = startX;
 			startX = endX;
@@ -182,7 +182,7 @@ public class TransparentTextField extends TextFieldWidget {
 			startX = getX() + getWidth();
 		}
 
-		context.drawSelection(startX, startY, endX, endY);
+		guiGraphics.textHighlight(startX, startY, endX, endY, true);
 	}
 
 }

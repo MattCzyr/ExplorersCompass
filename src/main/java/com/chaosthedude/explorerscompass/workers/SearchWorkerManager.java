@@ -10,14 +10,14 @@ import com.chaosthedude.explorerscompass.util.StructureUtils;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.gen.chunk.placement.ConcentricRingsStructurePlacement;
-import net.minecraft.world.gen.chunk.placement.RandomSpreadStructurePlacement;
-import net.minecraft.world.gen.chunk.placement.StructurePlacement;
-import net.minecraft.world.gen.structure.Structure;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.levelgen.structure.Structure;
+import net.minecraft.world.level.levelgen.structure.placement.ConcentricRingsStructurePlacement;
+import net.minecraft.world.level.levelgen.structure.placement.RandomSpreadStructurePlacement;
+import net.minecraft.world.level.levelgen.structure.placement.StructurePlacement;
 
 public class SearchWorkerManager {
 	
@@ -29,13 +29,13 @@ public class SearchWorkerManager {
 		workers = new ArrayList<StructureSearchWorker<?>>();
 	}
 	
-	public void createWorkers(ServerWorld world, PlayerEntity player, ItemStack stack, List<Structure> structures, BlockPos startPos) {
+	public void createWorkers(ServerLevel level, Player player, ItemStack stack, List<Structure> structures, BlockPos startPos) {
 		workers.clear();
 		
 		Map<StructurePlacement, List<Structure>> placementToStructuresMap = new Object2ObjectArrayMap<>();
 		
 		for (Structure structure : structures) {
-			for (StructurePlacement structureplacement : world.getChunkManager().getStructurePlacementCalculator().getPlacements(StructureUtils.getEntryForStructure(world, structure))) {
+			for (StructurePlacement structureplacement : level.getChunkSource().getGeneratorState().getPlacementsForStructure(StructureUtils.getHolderForStructure(level, structure))) {
 				placementToStructuresMap.computeIfAbsent(structureplacement, (holderSet) -> {
 					return new ObjectArrayList<Structure>();
 				}).add(structure);
@@ -45,11 +45,11 @@ public class SearchWorkerManager {
 		for (Map.Entry<StructurePlacement, List<Structure>> entry : placementToStructuresMap.entrySet()) {
 			StructurePlacement placement = entry.getKey();
 			if (placement instanceof ConcentricRingsStructurePlacement) {
-				workers.add(new ConcentricRingsSearchWorker(world, player, stack, startPos, (ConcentricRingsStructurePlacement) placement, entry.getValue(), id));
+				workers.add(new ConcentricRingsSearchWorker(level, player, stack, startPos, (ConcentricRingsStructurePlacement) placement, entry.getValue(), id));
 			} else if (placement instanceof RandomSpreadStructurePlacement) {
-				workers.add(new RandomSpreadSearchWorker(world, player, stack, startPos, (RandomSpreadStructurePlacement) placement, entry.getValue(), id));
+				workers.add(new RandomSpreadSearchWorker(level, player, stack, startPos, (RandomSpreadStructurePlacement) placement, entry.getValue(), id));
 			} else {
-				workers.add(new GenericSearchWorker(world, player, stack, startPos, placement, entry.getValue(), id));
+				workers.add(new GenericSearchWorker(level, player, stack, startPos, placement, entry.getValue(), id));
 			}
 		}
 	}

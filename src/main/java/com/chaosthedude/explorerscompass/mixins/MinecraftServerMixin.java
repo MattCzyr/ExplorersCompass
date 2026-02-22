@@ -14,17 +14,17 @@ import net.minecraft.server.MinecraftServer;
 @Mixin(MinecraftServer.class)
 public class MinecraftServerMixin {
 
-	@Inject(method = "tick(Ljava/util/function/BooleanSupplier;)V", at = @At(value = "HEAD"))
+	@Inject(method = "tickServer(Ljava/util/function/BooleanSupplier;)V", at = @At(value = "HEAD"))
 	private void startTick(BooleanSupplier shouldKeepTicking, CallbackInfo ci) {
 		WorldWorkerManager.tick(true);
 	}
 	
-	@Inject(method = "tick(Ljava/util/function/BooleanSupplier;)V", at = @At(value = "TAIL"))
+	@Inject(method = "tickServer(Ljava/util/function/BooleanSupplier;)V", at = @At(value = "TAIL"))
 	private void endTick(BooleanSupplier shouldKeepTicking, CallbackInfo ci) {
 		WorldWorkerManager.tick(false);
 	}
 	
-	@Inject(method = "shutdown()V", at = @At(value = "TAIL"))
+	@Inject(method = "stopServer()V", at = @At(value = "TAIL"))
 	private void onShutdown(CallbackInfo ci) {
 		WorldWorkerManager.clear();
 	}

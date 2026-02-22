@@ -2,18 +2,16 @@ package com.chaosthedude.explorerscompass.workers;
 
 import java.util.List;
 
-import com.chaosthedude.explorerscompass.ExplorersCompass;
-import com.chaosthedude.explorerscompass.config.ExplorersCompassConfig;
 import com.mojang.datafixers.util.Pair;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.ChunkSectionPos;
-import net.minecraft.world.gen.chunk.placement.RandomSpreadStructurePlacement;
-import net.minecraft.world.gen.structure.Structure;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.SectionPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.levelgen.structure.Structure;
+import net.minecraft.world.level.levelgen.structure.placement.RandomSpreadStructurePlacement;
 
 public class RandomSpreadSearchWorker extends StructureSearchWorker<RandomSpreadStructurePlacement> {
 
@@ -24,17 +22,17 @@ public class RandomSpreadSearchWorker extends StructureSearchWorker<RandomSpread
 	private int x;
 	private int z;
 
-	public RandomSpreadSearchWorker(ServerWorld level, PlayerEntity player, ItemStack stack, BlockPos startPos, RandomSpreadStructurePlacement placement, List<Structure> structureSet, String managerId) {
+	public RandomSpreadSearchWorker(ServerLevel level, Player player, ItemStack stack, BlockPos startPos, RandomSpreadStructurePlacement placement, List<Structure> structureSet, String managerId) {
 		super(level, player, stack, startPos, placement, structureSet, managerId);
 
-		spacing = placement.getSpacing();
-		startSectionPosX = ChunkSectionPos.getSectionCoord(startPos.getX());
-		startSectionPosZ = ChunkSectionPos.getSectionCoord(startPos.getZ());
+		spacing = placement.spacing();
+		startSectionPosX = SectionPos.blockToSectionCoord(startPos.getX());
+		startSectionPosZ = SectionPos.blockToSectionCoord(startPos.getZ());
 		x = 0;
 		z = 0;
 		length = 0;
 
-		finished = !level.getServer().getSaveProperties().getGeneratorOptions().shouldGenerateStructures();
+		finished = !level.getServer().getWorldData().worldGenOptions().generateStructures();
 	}
 
 	@Override
@@ -53,8 +51,8 @@ public class RandomSpreadSearchWorker extends StructureSearchWorker<RandomSpread
 				int sampleX = startSectionPosX + (spacing * x);
 				int sampleZ = startSectionPosZ + (spacing * z);
 				
-				ChunkPos chunkPos = placement.getStartChunk(level.getSeed(), sampleX, sampleZ);
-				currentPos = new BlockPos(ChunkSectionPos.getOffsetPos(chunkPos.x, 8), 0, ChunkSectionPos.getOffsetPos(chunkPos.z, 8));
+				ChunkPos chunkPos = placement.getPotentialStructureChunk(level.getSeed(), sampleX, sampleZ);
+				currentPos = new BlockPos(SectionPos.sectionToBlockCoord(chunkPos.x, 8), 0, SectionPos.sectionToBlockCoord(chunkPos.z, 8));
 				
 				Pair<BlockPos, Structure> pair = getStructureGeneratingAt(chunkPos);
 				samples++;
@@ -108,7 +106,7 @@ public class RandomSpreadSearchWorker extends StructureSearchWorker<RandomSpread
 				if (shouldSampleX || shouldSampleZ) {
 					int sampleX = startSectionPosX + (spacing * x);
 					int sampleZ = startSectionPosZ + (spacing * z);
-					ChunkPos chunkPos = placement.getStartChunk(level.getSeed(), sampleX, sampleZ);
+					ChunkPos chunkPos = placement.getPotentialStructureChunk(level.getSeed(), sampleX, sampleZ);
 					Pair<BlockPos, Structure> pair = getStructureGeneratingAt(chunkPos);
 					if (pair != null) {
 						return pair;

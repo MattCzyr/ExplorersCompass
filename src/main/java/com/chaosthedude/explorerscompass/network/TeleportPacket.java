@@ -8,83 +8,85 @@ import com.chaosthedude.explorerscompass.util.ItemUtils;
 import com.chaosthedude.explorerscompass.util.PlayerUtils;
 
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.registry.tag.BlockTags;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 
-public record TeleportPacket() implements CustomPayload {
-
-	public static final CustomPayload.Id<TeleportPacket> PACKET_ID = new CustomPayload.Id<>(Identifier.of(ExplorersCompass.MODID, "teleport"));
+public record TeleportPacket() implements CustomPacketPayload {
 	
-	public static final PacketCodec<RegistryByteBuf, TeleportPacket> PACKET_CODEC = PacketCodec.of(TeleportPacket::write, TeleportPacket::read);
+	public static final Type<TeleportPacket> TYPE = new Type<TeleportPacket>(Identifier.fromNamespaceAndPath(ExplorersCompass.MODID, "teleport"));
+	
+	public static final StreamCodec<FriendlyByteBuf, TeleportPacket> CODEC = StreamCodec.ofMember(TeleportPacket::write, TeleportPacket::read);
 
-	public static TeleportPacket read(RegistryByteBuf buf) {
+	public static TeleportPacket read(FriendlyByteBuf buf) {
 		return new TeleportPacket();
 	}
-	
-	public void write(RegistryByteBuf buf) {
+
+	public void write(FriendlyByteBuf buf) {
 	}
 
-	public static void apply(TeleportPacket packet, ServerPlayNetworking.Context context) {
+	public static void handle(TeleportPacket packet, ServerPlayNetworking.Context context) {
 		context.server().execute(() -> {
 			final ItemStack stack = ItemUtils.getHeldItem(context.player(), ExplorersCompass.EXPLORERS_COMPASS_ITEM);
 			if (!stack.isEmpty()) {
 				final ExplorersCompassItem explorersCompass = (ExplorersCompassItem) stack.getItem();
-				if (ExplorersCompassConfig.allowTeleport && PlayerUtils.canTeleport(context.player())) {
+				final ServerPlayer player = (ServerPlayer) context.player();
+				if (ExplorersCompassConfig.allowTeleport && PlayerUtils.canTeleport(player.level().getServer(), player)) {
 					if (explorersCompass.getState(stack) == CompassState.FOUND) {
 						final int x = explorersCompass.getFoundStructureX(stack);
 						final int z = explorersCompass.getFoundStructureZ(stack);
-						final int y = findValidTeleportHeight(context.player().getEntityWorld(), x, z);
+						final int y = packet.findValidTeleportHeight(player.level(), x, z);
 
-						context.player().stopRiding();
-						context.player().networkHandler.requestTeleport(x, y, z, context.player().getYaw(), context.player().getPitch());
+						player.stopRiding();
+						player.connection.teleport(x, y, z, player.getYRot(), player.getXRot());
 
-						if (!context.player().isGliding()) {
-							context.player().setVelocity(context.player().getVelocity().getX(), 0, context.player().getVelocity().getZ());
-							context.player().setOnGround(true);
+						if (!player.isFallFlying()) {
+							player.setDeltaMovement(player.getDeltaMovement().x(), 0, player.getDeltaMovement().z());
+							player.setOnGround(true);
 						}
 					}
 				} else {
-					ExplorersCompass.LOGGER.warn("Player " + context.player().getDisplayName().getString() + " tried to teleport but does not have permission.");
+					ExplorersCompass.LOGGER.warn("Player " + player.getDisplayName().getString() + " tried to teleport but does not have permission.");
 				}
 			}
 		});
 	}
 	
 	@Override
-	public Id<? extends CustomPayload> getId() {
-		return PACKET_ID;
+	public Type<TeleportPacket> type() {
+		return TYPE;
 	}
-
-	private static int findValidTeleportHeight(World world, int x, int z) {
-		int upY = world.getSeaLevel();
-		int downY = world.getSeaLevel();
-		while ((!world.isOutOfHeightLimit(upY) || !world.isOutOfHeightLimit(downY)) && !(isValidTeleportPosition(world, new BlockPos(x, upY, z)) || isValidTeleportPosition(world, new BlockPos(x, downY, z)))) {
+	
+	private int findValidTeleportHeight(Level level, int x, int z) {
+		int upY = level.getSeaLevel();
+		int downY = level.getSeaLevel();
+		while ((!level.isOutsideBuildHeight(upY) || !level.isOutsideBuildHeight(downY)) && !(isValidTeleportPosition(level, new BlockPos(x, upY, z)) || isValidTeleportPosition(level, new BlockPos(x, downY, z)))) {
 			upY++;
 			downY--;
 		}
 		BlockPos upPos = new BlockPos(x, upY, z);
 		BlockPos downPos = new BlockPos(x, downY, z);
-		if (isValidTeleportPosition(world, upPos)) {
+		if (isValidTeleportPosition(level, upPos)) {
 			return upY;
 		}
-		if (isValidTeleportPosition(world, downPos)) {
+		if (isValidTeleportPosition(level, downPos)) {
 			return downY;
 		}
 		return 256;
 	}
 	
-	private static boolean isValidTeleportPosition(World world, BlockPos pos) {
-		return isFree(world, pos) && isFree(world, pos.up()) && !isFree(world, pos.down());
+	private boolean isValidTeleportPosition(Level level, BlockPos pos) {
+		return isFree(level, pos) && isFree(level, pos.above()) && !isFree(level, pos.below());
 	}
 	
-	private static boolean isFree(World world, BlockPos pos) {
-		return world.getBlockState(pos).isAir() || world.getBlockState(pos).isIn(BlockTags.FIRE) || world.getBlockState(pos).isLiquid() || world.getBlockState(pos).isReplaceable();
+	private boolean isFree(Level level, BlockPos pos) {
+		return level.getBlockState(pos).isAir() || level.getBlockState(pos).is(BlockTags.FIRE) || level.getBlockState(pos).liquid() || level.getBlockState(pos).canBeReplaced();
 	}
 
 }

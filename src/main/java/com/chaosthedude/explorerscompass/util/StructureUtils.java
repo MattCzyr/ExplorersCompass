@@ -18,89 +18,86 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
-import net.minecraft.client.resource.language.I18n;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.structure.StructureSet;
-import net.minecraft.structure.StructureSet.WeightedEntry;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Mth;
 import net.minecraft.util.Util;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.gen.chunk.ChunkGenerator;
-import net.minecraft.world.gen.structure.Structure;
-import net.minecraft.world.gen.structure.StructureType;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.levelgen.structure.Structure;
+import net.minecraft.world.level.levelgen.structure.StructureSet;
+import net.minecraft.world.level.levelgen.structure.StructureSet.StructureSelectionEntry;
+import net.minecraft.world.level.levelgen.structure.StructureType;
 
 public class StructureUtils {
 	
-	public static ListMultimap<Identifier, Identifier> getGroupIDsToStructureIDs(ServerWorld world) {
-		ListMultimap<Identifier, Identifier> groupIDsToStructureIDs = ArrayListMultimap.create();
-		if (getStructureRegistry(world).isPresent()) {
-			for (Structure structure : getStructureRegistry(world).get()) {
-				groupIDsToStructureIDs.put(getGroupForStructure(world, structure), getIDForStructure(world, structure));
+	public static ListMultimap<Identifier, Identifier> groupIdsToStructureIds(ServerLevel level) {
+		ListMultimap<Identifier, Identifier> groupIdsToStructureIds = ArrayListMultimap.create();
+		if (getStructureRegistry(level).isPresent()) {
+			for (Structure structure : getStructureRegistry(level).get()) {
+				groupIdsToStructureIds.put(getGroupForStructure(level, structure), getIdForStructure(level, structure));
 			}
 		}
-		return groupIDsToStructureIDs;
+		return groupIdsToStructureIds;
 	}
 	
-	public static Map<Identifier, Identifier> getStructureIDsToGroupIDs(ServerWorld world) {
-		Map<Identifier, Identifier> structureIDsToGroupIDs = new HashMap<Identifier, Identifier>();
-		if (getStructureRegistry(world).isPresent()) {
-			for (Structure structure : getStructureRegistry(world).get()) {
-				structureIDsToGroupIDs.put(getIDForStructure(world, structure), getGroupForStructure(world, structure));
+	public static Map<Identifier, Identifier> structureIdsToGroupIds(ServerLevel level) {
+		Map<Identifier, Identifier> structureIdsToGroupIds = new HashMap<Identifier, Identifier>();
+		if (getStructureRegistry(level).isPresent()) {
+			for (Structure structure : getStructureRegistry(level).get()) {
+				structureIdsToGroupIds.put(getIdForStructure(level, structure), getGroupForStructure(level, structure));
 			}
 		}
-		return structureIDsToGroupIDs;
+		return structureIdsToGroupIds;
 	}
 	
-	public static Identifier getGroupForStructure(ServerWorld world, Structure structure) {
-		if (getStructureRegistry(world).isPresent()) {
-			Registry<StructureSet> registry = getStructureSetRegistry(world).get();
+	public static Identifier getGroupForStructure(ServerLevel level, Structure structure) {
+		if (getStructureRegistry(level).isPresent()) {
+			Registry<StructureSet> registry = getStructureSetRegistry(level).get();
 			for (StructureSet set : registry) {
-				for (WeightedEntry entry : set.structures()) {
+				for (StructureSelectionEntry entry : set.structures()) {
 					if (entry.structure().value().equals(structure)) {
-						return registry.getId(set);
+						return registry.getKey(set);
 					}
 				}
 			}
 		}
-		return Identifier.of(ExplorersCompass.MODID, "none");
+		return Identifier.fromNamespaceAndPath(ExplorersCompass.MODID, "none");
 	}
 
-	public static Identifier getIDForStructure(ServerWorld world, Structure structure) {
-		if (getStructureRegistry(world).isPresent()) {
-			return getStructureRegistry(world).get().getId(structure);
+	public static Identifier getIdForStructure(ServerLevel level, Structure structure) {
+		if (getStructureRegistry(level).isPresent()) {
+			return getStructureRegistry(level).get().getKey(structure);
 		}
 		return null;
 	}
 
-	public static Structure getStructureForID(ServerWorld world, Identifier id) {
-		if (getStructureRegistry(world).isPresent()) {
-			return getStructureRegistry(world).get().get(id);
+	public static Structure getStructureForId(ServerLevel level, Identifier id) {
+		if (getStructureRegistry(level).isPresent()) {
+			return getStructureRegistry(level).get().getValue(id);
 		}
 		return null;
 	}
 	
-	public static RegistryEntry<Structure> getEntryForStructure(ServerWorld world, Structure structure) {
-		if (getStructureRegistry(world).isPresent()) {
-			final Identifier structureID = getIDForStructure(world, structure);
-			if (structureID != null) {
-				return getStructureRegistry(world).get().getEntry(structureID).get();
-			}
+	public static Holder<Structure> getHolderForStructure(ServerLevel level, Structure structure) {
+		if (getStructureRegistry(level).isPresent()) {
+			return getStructureRegistry(level).get().wrapAsHolder(structure);
 		}
 		return null;
 	}
 
-	public static List<Identifier> getAllowedStructureIDs(ServerWorld world) {
+	public static List<Identifier> getAllowedStructureIds(ServerLevel level) {
 		final List<Identifier> structureIDs = new ArrayList<Identifier>();
-		if (getStructureRegistry(world).isPresent()) {
-			for (Structure structure : getStructureRegistry(world).get()) {
-				if (structure != null && getIDForStructure(world, structure) != null && !getIDForStructure(world, structure).getNamespace().isEmpty() && !getIDForStructure(world, structure).getPath().isEmpty() && !structureIsBlacklisted(world, structure) && !structureIsHidden(world, structure)) {
-					structureIDs.add(getIDForStructure(world, structure));
+		if (getStructureRegistry(level).isPresent()) {
+			for (Structure structure : getStructureRegistry(level).get()) {
+				if (structure != null && getIdForStructure(level, structure) != null && !getIdForStructure(level, structure).getNamespace().isEmpty() && !getIdForStructure(level, structure).getPath().isEmpty() && !structureIsBlacklisted(level, structure) && !structureIsHidden(level, structure)) {
+					structureIDs.add(getIdForStructure(level, structure));
 				}
 			}
 		}
@@ -108,59 +105,78 @@ public class StructureUtils {
 		return structureIDs;
 	}
 	
-	public static boolean structureIsBlacklisted(ServerWorld world, Structure structure) {
+	public static boolean structureIsBlacklisted(ServerLevel level, Structure structure) {
 		final List<String> structureBlacklist = ExplorersCompassConfig.structureBlacklist;
 		for (String structureKey : structureBlacklist) {
-			if (getIDForStructure(world, structure).toString().matches(convertToRegex(structureKey))) {
+			if (getIdForStructure(level, structure).toString().matches(convertToRegex(structureKey))) {
 				return true;
 			}
 		}
 		return false;
 	}
 	
-	public static boolean structureIsHidden(ServerWorld world, Structure structure) {
-		if (getStructureRegistry(world).isPresent()) {
-			final Registry<Structure> structureRegistry = getStructureRegistry(world).get();
-			final Identifier structureID = getIDForStructure(world, structure);
-			if (structureID != null && structureRegistry.getEntry(structureID).isPresent()) {
-				final RegistryEntry<Structure> structureEntry = structureRegistry.getEntry(structureID).get();
-				return structureEntry.streamTags().anyMatch(tag -> tag.id().getPath().equals("c:hidden_from_locator_selection"));
-			}
+	public static boolean structureIsHidden(ServerLevel level, Structure structure) {
+		if (getStructureRegistry(level).isPresent()) {
+			final Registry<Structure> structureRegistry = getStructureRegistry(level).get();
+			final Holder<Structure> structureHolder = structureRegistry.wrapAsHolder(structure);
+			return structureHolder.tags().anyMatch(tag -> tag.location().getPath().equals("c:hidden_from_locator_selection"));
 		}
 		return false;
 	}
 	
-	public static List<Identifier> getGeneratingDimensionIDs(ServerWorld serverWorld, Structure structure) {
+	public static List<Identifier> getGeneratingDimensionIds(ServerLevel serverLevel, Structure structure) {
 		final List<Identifier> dimensions = new ArrayList<Identifier>();
-		for (ServerWorld world : serverWorld.getServer().getWorlds()) {
-			ChunkGenerator chunkGenerator = world.getChunkManager().getChunkGenerator();
-			Set<RegistryEntry<Biome>> biomeSet = chunkGenerator.getBiomeSource().getBiomes();
-			if (!structure.getValidBiomes().stream().noneMatch(biomeSet::contains)) {
-				dimensions.add(world.getRegistryKey().getValue());
+		for (ServerLevel level : serverLevel.getServer().getAllLevels()) {
+			ChunkGenerator chunkGenerator = level.getChunkSource().getGenerator();
+			Set<Holder<Biome>> biomeSet = chunkGenerator.getBiomeSource().possibleBiomes();
+			if (!structure.biomes().stream().noneMatch(biomeSet::contains)) {
+				dimensions.add(level.dimension().identifier());
 			}
 		}
 		// Fix empty dimensions for stronghold
 		if (structure == StructureType.STRONGHOLD && dimensions.isEmpty()) {
-			dimensions.add(Identifier.of("minecraft:overworld"));
+			dimensions.add(Identifier.parse("minecraft:overworld"));
 		}
 		return dimensions;
 	}
 
-	public static ListMultimap<Identifier, Identifier> getGeneratingDimensionIDsForAllowedStructures(ServerWorld serverWorld) {
+	public static ListMultimap<Identifier, Identifier> getGeneratingDimensionIdsForAllowedStructures(ServerLevel serverLevel, List<Identifier> allowedStructures) {
 		ListMultimap<Identifier, Identifier> dimensionsForAllowedStructures = ArrayListMultimap.create();
-		for (Identifier id : getAllowedStructureIDs(serverWorld)) {
-			Structure structure = getStructureForID(serverWorld, id);
-			dimensionsForAllowedStructures.putAll(id, getGeneratingDimensionIDs(serverWorld, structure));
+		for (Identifier id : allowedStructures) {
+			Structure structure = getStructureForId(serverLevel, id);
+			dimensionsForAllowedStructures.putAll(id, getGeneratingDimensionIds(serverLevel, structure));
 		}
 		return dimensionsForAllowedStructures;
 	}
+	
+	public static int getXpLevelsForStructure(ServerLevel serverLevel, Identifier structureKey) {
+		int xpLevels = ExplorersCompassConfig.defaultXpLevel;
+		for (String structureRegex : ExplorersCompassConfig.xpLevelOverrides.keySet()) {
+			if (structureKey.toString().matches(convertToRegex(structureRegex))) {
+				xpLevels = ExplorersCompassConfig.xpLevelOverrides.get(structureRegex);
+				if (xpLevels > 3) {
+					xpLevels = 3;
+				}
+				break;
+			}
+		}
+		return xpLevels;
+	}
 
-	public static int getHorizontalDistanceToLocation(PlayerEntity player, int x, int z) {
-		return getHorizontalDistanceToLocation(player.getBlockPos(), x, z);
+	public static Map<Identifier, Integer> getXpLevelsForAllowedStructures(ServerLevel serverLevel, List<Identifier> allowedStructures) {
+		final Map<Identifier, Integer> xpLevels = new HashMap<Identifier, Integer>();
+		for (Identifier structureKey : allowedStructures) {
+			xpLevels.put(structureKey, getXpLevelsForStructure(serverLevel, structureKey));
+		}
+		return xpLevels;
+	}
+
+	public static int getHorizontalDistanceToLocation(Player player, int x, int z) {
+		return getHorizontalDistanceToLocation(player.blockPosition(), x, z);
 	}
 
 	public static int getHorizontalDistanceToLocation(BlockPos startPos, int x, int z) {
-		return (int) MathHelper.sqrt((float) startPos.getSquaredDistance(new BlockPos(x, startPos.getY(), z)));
+		return (int) Mth.sqrt((float) startPos.distSqr(new BlockPos(x, startPos.getY(), z)));
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -170,9 +186,9 @@ public class StructureUtils {
 		}
 		String name = id.toString();
 		if (ExplorersCompassConfig.translateStructureNames) {
-			name = I18n.translate(Util.createTranslationKey("structure", id));
+			name = I18n.get(Util.makeDescriptionId("structure", id));
 		}
-		if (name.equals(Util.createTranslationKey("structure", id)) || !ExplorersCompassConfig.translateStructureNames) {
+		if (name.equals(Util.makeDescriptionId("structure", id)) || !ExplorersCompassConfig.translateStructureNames) {
 			name = id.toString();
 			if (name.contains(":")) {
 				name = name.substring(name.indexOf(":") + 1);
@@ -213,8 +229,8 @@ public class StructureUtils {
 
 	@Environment(EnvType.CLIENT)
 	private static String getDimensionName(Identifier dimensionKey) {
-		String name = I18n.translate(Util.createTranslationKey("dimension", dimensionKey));
-		if (name.equals(Util.createTranslationKey("dimension", dimensionKey))) {
+		String name = I18n.get(Util.makeDescriptionId("dimension", dimensionKey));
+		if (name.equals(Util.makeDescriptionId("dimension", dimensionKey))) {
 			name = dimensionKey.toString();
 			if (name.contains(":")) {
 				name = name.substring(name.indexOf(":") + 1);
@@ -224,12 +240,12 @@ public class StructureUtils {
 		return name;
 	}
 	
-	private static Optional<Registry<Structure>> getStructureRegistry(ServerWorld world) {
-		return world.getRegistryManager().getOptional(RegistryKeys.STRUCTURE);
+	private static Optional<Registry<Structure>> getStructureRegistry(ServerLevel level) {
+		return level.registryAccess().lookup(Registries.STRUCTURE);
 	}
 	
-	private static Optional<Registry<StructureSet>> getStructureSetRegistry(ServerWorld world) {
-		return world.getRegistryManager().getOptional(RegistryKeys.STRUCTURE_SET);
+	private static Optional<Registry<StructureSet>> getStructureSetRegistry(ServerLevel level) {
+		return level.registryAccess().lookup(Registries.STRUCTURE_SET);
 	}
 
 	private static String convertToRegex(String glob) {

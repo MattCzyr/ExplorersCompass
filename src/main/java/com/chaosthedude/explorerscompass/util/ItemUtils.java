@@ -2,9 +2,9 @@ package com.chaosthedude.explorerscompass.util;
 
 import com.chaosthedude.explorerscompass.ExplorersCompass;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 
 public class ItemUtils {
 
@@ -12,11 +12,11 @@ public class ItemUtils {
 		return !stack.isEmpty() && stack.getItem() == ExplorersCompass.EXPLORERS_COMPASS_ITEM;
 	}
 
-	public static ItemStack getHeldItem(PlayerEntity player, Item item) {
-		if (!player.getMainHandStack().isEmpty() && player.getMainHandStack().getItem() == item) {
-			return player.getMainHandStack();
-		} else if (!player.getOffHandStack().isEmpty() && player.getOffHandStack().getItem() == item) {
-			return player.getOffHandStack();
+	public static ItemStack getHeldItem(Player player, Item item) {
+		if (!player.getMainHandItem().isEmpty() && player.getMainHandItem().getItem() == item) {
+			return player.getMainHandItem();
+		} else if (!player.getOffhandItem().isEmpty() && player.getOffhandItem().getItem() == item) {
+			return player.getOffhandItem();
 		}
 
 		return ItemStack.EMPTY;

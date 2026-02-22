@@ -4,20 +4,20 @@ import com.chaosthedude.explorerscompass.ExplorersCompass;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.resource.language.I18n;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.resources.Identifier;
 
 @Environment(EnvType.CLIENT)
 public class GroupSorting implements ISorting {
 	
 	@Override
 	public int compare(Identifier id1, Identifier id2) {
-		return ExplorersCompass.structureIDsToGroupIDs.get(id1).compareTo(ExplorersCompass.structureIDsToGroupIDs.get(id2));
+		return ExplorersCompass.structureIdsToGroupIds.get(id1).compareTo(ExplorersCompass.structureIdsToGroupIds.get(id2));
 	}
 
 	@Override
 	public Object getValue(Identifier id) {
-		return ExplorersCompass.structureIDsToGroupIDs.get(id);
+		return ExplorersCompass.structureIdsToGroupIds.get(id);
 	}
 
 	@Override
@@ -27,7 +27,7 @@ public class GroupSorting implements ISorting {
 
 	@Override
 	public String getLocalizedName() {
-		return I18n.translate("string.explorerscompass.group");
+		return I18n.get("string.explorerscompass.group");
 	}
 
 }

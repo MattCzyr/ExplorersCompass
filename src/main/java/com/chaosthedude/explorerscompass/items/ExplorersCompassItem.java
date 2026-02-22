@@ -16,72 +16,77 @@ import com.chaosthedude.explorerscompass.workers.SearchWorkerManager;
 import com.google.common.collect.ListMultimap;
 
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraft.world.gen.structure.Structure;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.levelgen.structure.Structure;
 
 public class ExplorersCompassItem extends Item {
 
 	public static final String NAME = "explorerscompass";
 	
-	public static final RegistryKey<Item> KEY = RegistryKey.of(RegistryKeys.ITEM, Identifier.of(ExplorersCompass.MODID, NAME));
+	public static final ResourceKey<Item> KEY = ResourceKey.create(BuiltInRegistries.ITEM.key(), Identifier.fromNamespaceAndPath(ExplorersCompass.MODID, NAME));
 	
 	private SearchWorkerManager workerManager;
 
 	public ExplorersCompassItem() {
-		super(new Settings().registryKey(KEY).maxCount(1));
+		super(new Properties().setId(KEY).stacksTo(1));
 		workerManager = new SearchWorkerManager();
 	}
 
 	@Override
-	public ActionResult use(World world, PlayerEntity player, Hand hand) {
-		if (!player.isSneaking()) {
-			if (world.isClient()) {
+	public InteractionResult use(Level level, Player player, InteractionHand hand) {
+		if (!player.isCrouching()) {
+			if (level.isClientSide()) {
 				final ItemStack stack = ItemUtils.getHeldItem(player, ExplorersCompass.EXPLORERS_COMPASS_ITEM);
-				GuiWrapper.openGUI(world, player, stack);
+				GuiWrapper.openGUI(level, player, stack);
 			} else {
-				final ServerWorld serverWorld = (ServerWorld) world;
-				final ServerPlayerEntity serverPlayer = (ServerPlayerEntity) player;
-				final boolean canTeleport = ExplorersCompassConfig.allowTeleport && PlayerUtils.canTeleport(player);
-				final List<Identifier> allowedStructures = StructureUtils.getAllowedStructureIDs(serverWorld);
-				final ListMultimap<Identifier, Identifier> dimensionsForAllowedStructures = StructureUtils.getGeneratingDimensionIDsForAllowedStructures(serverWorld);
-				final Map<Identifier, Identifier> structureIDsToGroupIDs = StructureUtils.getStructureIDsToGroupIDs(serverWorld);
-				final ListMultimap<Identifier, Identifier> groupIDsToStructureIDs = StructureUtils.getGroupIDsToStructureIDs(serverWorld);
-				ServerPlayNetworking.send(serverPlayer, new SyncPacket(canTeleport, allowedStructures, dimensionsForAllowedStructures, structureIDsToGroupIDs, groupIDsToStructureIDs));
+				final ServerLevel serverLevel = (ServerLevel) level;
+				final ServerPlayer serverPlayer = (ServerPlayer) player;
+				final boolean canTeleport = ExplorersCompassConfig.allowTeleport && PlayerUtils.canTeleport(serverLevel.getServer(), player);
+				final boolean hasInfiniteXp = player.hasInfiniteMaterials();
+				final List<Identifier> allowedStructureIds = StructureUtils.getAllowedStructureIds(serverLevel);
+				final Map<Identifier, Integer> xpLevels = StructureUtils.getXpLevelsForAllowedStructures(serverLevel, allowedStructureIds);
+				final ListMultimap<Identifier, Identifier> generatingDimensions = StructureUtils.getGeneratingDimensionIdsForAllowedStructures(serverLevel, allowedStructureIds);
+				ServerPlayNetworking.send(serverPlayer, new SyncPacket(canTeleport, hasInfiniteXp, allowedStructureIds, xpLevels, generatingDimensions, StructureUtils.structureIdsToGroupIds(serverLevel), StructureUtils.groupIdsToStructureIds(serverLevel)));
 			}
 		} else {
 			workerManager.stop();
 			workerManager.clear();
-			setState(player.getStackInHand(hand), null, CompassState.INACTIVE);
+			setState(player.getItemInHand(hand), null, CompassState.INACTIVE);
 		}
 
-		return ActionResult.CONSUME;
+		return InteractionResult.CONSUME;
 	}
 
-	public void searchForStructure(World world, PlayerEntity player, Identifier structureID, List<Identifier> structureIDs, BlockPos pos, ItemStack stack) {
+	public void searchForStructure(Level level, Player player, Identifier structureID, List<Identifier> structureIDs, BlockPos pos, ItemStack stack) {
 		setSearching(stack, structureID);
 		setSearchRadius(stack, 0);
-		if (world instanceof ServerWorld) {
-			ServerWorld serverWorld = (ServerWorld) world;
+		if (level instanceof ServerLevel) {
+			ServerLevel serverLevel = (ServerLevel) level;
 			List<Structure> structures = new ArrayList<Structure>();
 			for (Identifier id : structureIDs) {
-				structures.add(StructureUtils.getStructureForID(serverWorld, id));
+				structures.add(StructureUtils.getStructureForId(serverLevel, id));
 			}
 			workerManager.stop();
-			workerManager.createWorkers(serverWorld, player, stack, structures, pos);
+			workerManager.createWorkers(serverLevel, player, stack, structures, pos);
 			boolean started = workerManager.start();
 			if (!started) {
 				setNotFound(stack, 0, 0);
+			}
+			
+			int xpLevels = StructureUtils.getXpLevelsForStructure(serverLevel, structureID);
+			if (!player.hasInfiniteMaterials() && xpLevels > 0) {
+				player.giveExperienceLevels(-xpLevels);
 			}
 		}
 	}
@@ -157,9 +162,9 @@ public class ExplorersCompassItem extends Item {
 		}
 	}
 
-	public void setStructureKey(ItemStack stack, Identifier structureID) {
+	public void setStructureId(ItemStack stack, Identifier structureId) {
 		if (ItemUtils.isCompass(stack)) {
-			stack.set(ExplorersCompass.STRUCTURE_ID_COMPONENT, structureID.toString());
+			stack.set(ExplorersCompass.STRUCTURE_ID_COMPONENT, structureId.toString());
 		}
 	}
 
@@ -182,7 +187,7 @@ public class ExplorersCompassItem extends Item {
 	}
 
 	public CompassState getState(ItemStack stack) {
-		if (ItemUtils.isCompass(stack) && stack.contains(ExplorersCompass.COMPASS_STATE_COMPONENT)) {
+		if (ItemUtils.isCompass(stack) && stack.has(ExplorersCompass.COMPASS_STATE_COMPONENT)) {
 			return CompassState.fromID(stack.get(ExplorersCompass.COMPASS_STATE_COMPONENT));
 		}
 
@@ -190,7 +195,7 @@ public class ExplorersCompassItem extends Item {
 	}
 
 	public int getFoundStructureX(ItemStack stack) {
-		if (ItemUtils.isCompass(stack) && stack.contains(ExplorersCompass.FOUND_X_COMPONENT)) {
+		if (ItemUtils.isCompass(stack) && stack.has(ExplorersCompass.FOUND_X_COMPONENT)) {
 			return stack.get(ExplorersCompass.FOUND_X_COMPONENT);
 		}
 
@@ -198,7 +203,7 @@ public class ExplorersCompassItem extends Item {
 	}
 
 	public int getFoundStructureZ(ItemStack stack) {
-		if (ItemUtils.isCompass(stack) && stack.contains(ExplorersCompass.FOUND_Z_COMPONENT)) {
+		if (ItemUtils.isCompass(stack) && stack.has(ExplorersCompass.FOUND_Z_COMPONENT)) {
 			return stack.get(ExplorersCompass.FOUND_Z_COMPONENT);
 		}
 
@@ -206,15 +211,15 @@ public class ExplorersCompassItem extends Item {
 	}
 
 	public Identifier getStructureID(ItemStack stack) {
-		if (ItemUtils.isCompass(stack) && stack.contains(ExplorersCompass.STRUCTURE_ID_COMPONENT)) {
-			return Identifier.of(stack.get(ExplorersCompass.STRUCTURE_ID_COMPONENT));
+		if (ItemUtils.isCompass(stack) && stack.has(ExplorersCompass.STRUCTURE_ID_COMPONENT)) {
+			return Identifier.parse(stack.get(ExplorersCompass.STRUCTURE_ID_COMPONENT));
 		}
 
-		return Identifier.of("", "");
+		return Identifier.fromNamespaceAndPath("", "");
 	}
 
 	public int getSearchRadius(ItemStack stack) {
-		if (ItemUtils.isCompass(stack) && stack.contains(ExplorersCompass.SEARCH_RADIUS_COMPONENT)) {
+		if (ItemUtils.isCompass(stack) && stack.has(ExplorersCompass.SEARCH_RADIUS_COMPONENT)) {
 			return stack.get(ExplorersCompass.SEARCH_RADIUS_COMPONENT);
 		}
 
@@ -222,19 +227,19 @@ public class ExplorersCompassItem extends Item {
 	}
 
 	public int getSamples(ItemStack stack) {
-		if (ItemUtils.isCompass(stack) && stack.contains(ExplorersCompass.SAMPLES_COMPONENT)) {
+		if (ItemUtils.isCompass(stack) && stack.has(ExplorersCompass.SAMPLES_COMPONENT)) {
 			return stack.get(ExplorersCompass.SAMPLES_COMPONENT);
 		}
 
 		return -1;
 	}
 
-	public int getDistanceToBiome(PlayerEntity player, ItemStack stack) {
+	public int getDistanceToBiome(Player player, ItemStack stack) {
 		return StructureUtils.getHorizontalDistanceToLocation(player, getFoundStructureX(stack), getFoundStructureZ(stack));
 	}
 	
 	public boolean shouldDisplayCoordinates(ItemStack stack) {
-		if (ItemUtils.isCompass(stack) && stack.contains(ExplorersCompass.DISPLAY_COORDS_COMPONENT)) {
+		if (ItemUtils.isCompass(stack) && stack.has(ExplorersCompass.DISPLAY_COORDS_COMPONENT)) {
 			return stack.get(ExplorersCompass.DISPLAY_COORDS_COMPONENT);
 		}
 

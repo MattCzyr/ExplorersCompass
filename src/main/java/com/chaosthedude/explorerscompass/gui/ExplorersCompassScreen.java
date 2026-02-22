@@ -13,46 +13,43 @@ import com.chaosthedude.explorerscompass.sorting.NameSorting;
 import com.chaosthedude.explorerscompass.util.CompassState;
 import com.chaosthedude.explorerscompass.util.StructureUtils;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.input.KeyInput;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.world.World;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 
-@Environment(EnvType.CLIENT)
 public class ExplorersCompassScreen extends Screen {
 
-	private World world;
-	private PlayerEntity player;
-	private List<Identifier> allowedStructureIDs;
-	private List<Identifier> structureIDsMatchingSearch;
+	private Level level;
+	private Player player;
+	private List<Identifier> allowedStructures;
+	private List<Identifier> structuresMatchingSearch;
 	private ItemStack stack;
 	private ExplorersCompassItem explorersCompass;
-	private ButtonWidget searchButton;
-	private ButtonWidget searchForGroupButton;
-	private ButtonWidget sortByButton;
-	private ButtonWidget teleportButton;
-	private ButtonWidget cancelButton;
+	private Button searchButton;
+	private Button searchGroupButton;
+	private Button sortByButton;
+	private Button teleportButton;
+	private Button cancelButton;
 	private TransparentTextField searchTextField;
 	private StructureSearchList selectionList;
 	private ISorting sortingCategory;
 
-	public ExplorersCompassScreen(World world, PlayerEntity player, ItemStack stack, ExplorersCompassItem explorersCompass, List<Identifier> allowedStructureIDs) {
-		super(Text.translatable("string.explorerscompass.selectStructure"));
-		this.world = world;
+	public ExplorersCompassScreen(Level level, Player player, ItemStack stack, ExplorersCompassItem explorersCompass, List<Identifier> allowedStructures) {
+		super(Component.translatable("string.explorerscompass.selectStructure"));
+		this.level = level;
 		this.player = player;
 		this.stack = stack;
 		this.explorersCompass = explorersCompass;
 		
-		this.allowedStructureIDs = new ArrayList<Identifier>(allowedStructureIDs);
-		structureIDsMatchingSearch = new ArrayList<Identifier>(allowedStructureIDs);
+		this.allowedStructures = new ArrayList<Identifier>(allowedStructures);
+		structuresMatchingSearch = new ArrayList<Identifier>(this.allowedStructures);
 		sortingCategory = new NameSorting();
 	}
 
@@ -63,13 +60,7 @@ public class ExplorersCompassScreen extends Screen {
 
 	@Override
 	protected void init() {
-		clearChildren();
-		setupButtons();
-		setupTextFields();
-		if (selectionList == null) {
-			selectionList = new StructureSearchList(this, client, width + 110, height - 40, 40, 45);
-		}
-		addDrawableChild(selectionList);
+		setupWidgets();
 	}
 
 	@Override
@@ -77,24 +68,24 @@ public class ExplorersCompassScreen extends Screen {
 		teleportButton.active = explorersCompass.getState(stack) == CompassState.FOUND;
 		
 		// Check if the allowed structure list has synced
-		if (allowedStructureIDs.size() != ExplorersCompass.allowedStructureIDs.size()) {
-			remove(selectionList);
-			allowedStructureIDs = ExplorersCompass.allowedStructureIDs;
-			structureIDsMatchingSearch = new ArrayList<Identifier>(allowedStructureIDs);
-			selectionList = new StructureSearchList(this, client, width + 110, height - 40, 40, 45);
-			addDrawableChild(selectionList);
+		if (allowedStructures.size() != ExplorersCompass.allowedStructures.size()) {
+			removeWidget(selectionList);
+			allowedStructures = new ArrayList<Identifier>(ExplorersCompass.allowedStructures);
+			structuresMatchingSearch = new ArrayList<Identifier>(allowedStructures);
+			selectionList = new StructureSearchList(this, minecraft, player, width + 110, height - 50, 40, 50);
+			addRenderableWidget(selectionList);
 		}
 	}
 
 	@Override
-	public void render(DrawContext context, int mouseX, int mouseY, float partialTicks) {
-		super.render(context, mouseX, mouseY, partialTicks);
-		context.drawCenteredTextWithShadow(textRenderer, title, 65, 15, 0xffffffff);
+	public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+		super.render(guiGraphics, mouseX, mouseY, partialTicks);
+		guiGraphics.drawCenteredString(font, title, 65, 15, 0xffffffff);
 	}
 	
 	@Override
-	public boolean keyPressed(KeyInput input) {
-		boolean ret = super.keyPressed(input);
+	public boolean keyPressed(KeyEvent event) {
+		boolean ret = super.keyPressed(event);
 		if (searchTextField.isFocused()) {
 			processSearchTerm();
 			return true;
@@ -105,78 +96,82 @@ public class ExplorersCompassScreen extends Screen {
 	public void selectStructure(StructureSearchEntry entry) {
 		boolean enable = entry != null;
 		searchButton.active = enable;
-		searchForGroupButton.active = enable;
+		searchGroupButton.active = enable;
 	}
 
 	public void searchForStructure(Identifier structureID) {
-		ClientPlayNetworking.send(new SearchPacket(structureID, List.of(structureID), player.getBlockPos()));
-		client.setScreen(null);
+		ClientPlayNetworking.send(new SearchPacket(structureID, List.of(structureID), player.blockPosition()));
+		minecraft.setScreen(null);
 	}
 	
 	public void searchForStructureGroup(Identifier structureID) {
-		ClientPlayNetworking.send(new SearchPacket(structureID, ExplorersCompass.groupIDsToStructureIDs.get(structureID), player.getBlockPos()));
-		client.setScreen(null);
+		ClientPlayNetworking.send(new SearchPacket(structureID, ExplorersCompass.groupIdsToStructureIds.get(structureID), player.blockPosition()));
+		minecraft.setScreen(null);
 	}
 
 	public void teleport() {
 		ClientPlayNetworking.send(new TeleportPacket());
-		client.setScreen(null);
+		minecraft.setScreen(null);
 	}
-	
+
 	public void processSearchTerm() {
-		structureIDsMatchingSearch = new ArrayList<Identifier>();
-		String searchTerm = searchTextField.getText().toLowerCase();
-		for (Identifier id : allowedStructureIDs) {
+		structuresMatchingSearch = new ArrayList<Identifier>();
+		String searchTerm = searchTextField.getValue().toLowerCase();
+		for (Identifier structureId : allowedStructures) {
 			if (searchTerm.startsWith("@")) {
-				if (StructureUtils.getStructureSource(id).toLowerCase().contains(searchTerm.substring(1))) {
-					structureIDsMatchingSearch.add(id);
+				if (StructureUtils.getStructureSource(structureId).toLowerCase().contains(searchTerm.substring(1))) {
+					structuresMatchingSearch.add(structureId);
 				}
-			} else if (StructureUtils.getStructureName(id).toLowerCase().contains(searchTerm)) {
-				structureIDsMatchingSearch.add(id);
+			} else if (StructureUtils.getStructureName(structureId).toLowerCase().contains(searchTerm)) {
+				structuresMatchingSearch.add(structureId);
 			}
 		}
 		selectionList.refreshList();
 	}
 
 	public List<Identifier> sortStructures() {
-		final List<Identifier> structures = structureIDsMatchingSearch;
+		final List<Identifier> structures = structuresMatchingSearch;
 		Collections.sort(structures, new NameSorting());
 		Collections.sort(structures, sortingCategory);
 		return structures;
 	}
 
-	private void setupButtons() {
-		searchButton = addDrawableChild(new TransparentButton(10, 40, 110, 20, Text.translatable("string.explorerscompass.search"), (onPress) -> {
+	private void setupWidgets() {
+		clearWidgets();
+		searchButton = addRenderableWidget(new TransparentButton(10, 40, 110, 20, Component.translatable("string.explorerscompass.search"), (onPress) -> {
 			if (selectionList.hasSelection()) {
-				selectionList.getSelectedOrNull().searchForStructure();
+				selectionList.getSelected().searchForStructure();
 			}
 		}));
-		searchForGroupButton = addDrawableChild(new TransparentButton(10, 65, 110, 20, Text.translatable("string.explorerscompass.searchForGroup"), (onPress) -> {
+		searchGroupButton = addRenderableWidget(new TransparentButton(10, 65, 110, 20, Component.translatable("string.explorerscompass.searchForGroup"), (onPress) -> {
 			if (selectionList.hasSelection()) {
-				selectionList.getSelectedOrNull().searchForStructureGroup();
+				selectionList.getSelected().searchForGroup();
 			}
 		}));
-		sortByButton = addDrawableChild(new TransparentButton(10, 90, 110, 20, Text.translatable("string.explorerscompass.sortBy").append(": " + sortingCategory.getLocalizedName()), (onPress) -> {
+		sortByButton = addRenderableWidget(new TransparentButton(10, 90, 110, 20, Component.translatable("string.explorerscompass.sortBy").append(Component.literal(": " + sortingCategory.getLocalizedName())), (onPress) -> {
 			sortingCategory = sortingCategory.next();
-			sortByButton.setMessage(Text.translatable("string.explorerscompass.sortBy").append(": " + sortingCategory.getLocalizedName()));
+			sortByButton.setMessage(Component.translatable("string.explorerscompass.sortBy").append(Component.literal(": " + sortingCategory.getLocalizedName())));
 			selectionList.refreshList();
 		}));
-		cancelButton = addDrawableChild(new TransparentButton(10, height - 30, 110, 20, Text.translatable("gui.cancel"), (onPress) -> {
-			client.setScreen(null);
+		cancelButton = addRenderableWidget(new TransparentButton(10, height - 30, 110, 20, Component.translatable("gui.cancel"), (onPress) -> {
+			minecraft.setScreen(null);
 		}));
-		teleportButton = addDrawableChild(new TransparentButton(width - 120, 10, 110, 20, Text.translatable("string.explorerscompass.teleport"), (onPress) -> {
+		teleportButton = addRenderableWidget(new TransparentButton(width - 120, 10, 110, 20, Component.translatable("string.explorerscompass.teleport"), (onPress) -> {
 			teleport();
 		}));
 
 		searchButton.active = false;
-		searchForGroupButton.active = false;
+		searchGroupButton.active = false;
 
 		teleportButton.visible = ExplorersCompass.canTeleport;
-	}
-
-	private void setupTextFields() {
-		searchTextField = new TransparentTextField(textRenderer, width / 2 - 82, 10, 140, 20, Text.translatable("string.explorerscompass.search"));
-		addDrawableChild(searchTextField);
+		
+		searchTextField = new TransparentTextField(font, width / 2 - 82, 10, 140, 20, Component.translatable("string.explorerscompass.search"));
+		addRenderableWidget(searchTextField);
+		
+		if (selectionList == null) {
+			selectionList = new StructureSearchList(this, minecraft, player, width + 110, height - 50, 40, 50);
+		}
+		addRenderableWidget(selectionList);
 	}
 
 }
