@@ -151,9 +151,9 @@ public class StructureUtils {
 	
 	public static int getXpLevelsForStructure(ServerLevel serverLevel, Identifier structureKey) {
 		int xpLevels = ExplorersCompassConfig.defaultXpLevel;
-		for (String structureRegex : ExplorersCompassConfig.xpLevelOverrides.keySet()) {
+		for (String structureRegex : ExplorersCompassConfig.perStructureXpLevels.keySet()) {
 			if (structureKey.toString().matches(convertToRegex(structureRegex))) {
-				xpLevels = ExplorersCompassConfig.xpLevelOverrides.get(structureRegex);
+				xpLevels = ExplorersCompassConfig.perStructureXpLevels.get(structureRegex);
 				if (xpLevels > 3) {
 					xpLevels = 3;
 				}

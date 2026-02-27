@@ -27,7 +27,7 @@ public class ExplorersCompassConfig {
 	public static int maxRadius = 10000;
 	public static int maxSamples = 100000;
 	public static int defaultXpLevel = 0;
-	public static Map<String, Integer> xpLevelOverrides = new HashMap<String, Integer>();
+	public static Map<String, Integer> perStructureXpLevels = new HashMap<String, Integer>();
 	public static List<String> structureBlacklist = new ArrayList<String>();
 	
 	public static boolean displayWithChatOpen = true;
@@ -48,7 +48,7 @@ public class ExplorersCompassConfig {
 				maxRadius = data.common.maxRadius;
 				maxSamples = data.common.maxSamples;
 				defaultXpLevel = data.common.defaultXpLevel;
-				xpLevelOverrides = data.common.xpLevelOverrides;
+				perStructureXpLevels = data.common.perStructureXpLevels;
 				structureBlacklist = data.common.structureBlacklist;
 				
 				displayWithChatOpen = data.client.displayWithChatOpen;
@@ -67,7 +67,7 @@ public class ExplorersCompassConfig {
 	public static void save() {
 		try {
 			Writer writer = Files.newBufferedWriter(getFilePath());
-			Data data = new Data(new Data.Common(allowTeleport, displayCoordinates, maxRadius, maxSamples, defaultXpLevel, xpLevelOverrides, structureBlacklist), new Data.Client(displayWithChatOpen, translateStructureNames, overlayLineOffset, overlaySide));
+			Data data = new Data(new Data.Common(allowTeleport, displayCoordinates, maxRadius, maxSamples, defaultXpLevel, perStructureXpLevels, structureBlacklist), new Data.Client(displayWithChatOpen, translateStructureNames, overlayLineOffset, overlaySide));
 			gson.toJson(data, writer);
 			writer.close();
 		} catch (IOException e) {
@@ -108,8 +108,8 @@ public class ExplorersCompassConfig {
 			private final String defaultXpLevelComment = "The default number of XP levels consumed when searching for a structure. Individual structures can be configured via xpLevelOverrides. Max of 3 levels.";
 			private final int defaultXpLevel;
 			
-			private final String xpLevelOverridesComment = "A map of structure-specific XP level costs that override defaultXpLevels. Structures not listed here use defaultXpLevels. Max of 3 levels. The wildcard character * can be used to match any number of characters, and ? can be used to match one character. Ex: {\"minecraft:buried_treasure\":3, \"minecraft:end*\":2, \"minecraft:*village*\":1}";
-			private final Map<String, Integer> xpLevelOverrides;
+			private final String perStructureXpLevelsComment = "A map of per-structure XP level costs that override defaultXpLevels. Structures not listed here use defaultXpLevels. Max of 3 levels. The wildcard character * can be used to match any number of characters, and ? can be used to match one character. Ex: {\"minecraft:buried_treasure\":3, \"minecraft:end*\":2, \"minecraft:*village*\":1}";
+			private final Map<String, Integer> perStructureXpLevels;
 			
 			private final String structureBlacklistComment = "A list of structures that the compass will not display in the GUI and will not be able to search for. The wildcard character * can be used to match any number of characters, and ? can be used to match one character. Ex (ignore backslashes): [\"minecraft:stronghold\", \"minecraft:endcity\", \"minecraft:*village*\"]";
 			private final List<String> structureBlacklist;
@@ -120,17 +120,17 @@ public class ExplorersCompassConfig {
 				maxRadius = 10000;
 				maxSamples = 100000;
 				defaultXpLevel = 0;
-				xpLevelOverrides = new HashMap<String, Integer>();
+				perStructureXpLevels = new HashMap<String, Integer>();
 				structureBlacklist = new ArrayList<String>();
 			}
 			
-			private Common(boolean allowTeleport, boolean displayCoordinates, int maxRadius, int maxSamples, int defaultXpLevel, Map<String, Integer> xpLevelOverrides, List<String> structureBlacklist) {
+			private Common(boolean allowTeleport, boolean displayCoordinates, int maxRadius, int maxSamples, int defaultXpLevel, Map<String, Integer> perStructureXpLevels, List<String> structureBlacklist) {
 				this.allowTeleport = allowTeleport;
 				this.displayCoordinates = displayCoordinates;
 				this.maxRadius = maxRadius;
 				this.maxSamples = maxSamples;
 				this.defaultXpLevel = defaultXpLevel;
-				this.xpLevelOverrides = xpLevelOverrides;
+				this.perStructureXpLevels = perStructureXpLevels;
 				this.structureBlacklist = structureBlacklist;
 			}
 		}
