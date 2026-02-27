@@ -142,7 +142,7 @@ public class StructureUtils {
 	}
 
 	public static Map<String, Integer> parseXpLevelOverridesConfig() {
-		final List<String> xpLevelOverrides = ConfigHandler.GENERAL.xpLevelOverrides.get();
+		final List<String> xpLevelOverrides = ConfigHandler.GENERAL.perStructureXpLevels.get();
 		Map<String, Integer> parsedOverrides = new HashMap<String, Integer>();
 		for (String override : xpLevelOverrides) {
 			String[] split = override.split(",");
