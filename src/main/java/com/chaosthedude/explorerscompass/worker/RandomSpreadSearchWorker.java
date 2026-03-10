@@ -63,12 +63,12 @@ public class RandomSpreadSearchWorker extends StructureSearchWorker<RandomSpread
 
 			z++;
 			if (z > length) {
-				z = -length;
 				x++;
 				if (x > length) {
-					x = -length;
 					length++;
+					x = -length;
 				}
+				z = -length;
 			}
 		} else {
 			if (!finished) {
