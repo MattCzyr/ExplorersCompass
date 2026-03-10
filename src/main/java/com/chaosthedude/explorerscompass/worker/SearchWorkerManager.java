@@ -29,7 +29,7 @@ public class SearchWorkerManager {
 		workers = new ArrayList<StructureSearchWorker<?>>();
 	}
 	
-	public void createWorkers(ServerLevel level, Player player, ItemStack stack, List<Structure> structures, BlockPos startPos) {
+	public void createWorkers(ServerLevel level, Player player, ItemStack stack, List<Structure> structures, boolean isGroup, BlockPos startPos, List<BlockPos> prevPos) {
 		workers.clear();
 		
 		Map<StructurePlacement, List<Structure>> placementToStructuresMap = new Object2ObjectArrayMap<>();
@@ -44,14 +44,20 @@ public class SearchWorkerManager {
 
 		for (Map.Entry<StructurePlacement, List<Structure>> entry : placementToStructuresMap.entrySet()) {
 			StructurePlacement placement = entry.getKey();
+			List<Structure> placementStructures = entry.getValue();
+			
 			if (placement instanceof ConcentricRingsStructurePlacement) {
-				workers.add(new ConcentricRingsSearchWorker(level, player, stack, startPos, (ConcentricRingsStructurePlacement) placement, entry.getValue(), id));
+				workers.add(new ConcentricRingsSearchWorker(level, player, stack, startPos, prevPos, (ConcentricRingsStructurePlacement) placement, placementStructures, isGroup, id));
 			} else if (placement instanceof RandomSpreadStructurePlacement) {
-				workers.add(new RandomSpreadSearchWorker(level, player, stack, startPos, (RandomSpreadStructurePlacement) placement, entry.getValue(), id));
+				workers.add(new RandomSpreadSearchWorker(level, player, stack, startPos, prevPos, (RandomSpreadStructurePlacement) placement, placementStructures, isGroup, id));
 			} else {
-				workers.add(new GenericSearchWorker(level, player, stack, startPos, placement, entry.getValue(), id));
+				workers.add(new GenericSearchWorker(level, player, stack, startPos, prevPos, placement, placementStructures, isGroup, id));
 			}
 		}
+	}
+	
+	public void createWorkers(ServerLevel level, Player player, ItemStack stack, List<Structure> structures, boolean isGroup, BlockPos startPos) {
+		createWorkers(level, player, stack, structures, isGroup, startPos, null);
 	}
 	
 	// Returns true if a worker starts, false otherwise

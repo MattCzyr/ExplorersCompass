@@ -8,10 +8,8 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.player.Player;
 
 public class StructureSearchEntry extends ObjectSelectionList.Entry<StructureSearchEntry> {
@@ -73,9 +71,11 @@ public class StructureSearchEntry extends ObjectSelectionList.Entry<StructureSea
 
 	@Override
 	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-		boolean selected = structuresList.selectStructure(this);
-		if (doubleClick && selected) {
-			searchForStructure();
+		if (isEnabled()) {
+			structuresList.setSelected(this);
+			if (doubleClick) {
+				parentScreen.searchForStructure(structureId);
+			}
 		}
 		return true;
 	}
@@ -85,18 +85,16 @@ public class StructureSearchEntry extends ObjectSelectionList.Entry<StructureSea
 		return Component.literal(StructureUtils.getStructureName(structureId));
 	}
 
-	public void searchForStructure() {
-		mc.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
-		parentScreen.searchForStructure(structureId);
-	}
-
-	public void searchForGroup() {
-		mc.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
-		parentScreen.searchForGroup(ExplorersCompass.structureIdsToGroupIds.get(structureId));
-	}
-
 	public boolean isEnabled() {
 		return ExplorersCompass.infiniteXp || player.experienceLevel >= xpLevels;
+	}
+	
+	public Identifier getStructureId() {
+		return structureId;
+	}
+	
+	public Identifier getGroupId() {
+		return ExplorersCompass.structureIdsToGroupIds.get(structureId);
 	}
 
 }

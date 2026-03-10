@@ -24,8 +24,8 @@ public class GenericSearchWorker extends StructureSearchWorker<StructurePlacemen
 	public double nextLength;
 	public Direction direction;
 
-	public GenericSearchWorker(ServerLevel level, Player player, ItemStack stack, BlockPos startPos, StructurePlacement placement, List<Structure> structureSet, String managerId) {
-		super(level, player, stack, startPos, placement, structureSet, managerId);
+	public GenericSearchWorker(ServerLevel level, Player player, ItemStack stack, BlockPos startPos, List<BlockPos> prevPos, StructurePlacement placement, List<Structure> structureSet, boolean isGroup, String managerId) {
+		super(level, player, stack, startPos, prevPos, placement, structureSet, isGroup, managerId);
 		chunkX = startPos.getX() >> 4;
 		chunkZ = startPos.getZ() >> 4;
 		nextLength = 1;
@@ -50,7 +50,8 @@ public class GenericSearchWorker extends StructureSearchWorker<StructurePlacemen
 			currentPos = new BlockPos(SectionPos.sectionToBlockCoord(chunkPos.x, 8), 0, SectionPos.sectionToBlockCoord(chunkPos.z, 8));
 
 			Pair<BlockPos, Structure> pair = getStructureGeneratingAt(chunkPos);
-			if (pair != null) {
+			if (pair != null && !shouldIgnore(pair.getFirst())) {
+				prevPos.add(pair.getFirst());
 				succeed(pair.getFirst(), pair.getSecond());
 			}
 

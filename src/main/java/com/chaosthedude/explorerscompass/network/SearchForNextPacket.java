@@ -12,37 +12,34 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-public record SearchPacket(Identifier structureOrGroupId, boolean isGroup) implements CustomPacketPayload {
-	
-	public static final Type<SearchPacket> TYPE = new Type<SearchPacket>(Identifier.fromNamespaceAndPath(ExplorersCompass.MODID, "search"));
-	
-	public static final StreamCodec<FriendlyByteBuf, SearchPacket> CODEC = StreamCodec.ofMember(SearchPacket::write, SearchPacket::read);
+public record SearchForNextPacket() implements CustomPacketPayload {
 
-	public static SearchPacket read(FriendlyByteBuf buf) {
-		final Identifier groupId = buf.readIdentifier();
-		final boolean isGroup = buf.readBoolean();
-		return new SearchPacket(groupId, isGroup);
+	public static final Type<SearchForNextPacket> TYPE = new Type<>(Identifier.fromNamespaceAndPath(ExplorersCompass.MODID, "continue_search"));
+
+	public static final StreamCodec<FriendlyByteBuf, SearchForNextPacket> CODEC = StreamCodec.ofMember(SearchForNextPacket::write, SearchForNextPacket::read);
+
+	public static SearchForNextPacket read(FriendlyByteBuf buf) {
+		return new SearchForNextPacket();
 	}
 
 	public void write(FriendlyByteBuf buf) {
-		buf.writeIdentifier(structureOrGroupId);
-		buf.writeBoolean(isGroup);
 	}
 
-	public static void handle(SearchPacket packet, IPayloadContext context) {
+	public static void handle(SearchForNextPacket packet, IPayloadContext context) {
 		if (context.flow().isServerbound()) {
 			context.enqueueWork(() -> {
 				final ItemStack stack = ItemUtils.getHeldItem(context.player(), ExplorersCompass.explorersCompass);
 				if (!stack.isEmpty()) {
 					final ExplorersCompassItem explorersCompass = (ExplorersCompassItem) stack.getItem();
-					explorersCompass.searchForStructure((ServerLevel) context.player().level(), context.player(), context.player().blockPosition(), packet.structureOrGroupId, packet.isGroup, stack);
+					explorersCompass.searchForNextStructure((ServerLevel) context.player().level(), context.player(), context.player().blockPosition(), stack);
 				}
 			});
 		}
 	}
-	
+
 	@Override
-	public Type<SearchPacket> type() {
+	public Type<SearchForNextPacket> type() {
 		return TYPE;
 	}
+
 }

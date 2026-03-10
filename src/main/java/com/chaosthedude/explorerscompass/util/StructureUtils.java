@@ -36,14 +36,6 @@ import net.neoforged.fml.ModList;
 
 public class StructureUtils {
 
-	public static ListMultimap<Identifier, Identifier> groupIdsToStructureIds(ServerLevel level) {
-		ListMultimap<Identifier, Identifier> groupIdsToStructureIds = ArrayListMultimap.create();
-		for (Structure structure : getStructureRegistry(level)) {
-			groupIdsToStructureIds.put(getGroupForStructure(level, structure), getIdForStructure(level, structure));
-		}
-		return groupIdsToStructureIds;
-	}
-
 	public static Map<Identifier, Identifier> structureIdsToGroupIds(ServerLevel level) {
 		Map<Identifier, Identifier> structureIdsToGroupIds = new HashMap<Identifier, Identifier>();
 		for (Structure structure : getStructureRegistry(level)) {
@@ -62,6 +54,21 @@ public class StructureUtils {
 			}
 		}
 		return Identifier.fromNamespaceAndPath(ExplorersCompass.MODID, "none");
+	}
+	
+	public static List<Identifier> getStructuresForGroup(ServerLevel level, Identifier groupId) {
+		List<Identifier> structureIds = new ArrayList<Identifier>();
+		Registry<StructureSet> registry = getStructureSetRegistry(level);
+		if (registry.containsKey(groupId)) {
+			StructureSet set = registry.getValue(groupId);
+			for (StructureSelectionEntry entry : set.structures()) {
+				Identifier structureId = getIdForStructure(level, entry.structure().value());
+				if (structureId != null) {
+					structureIds.add(structureId);
+				}
+			}
+		}
+		return structureIds;
 	}
 
 	public static Identifier getIdForStructure(ServerLevel level, Structure structure) {

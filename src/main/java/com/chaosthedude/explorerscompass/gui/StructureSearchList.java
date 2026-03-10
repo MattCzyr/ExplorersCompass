@@ -14,11 +14,11 @@ public class StructureSearchList extends ObjectSelectionList<StructureSearchEntr
 	private final ExplorersCompassScreen parentScreen;
 	private Player player;
 
-	public StructureSearchList(ExplorersCompassScreen parentScreen, Minecraft mc, Player player, int width, int height, int y, int itemHeight) {
+	public StructureSearchList(ExplorersCompassScreen parentScreen, Minecraft mc, Player player, Identifier structureIdToSelect, int width, int height, int y, int itemHeight) {
 		super(mc, width, height, y, itemHeight);
 		this.parentScreen = parentScreen;
 		this.player = player;
-		refreshList();
+		refreshList(structureIdToSelect);
 	}
 
 	@Override
@@ -74,23 +74,29 @@ public class StructureSearchList extends ObjectSelectionList<StructureSearchEntr
 			guiGraphics.fill(left, top, right, top + height, scrollbarFillColor);
 		}
 	}
-
-	public void refreshList() {
-		clearEntries();
-		for (Identifier structureId : parentScreen.sortStructures()) {
-			addEntry(new StructureSearchEntry(this, structureId, player));
+	
+	@Override
+	public void setSelected(StructureSearchEntry entry) {
+		if (entry == null || entry.isEnabled()) {
+			super.setSelected(entry);
 		}
-		selectStructure(null);
-		setScrollAmount(0);
 	}
 
-	public boolean selectStructure(StructureSearchEntry entry) {
-		if (entry == null || entry.isEnabled()) {
-			setSelected(entry);
-			parentScreen.selectStructure(entry);
-			return true;
+	public void refreshList(Identifier structureIdToSelect) {
+		clearEntries();
+		for (Identifier structureId : parentScreen.sortStructures()) {
+			StructureSearchEntry entry = new StructureSearchEntry(this, structureId, player);
+			addEntry(entry);
+			if (structureId.equals(structureIdToSelect)) {
+				setSelected(entry);
+			}
 		}
-		return false;
+		setScrollAmount(0);
+	}
+	
+	public void refreshList(boolean maintainSelection) {
+		Identifier select = maintainSelection && hasSelection() ? getSelected().getStructureId() : null;
+		refreshList(select);
 	}
 
 	public boolean hasSelection() {

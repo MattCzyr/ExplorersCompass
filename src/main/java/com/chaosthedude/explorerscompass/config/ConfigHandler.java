@@ -20,6 +20,7 @@ public class ConfigHandler {
 
 	public static class General {
 		public final ModConfigSpec.BooleanValue allowTeleport;
+		public final ModConfigSpec.IntValue maxNextSearches;
 		public final ModConfigSpec.BooleanValue displayCoordinates;
 		public final ModConfigSpec.IntValue maxRadius;
 		public final ModConfigSpec.ConfigValue<List<String>> structureBlacklist;
@@ -33,7 +34,10 @@ public class ConfigHandler {
 
 			desc = "Allows a player to teleport to a located structure when in creative mode, opped, or in cheat mode.";
 			allowTeleport = builder.comment(desc).define("allowTeleport", true);
-			
+
+			desc = "The maximum number of times a player can search for the next instance of a located structure, excluding already-found locations. Set to 0 to disable searching for additional structure instances and make the compass always locate the nearest instance.";
+			maxNextSearches = builder.comment(desc).defineInRange("maxNextSearches", 100, 0, 10000);
+
 			desc = "Allows players to view the precise coordinates and distance of a located structure on the HUD, rather than relying on the direction the compass is pointing.";
 			displayCoordinates = builder.comment(desc).define("displayCoordinates", true);
 

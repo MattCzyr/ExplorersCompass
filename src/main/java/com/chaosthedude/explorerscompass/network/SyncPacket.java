@@ -15,7 +15,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-public record SyncPacket(boolean canTeleport, boolean infiniteXp, List<Identifier> allowedStructures, Map<Identifier, Integer> xpLevelsForAllowedStructures, ListMultimap<Identifier, Identifier> dimensionsForAllowedStructures, Map<Identifier, Identifier> structureIdsToGroupIds, ListMultimap<Identifier, Identifier> groupIdsToStructureIds) implements CustomPacketPayload {
+public record SyncPacket(boolean canTeleport, int maxNextSearches, boolean infiniteXp, List<Identifier> allowedStructures, Map<Identifier, Integer> xpLevelsForAllowedStructures, ListMultimap<Identifier, Identifier> dimensionsForAllowedStructures, Map<Identifier, Identifier> structureIdsToGroupIds) implements CustomPacketPayload {
 
 	public static final Type<SyncPacket> TYPE = new Type<SyncPacket>(Identifier.fromNamespaceAndPath(ExplorersCompass.MODID, "sync"));
 
@@ -23,12 +23,12 @@ public record SyncPacket(boolean canTeleport, boolean infiniteXp, List<Identifie
 
 	public static SyncPacket read(FriendlyByteBuf buf) {
 		final boolean canTeleport = buf.readBoolean();
+		final int maxNextSearches = buf.readInt();
 		final boolean infiniteXp = buf.readBoolean();
 		final List<Identifier> allowedStructureIds = new ArrayList<Identifier>();
 		final Map<Identifier, Integer> xpLevelsForAllowedStructures = new HashMap<Identifier, Integer>();
 		final ListMultimap<Identifier, Identifier> dimensionsForAllowedStructures = ArrayListMultimap.create();
 		final Map<Identifier, Identifier> structureIdsToGroupIds = new HashMap<Identifier, Identifier>();
-		final ListMultimap<Identifier, Identifier> groupIdsToStructureIds = ArrayListMultimap.create();
 
 		final int numStructures = buf.readInt();
 		for (int i = 0; i < numStructures; i++) {
@@ -48,21 +48,12 @@ public record SyncPacket(boolean canTeleport, boolean infiniteXp, List<Identifie
 			}
 		}
 
-		final int numTypes = buf.readInt();
-		for (int i = 0; i < numTypes; i++) {
-			final Identifier typeKey = buf.readIdentifier();
-			final int numStructuresToAdd = buf.readInt();
-			for (int j = 0; j < numStructuresToAdd; j++) {
-				final Identifier structureKey = buf.readIdentifier();
-				groupIdsToStructureIds.put(typeKey, structureKey);
-			}
-		}
-
-		return new SyncPacket(canTeleport, infiniteXp, allowedStructureIds, xpLevelsForAllowedStructures, dimensionsForAllowedStructures, structureIdsToGroupIds, groupIdsToStructureIds);
+		return new SyncPacket(canTeleport, maxNextSearches, infiniteXp, allowedStructureIds, xpLevelsForAllowedStructures, dimensionsForAllowedStructures, structureIdsToGroupIds);
 	}
 
 	public void write(FriendlyByteBuf buf) {
 		buf.writeBoolean(canTeleport);
+		buf.writeInt(maxNextSearches);
 		buf.writeBoolean(infiniteXp);
 		buf.writeInt(allowedStructures.size());
 		for (Identifier structureKey : allowedStructures) {
@@ -77,28 +68,19 @@ public record SyncPacket(boolean canTeleport, boolean infiniteXp, List<Identifie
 			int xpLevels = xpLevelsForAllowedStructures.get(structureKey);
 			buf.writeInt(xpLevels);
 		}
-
-		buf.writeInt(groupIdsToStructureIds.keySet().size());
-		for (Identifier typeKey : groupIdsToStructureIds.keySet()) {
-			buf.writeIdentifier(typeKey);
-			List<Identifier> structureKeys = groupIdsToStructureIds.get(typeKey);
-			buf.writeInt(structureKeys.size());
-			for (Identifier structureKey : structureKeys) {
-				buf.writeIdentifier(structureKey);
-			}
-		}
 	}
 
 	public static void handle(SyncPacket packet, IPayloadContext  context) {
 		if (context.flow().isClientbound()) {
 			context.enqueueWork(() -> {
+				ExplorersCompass.synced = true;
 				ExplorersCompass.canTeleport = packet.canTeleport;
+				ExplorersCompass.maxNextSearches = packet.maxNextSearches;
 				ExplorersCompass.infiniteXp = packet.infiniteXp;
 				ExplorersCompass.allowedStructures = packet.allowedStructures;
 				ExplorersCompass.xpLevelsForAllowedStructures = packet.xpLevelsForAllowedStructures;
 				ExplorersCompass.dimensionsForAllowedStructures = packet.dimensionsForAllowedStructures;
 				ExplorersCompass.structureIdsToGroupIds = packet.structureIdsToGroupIds;
-				ExplorersCompass.groupIdsToStructureIds = packet.groupIdsToStructureIds;
 			});
 		}
 	}
