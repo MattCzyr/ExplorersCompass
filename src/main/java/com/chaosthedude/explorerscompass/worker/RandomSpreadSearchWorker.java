@@ -6,11 +6,11 @@ import com.mojang.datafixers.util.Pair;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.placement.RandomSpreadStructurePlacement;
 
@@ -23,8 +23,8 @@ public class RandomSpreadSearchWorker extends StructureSearchWorker<RandomSpread
 	private int x;
 	private int z;
 
-	public RandomSpreadSearchWorker(ServerLevel level, Player player, ItemStack stack, BlockPos startPos, List<BlockPos> prevPos, RandomSpreadStructurePlacement placement, List<Structure> structureSet, boolean isGroup, String managerId) {
-		super(level, player, stack, startPos, prevPos, placement, structureSet, isGroup, managerId);
+	public RandomSpreadSearchWorker(ServerLevel level, Player player, ItemStack stack, BlockPos startPos, List<BlockPos> prevPos, RandomSpreadStructurePlacement placement, List<Structure> structureSet, Identifier structureOrGroupId, boolean isGroup, String managerId) {
+		super(level, player, stack, startPos, prevPos, placement, structureSet, structureOrGroupId, isGroup, managerId);
 
 		spacing = placement.spacing();
 		startSectionPosX = SectionPos.blockToSectionCoord(startPos.getX());

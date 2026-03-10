@@ -34,8 +34,6 @@ public class ExplorersCompassScreen extends Screen {
 	private Player player;
 	private List<Identifier> allowedStructures;
 	private List<Identifier> structuresMatchingSearch;
-	private ItemStack stack;
-	private ExplorersCompassItem explorersCompass;
 	private Identifier foundStructureId;
 	private Button searchButton;
 	private Button searchForNextButton;
@@ -51,15 +49,16 @@ public class ExplorersCompassScreen extends Screen {
 		super(Component.translatable("string.explorerscompass.selectStructure"));
 		this.level = level;
 		this.player = player;
-		this.stack = stack;
-		this.explorersCompass = explorersCompass;
 		
 		this.allowedStructures = new ArrayList<Identifier>(allowedStructures);
 		structuresMatchingSearch = new ArrayList<Identifier>(this.allowedStructures);
 		sortingCategory = new NameSorting();
 		
 		if (explorersCompass.getCompassState(stack) == CompassState.FOUND) {
-			foundStructureId = explorersCompass.getStructureId(stack);
+			String foundStructureIdStr = stack.getOrDefault(ExplorersCompass.STRUCTURE_ID, null);
+			if (foundStructureIdStr != null) {
+				foundStructureId = Identifier.parse(foundStructureIdStr);
+			}
 		}
 	}
 

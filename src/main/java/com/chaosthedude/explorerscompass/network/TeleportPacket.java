@@ -40,8 +40,8 @@ public static final Type<TeleportPacket> TYPE = new Type<TeleportPacket>(Identif
 					final ServerPlayer player = (ServerPlayer) context.player();
 					if (ConfigHandler.GENERAL.allowTeleport.get() && PlayerUtils.canTeleport(player.level().getServer(), player)) {
 						if (explorersCompass.getCompassState(stack) == CompassState.FOUND) {
-							final int x = explorersCompass.getFoundStructureX(stack);
-							final int z = explorersCompass.getFoundStructureZ(stack);
+							final int x = stack.getOrDefault(ExplorersCompass.FOUND_X, 0);
+							final int z = stack.getOrDefault(ExplorersCompass.FOUND_Z, 0);
 							final int y = packet.findValidTeleportHeight(player.level(), x, z);
 	
 							player.stopRiding();

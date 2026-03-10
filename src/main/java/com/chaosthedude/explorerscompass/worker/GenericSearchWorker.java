@@ -3,12 +3,12 @@ package com.chaosthedude.explorerscompass.worker;
 import java.util.List;
 
 import com.chaosthedude.explorerscompass.ExplorersCompass;
-import com.chaosthedude.explorerscompass.item.ExplorersCompassItem;
 import com.mojang.datafixers.util.Pair;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.SectionPos;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -24,8 +24,8 @@ public class GenericSearchWorker extends StructureSearchWorker<StructurePlacemen
 	public double nextLength;
 	public Direction direction;
 
-	public GenericSearchWorker(ServerLevel level, Player player, ItemStack stack, BlockPos startPos, List<BlockPos> prevPos, StructurePlacement placement, List<Structure> structureSet, boolean isGroup, String managerId) {
-		super(level, player, stack, startPos, prevPos, placement, structureSet, isGroup, managerId);
+	public GenericSearchWorker(ServerLevel level, Player player, ItemStack stack, BlockPos startPos, List<BlockPos> prevPos, StructurePlacement placement, List<Structure> structureSet, Identifier structureOrGroupId, boolean isGroup, String managerId) {
+		super(level, player, stack, startPos, prevPos, placement, structureSet, structureOrGroupId, isGroup, managerId);
 		chunkX = startPos.getX() >> 4;
 		chunkZ = startPos.getZ() >> 4;
 		nextLength = 1;
@@ -70,7 +70,7 @@ public class GenericSearchWorker extends StructureSearchWorker<StructurePlacemen
 			int radius = getRadius();
 			if (radius > 250 && radius / 250 > lastRadiusThreshold) {
 				if (!stack.isEmpty() && stack.getItem() == ExplorersCompass.explorersCompass) {
-					((ExplorersCompassItem) stack.getItem()).setSearchRadius(stack, roundRadius(radius, 250), player);
+					stack.set(ExplorersCompass.SEARCH_RADIUS, roundRadius(radius, 250));
 				}
 				lastRadiusThreshold = radius / 250;
 			}

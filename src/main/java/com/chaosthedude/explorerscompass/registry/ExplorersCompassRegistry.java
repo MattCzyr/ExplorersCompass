@@ -20,15 +20,15 @@ public class ExplorersCompassRegistry {
         });
 		
 		e.register(BuiltInRegistries.DATA_COMPONENT_TYPE.key(), registry -> {
-			registry.register(Identifier.fromNamespaceAndPath(ExplorersCompass.MODID, "structure_id"), ExplorersCompass.STRUCTURE_ID_COMPONENT);
-			registry.register(Identifier.fromNamespaceAndPath(ExplorersCompass.MODID, "compass_state"), ExplorersCompass.COMPASS_STATE_COMPONENT);
-			registry.register(Identifier.fromNamespaceAndPath(ExplorersCompass.MODID, "found_x"), ExplorersCompass.FOUND_X_COMPONENT);
-			registry.register(Identifier.fromNamespaceAndPath(ExplorersCompass.MODID, "found_z"), ExplorersCompass.FOUND_Z_COMPONENT);
-			registry.register(Identifier.fromNamespaceAndPath(ExplorersCompass.MODID, "search_radius"), ExplorersCompass.SEARCH_RADIUS_COMPONENT);
-			registry.register(Identifier.fromNamespaceAndPath(ExplorersCompass.MODID, "samples"), ExplorersCompass.SAMPLES_COMPONENT);
-			registry.register(Identifier.fromNamespaceAndPath(ExplorersCompass.MODID, "display_coords"), ExplorersCompass.DISPLAY_COORDS_COMPONENT);
-			registry.register(Identifier.fromNamespaceAndPath(ExplorersCompass.MODID, "is_group"), ExplorersCompass.IS_GROUP_COMPONENT);
-			registry.register(Identifier.fromNamespaceAndPath(ExplorersCompass.MODID, "prev_pos"), ExplorersCompass.PREV_POS_COMPONENT);
+			registry.register(Identifier.fromNamespaceAndPath(ExplorersCompass.MODID, "structure_id"), ExplorersCompass.STRUCTURE_ID);
+			registry.register(Identifier.fromNamespaceAndPath(ExplorersCompass.MODID, "compass_state"), ExplorersCompass.COMPASS_STATE);
+			registry.register(Identifier.fromNamespaceAndPath(ExplorersCompass.MODID, "found_x"), ExplorersCompass.FOUND_X);
+			registry.register(Identifier.fromNamespaceAndPath(ExplorersCompass.MODID, "found_z"), ExplorersCompass.FOUND_Z);
+			registry.register(Identifier.fromNamespaceAndPath(ExplorersCompass.MODID, "search_radius"), ExplorersCompass.SEARCH_RADIUS);
+			registry.register(Identifier.fromNamespaceAndPath(ExplorersCompass.MODID, "samples"), ExplorersCompass.SAMPLES);
+			registry.register(Identifier.fromNamespaceAndPath(ExplorersCompass.MODID, "display_coords"), ExplorersCompass.DISPLAY_COORDS);
+			registry.register(Identifier.fromNamespaceAndPath(ExplorersCompass.MODID, "is_group"), ExplorersCompass.IS_GROUP);
+			registry.register(Identifier.fromNamespaceAndPath(ExplorersCompass.MODID, "prev_pos"), ExplorersCompass.PREV_POS);
 		});
 	}
 

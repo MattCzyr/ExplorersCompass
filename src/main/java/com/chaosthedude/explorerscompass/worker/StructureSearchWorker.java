@@ -10,6 +10,7 @@ import com.mojang.datafixers.util.Pair;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -31,19 +32,21 @@ public abstract class StructureSearchWorker<T extends StructurePlacement> implem
 	protected BlockPos currentPos;
 	protected T placement;
 	protected List<Structure> structureSet;
+	protected Identifier structureOrGroupId;
 	protected boolean isGroup;
 	protected int samples;
 	protected boolean finished;
 	protected int lastRadiusThreshold;
 	protected List<BlockPos> prevPos;
 
-	public StructureSearchWorker(ServerLevel level, Player player, ItemStack stack, BlockPos startPos, List<BlockPos> prevPos, T placement, List<Structure> structureSet, boolean isGroup, String managerId) {
+	public StructureSearchWorker(ServerLevel level, Player player, ItemStack stack, BlockPos startPos, List<BlockPos> prevPos, T placement, List<Structure> structureSet, Identifier structureOrGroupId, boolean isGroup, String managerId) {
 		this.level = level;
 		this.player = player;
 		this.stack = stack;
 		this.startPos = startPos;
 		this.prevPos = prevPos;
 		this.structureSet = structureSet;
+		this.structureOrGroupId = structureOrGroupId;
 		this.isGroup = isGroup;
 		this.placement = placement;
 		this.managerId = managerId;
@@ -75,7 +78,7 @@ public abstract class StructureSearchWorker<T extends StructurePlacement> implem
 		int radius = getRadius();
 		if (radius > 250 && radius / 250 > lastRadiusThreshold) {
 			if (!stack.isEmpty() && stack.getItem() == ExplorersCompass.explorersCompass) {
-				((ExplorersCompassItem) stack.getItem()).setSearchRadius(stack, roundRadius(radius, 250), player);
+				stack.set(ExplorersCompass.SEARCH_RADIUS, roundRadius(radius, 250));
 			}
 			lastRadiusThreshold = radius / 250;
 		}
@@ -114,7 +117,7 @@ public abstract class StructureSearchWorker<T extends StructurePlacement> implem
 	protected void fail() {
 		ExplorersCompass.LOGGER.info("SearchWorkerManager " + managerId + ": " + getName() + " failed with " + (shouldLogRadius() ? getRadius() + " radius, " : "") + samples + " samples");
 		if (!stack.isEmpty() && stack.getItem() == ExplorersCompass.explorersCompass) {
-			((ExplorersCompassItem) stack.getItem()).fail(stack, roundRadius(getRadius(), 250), samples);
+			((ExplorersCompassItem) stack.getItem()).fail(stack, structureOrGroupId, roundRadius(getRadius(), 250), samples);
 		} else {
 			ExplorersCompass.LOGGER.error("SearchWorkerManager " + managerId + ": " + getName() + " found invalid compass after failed search");
 		}
