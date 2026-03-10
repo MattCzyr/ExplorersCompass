@@ -1,3 +1,15 @@
+## Version 3.2.0
+#### NeoForge 1.21.11
+- Added feature to search for the next instance of an already located structure
+- Fixed an issue with certain structure types where instances west of the search starting position would be missed
+- More minor improvements to structure selection GUI
+
+## Version 2.4.0
+#### Fabric 1.21.11
+- Added feature to search for the next instance of an already located structure
+- Fixed an issue with certain structure types where instances west of the search starting position would be missed
+- More minor improvements to structure selection GUI
+
 ## Version 3.1.0
 #### NeoForge 1.21.11
 - Added config options to make the compass consume XP levels when searching for a structure
