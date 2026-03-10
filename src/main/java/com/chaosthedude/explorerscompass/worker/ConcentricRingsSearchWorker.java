@@ -8,6 +8,7 @@ import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.BlockPos.MutableBlockPos;
 import net.minecraft.core.SectionPos;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -22,8 +23,8 @@ public class ConcentricRingsSearchWorker extends StructureSearchWorker<Concentri
 	private double minDistance;
 	private Pair<BlockPos, Structure> closest;
 
-	public ConcentricRingsSearchWorker(ServerLevel level, Player player, ItemStack stack, BlockPos startPos, List<BlockPos> prevPos, ConcentricRingsStructurePlacement placement, List<Structure> structureSet, boolean isGroup, String managerId) {
-		super(level, player, stack, startPos, prevPos, placement, structureSet, isGroup, managerId);
+	public ConcentricRingsSearchWorker(ServerLevel level, Player player, ItemStack stack, BlockPos startPos, List<BlockPos> prevPos, ConcentricRingsStructurePlacement placement, List<Structure> structureSet, Identifier structureOrGroupId, boolean isGroup, String managerId) {
+		super(level, player, stack, startPos, prevPos, placement, structureSet, structureOrGroupId, isGroup, managerId);
 
 		minDistance = Double.MAX_VALUE;
 		chunkIndex = 0;

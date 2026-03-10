@@ -36,7 +36,7 @@ public class ExplorersCompassAngleState extends NeedleDirectionHelper {
 		if (stack.getItem() == ExplorersCompass.EXPLORERS_COMPASS_ITEM) {
 			ExplorersCompassItem compassItem = (ExplorersCompassItem) stack.getItem();
 			if (compassItem.getCompassState(stack) == CompassState.FOUND) {
-				pos = new GlobalPos(level.dimension(), new BlockPos(compassItem.getFoundStructureX(stack), 0, compassItem.getFoundStructureZ(stack)));
+				pos = new GlobalPos(level.dimension(), new BlockPos(stack.getOrDefault(ExplorersCompass.FOUND_X, 0), 0, stack.getOrDefault(ExplorersCompass.FOUND_Z, 0)));
 			}
 		}
 		long gameTime = level.getGameTime();
