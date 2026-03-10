@@ -1,9 +1,9 @@
 {
-    "_comment": "结构罗盘 - 语言文件",
+    "_comment": "探险者指南针 - 语言文件",
     "_comment": "中国大陆 - 简体中文",
 
     "_comment": "物品",
-    "item.explorerscompass.explorerscompass": "结构罗盘",
+    "item.explorerscompass.explorerscompass": "探险者指南针",
 
     "_comment": "字符串 - 按钮",
     "string.explorerscompass.back": "返回",
