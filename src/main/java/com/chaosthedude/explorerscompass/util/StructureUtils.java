@@ -37,16 +37,6 @@ import net.minecraft.world.level.levelgen.structure.StructureType;
 
 public class StructureUtils {
 	
-	public static ListMultimap<Identifier, Identifier> groupIdsToStructureIds(ServerLevel level) {
-		ListMultimap<Identifier, Identifier> groupIdsToStructureIds = ArrayListMultimap.create();
-		if (getStructureRegistry(level).isPresent()) {
-			for (Structure structure : getStructureRegistry(level).get()) {
-				groupIdsToStructureIds.put(getGroupForStructure(level, structure), getIdForStructure(level, structure));
-			}
-		}
-		return groupIdsToStructureIds;
-	}
-	
 	public static Map<Identifier, Identifier> structureIdsToGroupIds(ServerLevel level) {
 		Map<Identifier, Identifier> structureIdsToGroupIds = new HashMap<Identifier, Identifier>();
 		if (getStructureRegistry(level).isPresent()) {
@@ -69,6 +59,23 @@ public class StructureUtils {
 			}
 		}
 		return Identifier.fromNamespaceAndPath(ExplorersCompass.MODID, "none");
+	}
+	
+	public static List<Identifier> getStructuresForGroup(ServerLevel level, Identifier groupId) {
+		List<Identifier> structureIds = new ArrayList<Identifier>();
+		if (getStructureSetRegistry(level).isPresent()) {	
+			Registry<StructureSet> registry = getStructureSetRegistry(level).get();
+			if (registry.containsKey(groupId)) {
+				StructureSet set = registry.getValue(groupId);
+				for (StructureSelectionEntry entry : set.structures()) {
+					Identifier structureId = getIdForStructure(level, entry.structure().value());
+					if (structureId != null) {
+						structureIds.add(structureId);
+					}
+				}
+			}
+		}
+		return structureIds;
 	}
 
 	public static Identifier getIdForStructure(ServerLevel level, Structure structure) {

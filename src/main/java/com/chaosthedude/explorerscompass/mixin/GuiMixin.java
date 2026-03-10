@@ -41,7 +41,7 @@ public class GuiMixin {
 			final ItemStack stack = ItemUtils.getHeldItem(player, ExplorersCompass.EXPLORERS_COMPASS_ITEM);
 			if (stack != null && stack.getItem() instanceof ExplorersCompassItem) {
 				final ExplorersCompassItem compass = (ExplorersCompassItem) stack.getItem();
-				if (compass.getState(stack) == CompassState.SEARCHING) {
+				if (compass.getCompassState(stack) == CompassState.SEARCHING) {
 					RenderUtils.drawConfiguredStringOnHUD(guiGraphics, I18n.get("string.explorerscompass.status"), 5, 5, 0xffffffff, 0);
 					RenderUtils.drawConfiguredStringOnHUD(guiGraphics, I18n.get("string.explorerscompass.searching"), 5, 5, 0xffaaaaaa, 1);
 
@@ -50,7 +50,7 @@ public class GuiMixin {
 					
 					RenderUtils.drawConfiguredStringOnHUD(guiGraphics, I18n.get("string.explorerscompass.radius"), 5, 5, 0xffffffff, 6);
  					RenderUtils.drawConfiguredStringOnHUD(guiGraphics, String.valueOf(compass.getSearchRadius(stack)), 5, 5, 0xffaaaaaa, 7);
-				} else if (compass.getState(stack) == CompassState.FOUND) {
+				} else if (compass.getCompassState(stack) == CompassState.FOUND) {
 					RenderUtils.drawConfiguredStringOnHUD(guiGraphics, I18n.get("string.explorerscompass.status"), 5, 5, 0xffffffff, 0);
 					RenderUtils.drawConfiguredStringOnHUD(guiGraphics, I18n.get("string.explorerscompass.found"), 5, 5, 0xffaaaaaa, 1);
 
@@ -64,7 +64,7 @@ public class GuiMixin {
 						RenderUtils.drawConfiguredStringOnHUD(guiGraphics, I18n.get("string.explorerscompass.distance"), 5, 5, 0xffffffff, 9);
 						RenderUtils.drawConfiguredStringOnHUD(guiGraphics, String.valueOf(StructureUtils.getHorizontalDistanceToLocation(player, compass.getFoundStructureX(stack), compass.getFoundStructureZ(stack))), 5, 5, 0xffaaaaaa, 10);
 					}
-				} else if (compass.getState(stack) == CompassState.NOT_FOUND) {
+				} else if (compass.getCompassState(stack) == CompassState.NOT_FOUND) {
 					RenderUtils.drawConfiguredStringOnHUD(guiGraphics, I18n.get("string.explorerscompass.status"), 5, 5, 0xffffffff, 0);
 					RenderUtils.drawConfiguredStringOnHUD(guiGraphics, I18n.get("string.explorerscompass.notFound"), 5, 5, 0xffaaaaaa, 1);
 

@@ -23,6 +23,7 @@ public class ExplorersCompassConfig {
 	private static Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 	
 	public static boolean allowTeleport = true;
+	public static int maxNextSearches = 100;
 	public static boolean displayCoordinates = true;
 	public static int maxRadius = 10000;
 	public static int maxSamples = 100000;
@@ -44,6 +45,7 @@ public class ExplorersCompassConfig {
 				Data data = gson.fromJson(reader, Data.class);
 				
 				allowTeleport = data.common.allowTeleport;
+				maxNextSearches = data.common.maxNextSearches;
 				displayCoordinates = data.common.displayCoordinates;
 				maxRadius = data.common.maxRadius;
 				maxSamples = data.common.maxSamples;
@@ -67,7 +69,7 @@ public class ExplorersCompassConfig {
 	public static void save() {
 		try {
 			Writer writer = Files.newBufferedWriter(getFilePath());
-			Data data = new Data(new Data.Common(allowTeleport, displayCoordinates, maxRadius, maxSamples, defaultXpLevel, perStructureXpLevels, structureBlacklist), new Data.Client(displayWithChatOpen, translateStructureNames, overlayLineOffset, overlaySide));
+			Data data = new Data(new Data.Common(allowTeleport, maxNextSearches, displayCoordinates, maxRadius, maxSamples, defaultXpLevel, perStructureXpLevels, structureBlacklist), new Data.Client(displayWithChatOpen, translateStructureNames, overlayLineOffset, overlaySide));
 			gson.toJson(data, writer);
 			writer.close();
 		} catch (IOException e) {
@@ -95,7 +97,10 @@ public class ExplorersCompassConfig {
 		private static class Common {
 			private final String allowTeleportComment = "Allows a player to teleport to a located structure when in creative mode, opped, or in cheat mode.";
 			private final boolean allowTeleport;
-			
+
+			private final String maxNextSearchesComment = "The maximum number of times a player can search for the next instance of a located structure, excluding already-found locations. Set to 0 to disable searching for additional structure instances and make the compass always locate the nearest instance.";
+			private final int maxNextSearches;
+
 			private final String displayCoordinatesComment = "Allows players to view the precise coordinates and distance of a located structure on the HUD, rather than relying on the direction the compass is pointing.";
 			private final boolean displayCoordinates;
 			
@@ -116,6 +121,7 @@ public class ExplorersCompassConfig {
 			
 			private Common() {
 				allowTeleport = true;
+				maxNextSearches = 100;
 				displayCoordinates = true;
 				maxRadius = 10000;
 				maxSamples = 100000;
@@ -123,9 +129,10 @@ public class ExplorersCompassConfig {
 				perStructureXpLevels = new HashMap<String, Integer>();
 				structureBlacklist = new ArrayList<String>();
 			}
-			
-			private Common(boolean allowTeleport, boolean displayCoordinates, int maxRadius, int maxSamples, int defaultXpLevel, Map<String, Integer> perStructureXpLevels, List<String> structureBlacklist) {
+
+			private Common(boolean allowTeleport, int maxNextSearches, boolean displayCoordinates, int maxRadius, int maxSamples, int defaultXpLevel, Map<String, Integer> perStructureXpLevels, List<String> structureBlacklist) {
 				this.allowTeleport = allowTeleport;
+				this.maxNextSearches = maxNextSearches;
 				this.displayCoordinates = displayCoordinates;
 				this.maxRadius = maxRadius;
 				this.maxSamples = maxSamples;

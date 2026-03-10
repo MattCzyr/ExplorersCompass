@@ -22,8 +22,8 @@ public class RandomSpreadSearchWorker extends StructureSearchWorker<RandomSpread
 	private int x;
 	private int z;
 
-	public RandomSpreadSearchWorker(ServerLevel level, Player player, ItemStack stack, BlockPos startPos, RandomSpreadStructurePlacement placement, List<Structure> structureSet, String managerId) {
-		super(level, player, stack, startPos, placement, structureSet, managerId);
+	public RandomSpreadSearchWorker(ServerLevel level, Player player, ItemStack stack, BlockPos startPos, List<BlockPos> prevPos, RandomSpreadStructurePlacement placement, List<Structure> structureSet, boolean isGroup, String managerId) {
+		super(level, player, stack, startPos, prevPos, placement, structureSet, isGroup, managerId);
 
 		spacing = placement.spacing();
 		startSectionPosX = SectionPos.blockToSectionCoord(startPos.getX());
@@ -56,18 +56,21 @@ public class RandomSpreadSearchWorker extends StructureSearchWorker<RandomSpread
 				
 				Pair<BlockPos, Structure> pair = getStructureGeneratingAt(chunkPos);
 				samples++;
-				if (pair != null) {
+				if (pair != null && !shouldIgnore(pair.getFirst())) {
+					prevPos.add(pair.getFirst());
 					succeed(pair.getFirst(), pair.getSecond());
 				}
 			}
 
 			z++;
 			if (z > length) {
-				z = -length;
 				x++;
 				if (x > length) {
-					x = -length;
 					length++;
+					x = -length;
+					z = -length;
+				} else {
+					z = -length;
 				}
 			}
 		} else {

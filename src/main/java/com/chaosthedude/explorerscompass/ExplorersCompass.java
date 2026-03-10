@@ -10,6 +10,7 @@ import org.apache.logging.log4j.Logger;
 
 import com.chaosthedude.explorerscompass.config.ExplorersCompassConfig;
 import com.chaosthedude.explorerscompass.item.ExplorersCompassItem;
+import com.chaosthedude.explorerscompass.network.SearchForNextPacket;
 import com.chaosthedude.explorerscompass.network.SearchPacket;
 import com.chaosthedude.explorerscompass.network.SyncPacket;
 import com.chaosthedude.explorerscompass.network.TeleportPacket;
@@ -21,6 +22,7 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -43,14 +45,17 @@ public class ExplorersCompass implements ModInitializer {
 	public static final DataComponentType<Integer> SEARCH_RADIUS_COMPONENT = DataComponentType.<Integer>builder().persistent(Codec.INT).networkSynchronized(ByteBufCodecs.VAR_INT).build();
 	public static final DataComponentType<Integer> SAMPLES_COMPONENT = DataComponentType.<Integer>builder().persistent(Codec.INT).networkSynchronized(ByteBufCodecs.VAR_INT).build();
 	public static final DataComponentType<Boolean> DISPLAY_COORDS_COMPONENT = DataComponentType.<Boolean>builder().persistent(Codec.BOOL).networkSynchronized(ByteBufCodecs.BOOL).build();
-
+	public static final DataComponentType<Boolean> IS_GROUP_COMPONENT = DataComponentType.<Boolean>builder().persistent(Codec.BOOL).networkSynchronized(ByteBufCodecs.BOOL).build();
+	public static final DataComponentType<List<BlockPos>> PREV_POS_COMPONENT = DataComponentType.<List<BlockPos>>builder().persistent(BlockPos.CODEC.listOf().xmap(ArrayList::new, list -> list)).networkSynchronized(ByteBufCodecs.collection(ArrayList::new, BlockPos.STREAM_CODEC)).build();
+	
+	public static boolean synced;
 	public static boolean canTeleport;
+	public static int maxNextSearches;
 	public static boolean infiniteXp;
 	public static List<Identifier> allowedStructures;
 	public static Map<Identifier, Integer> xpLevelsForAllowedStructures;
 	public static ListMultimap<Identifier, Identifier> dimensionsForAllowedStructures;
 	public static Map<Identifier, Identifier> structureIdsToGroupIds;
-	public static ListMultimap<Identifier, Identifier> groupIdsToStructureIds;
 
 	@Override
 	public void onInitialize() {
@@ -65,21 +70,24 @@ public class ExplorersCompass implements ModInitializer {
 		Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Identifier.fromNamespaceAndPath(MODID, "search_radius"), SEARCH_RADIUS_COMPONENT);
 		Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Identifier.fromNamespaceAndPath(MODID, "samples"), SAMPLES_COMPONENT);
 		Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Identifier.fromNamespaceAndPath(MODID, "display_coords"), DISPLAY_COORDS_COMPONENT);
-		
+		Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Identifier.fromNamespaceAndPath(MODID, "is_group"), IS_GROUP_COMPONENT);
+		Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Identifier.fromNamespaceAndPath(MODID, "prev_pos"), PREV_POS_COMPONENT);
+
 		ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(entries -> entries.accept(EXPLORERS_COMPASS_ITEM));
-		
+
 		PayloadTypeRegistry.playC2S().register(SearchPacket.TYPE, SearchPacket.CODEC);
+		PayloadTypeRegistry.playC2S().register(SearchForNextPacket.TYPE, SearchForNextPacket.CODEC);
 		PayloadTypeRegistry.playC2S().register(TeleportPacket.TYPE, TeleportPacket.CODEC);
 		PayloadTypeRegistry.playS2C().register(SyncPacket.TYPE, SyncPacket.CODEC);
-		
+
 		ServerPlayNetworking.registerGlobalReceiver(SearchPacket.TYPE, SearchPacket::handle);
+		ServerPlayNetworking.registerGlobalReceiver(SearchForNextPacket.TYPE, SearchForNextPacket::handle);
 		ServerPlayNetworking.registerGlobalReceiver(TeleportPacket.TYPE, TeleportPacket::handle);
 		
 		allowedStructures = new ArrayList<Identifier>();
 		xpLevelsForAllowedStructures = new HashMap<Identifier, Integer>();
 		dimensionsForAllowedStructures = ArrayListMultimap.create();
 		structureIdsToGroupIds = new HashMap<Identifier, Identifier>();
-		groupIdsToStructureIds = ArrayListMultimap.create();
 	}
 
 }
