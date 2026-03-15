@@ -81,7 +81,11 @@ public class StructureUtils {
 	public static List<ResourceLocation> getAllowedStructureKeys(ServerLevel level) {
 		final List<ResourceLocation> structures = new ArrayList<ResourceLocation>();
 		for (Structure structure : getStructureRegistry(level)) {
-			if (structure != null && getKeyForStructure(level, structure) != null && !structureIsBlacklisted(level, structure) && !structureIsHidden(level, structure)) {
+			if (structure != null &&
+				getKeyForStructure(level, structure) != null &&
+				!structureIsBlacklisted(level, structure) &&
+				structureIsWhitelisted(level, structure) &&
+				!structureIsHidden(level, structure)) {
 				structures.add(getKeyForStructure(level, structure));
 			}
 		}
@@ -95,6 +99,22 @@ public class StructureUtils {
 				return true;
 			}
 		}
+		return false;
+	}
+
+	public static boolean structureIsWhitelisted(ServerLevel level, Structure structure) {
+		final List<String> structureWhitelist = ConfigHandler.GENERAL.structureWhitelist.get();
+
+		if (structureWhitelist.isEmpty()) {
+			return true;
+		}
+
+		for (String structureKey : structureWhitelist) {
+			if (getKeyForStructure(level, structure).toString().matches(convertToRegex(structureKey))) {
+				return true;
+			}
+		}
+
 		return false;
 	}
 	
