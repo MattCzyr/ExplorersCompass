@@ -41,7 +41,7 @@ public class ExplorersCompassScreen extends Screen {
 	private Button sortByButton;
 	private Button teleportButton;
 	private Button cancelButton;
-	private TransparentTextField searchTextField;
+	private TransparentEditBox searchBox;
 	private StructureSearchList selectionList;
 	private ISorting sortingCategory;
 
@@ -106,7 +106,7 @@ public class ExplorersCompassScreen extends Screen {
 	@Override
 	public boolean keyPressed(KeyEvent event) {
 		boolean ret = super.keyPressed(event);
-		if (searchTextField.isFocused()) {
+		if (searchBox.isFocused()) {
 			processSearchTerm();
 			return true;
 		}
@@ -116,7 +116,7 @@ public class ExplorersCompassScreen extends Screen {
 	@Override
 	public boolean charTyped(CharacterEvent event) {
 		boolean ret = super.charTyped(event);
-		if (searchTextField.isFocused()) {
+		if (searchBox.isFocused()) {
 			processSearchTerm();
 			return true;
 		}
@@ -154,7 +154,7 @@ public class ExplorersCompassScreen extends Screen {
 
 	public void processSearchTerm() {
 		structuresMatchingSearch = new ArrayList<Identifier>();
-		String searchTerm = searchTextField.getValue().toLowerCase();
+		String searchTerm = searchBox.getValue().toLowerCase();
 		for (Identifier structureId : allowedStructures) {
 			if (searchTerm.startsWith("@")) {
 				if (StructureUtils.getStructureSource(structureId).toLowerCase().contains(searchTerm.substring(1))) {
@@ -215,13 +215,12 @@ public class ExplorersCompassScreen extends Screen {
 			minecraft.setScreen(null);
 		}));
 		
-		searchTextField = new TransparentTextField(font, width / 2 - 82, 10, 140, 20, Component.translatable("string.explorerscompass.search"));
-		addRenderableWidget(searchTextField);
+		searchBox = addRenderableWidget(new TransparentEditBox(font, width / 2 - 82, 10, 140, 20, Component.translatable("string.explorerscompass.search")));
+        searchBox.setHint(Component.translatable("string.explorerscompass.search"));
 		
 		if (selectionList == null) {
-			selectionList = new StructureSearchList(this, minecraft, player, foundStructureId, width + 110, height - 50, 40, 50);
+			selectionList = addRenderableWidget(new StructureSearchList(this, minecraft, player, foundStructureId, width + 110, height - 50, 40, 50));
 		}
-		addRenderableWidget(selectionList);
 	}
 
 }
