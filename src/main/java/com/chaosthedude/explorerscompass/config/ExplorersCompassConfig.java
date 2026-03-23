@@ -27,6 +27,7 @@ public class ExplorersCompassConfig {
 	public static boolean displayCoordinates = true;
 	public static int maxRadius = 10000;
 	public static int maxSamples = 100000;
+	public static int compassDurability = 0;
 	public static int defaultXpLevel = 0;
 	public static Map<String, Integer> perStructureXpLevels = new HashMap<String, Integer>();
 	public static List<String> structureBlacklist = new ArrayList<String>();
@@ -49,6 +50,7 @@ public class ExplorersCompassConfig {
 				displayCoordinates = data.common.displayCoordinates;
 				maxRadius = data.common.maxRadius;
 				maxSamples = data.common.maxSamples;
+				compassDurability = data.common.compassDurability;
 				defaultXpLevel = data.common.defaultXpLevel;
 				perStructureXpLevels = data.common.perStructureXpLevels;
 				structureBlacklist = data.common.structureBlacklist;
@@ -69,7 +71,7 @@ public class ExplorersCompassConfig {
 	public static void save() {
 		try {
 			Writer writer = Files.newBufferedWriter(getFilePath());
-			Data data = new Data(new Data.Common(allowTeleport, maxNextSearches, displayCoordinates, maxRadius, maxSamples, defaultXpLevel, perStructureXpLevels, structureBlacklist), new Data.Client(displayWithChatOpen, translateStructureNames, overlayLineOffset, overlaySide));
+			Data data = new Data(new Data.Common(allowTeleport, maxNextSearches, displayCoordinates, maxRadius, maxSamples, compassDurability, defaultXpLevel, perStructureXpLevels, structureBlacklist), new Data.Client(displayWithChatOpen, translateStructureNames, overlayLineOffset, overlaySide));
 			gson.toJson(data, writer);
 			writer.close();
 		} catch (IOException e) {
@@ -109,7 +111,10 @@ public class ExplorersCompassConfig {
 			
 			private final String maxSamplesComment = "The maximum number of samples to be taken when searching for a structure.";
 			private final int maxSamples;
-			
+
+			private final String compassDurabilityComment = "The number of successful structure searches before the compass breaks and must be repaired. Set to 0 to disable durability.";
+			private final int compassDurability;
+
 			private final String defaultXpLevelComment = "The default number of XP levels consumed when searching for a structure. Individual structures can be configured via xpLevelOverrides. Max of 3 levels.";
 			private final int defaultXpLevel;
 			
@@ -125,17 +130,19 @@ public class ExplorersCompassConfig {
 				displayCoordinates = true;
 				maxRadius = 10000;
 				maxSamples = 100000;
+				compassDurability = 0;
 				defaultXpLevel = 0;
 				perStructureXpLevels = new HashMap<String, Integer>();
 				structureBlacklist = new ArrayList<String>();
 			}
 
-			private Common(boolean allowTeleport, int maxNextSearches, boolean displayCoordinates, int maxRadius, int maxSamples, int defaultXpLevel, Map<String, Integer> perStructureXpLevels, List<String> structureBlacklist) {
+			private Common(boolean allowTeleport, int maxNextSearches, boolean displayCoordinates, int maxRadius, int maxSamples, int compassDurability, int defaultXpLevel, Map<String, Integer> perStructureXpLevels, List<String> structureBlacklist) {
 				this.allowTeleport = allowTeleport;
 				this.maxNextSearches = maxNextSearches;
 				this.displayCoordinates = displayCoordinates;
 				this.maxRadius = maxRadius;
 				this.maxSamples = maxSamples;
+				this.compassDurability = compassDurability;
 				this.defaultXpLevel = defaultXpLevel;
 				this.perStructureXpLevels = perStructureXpLevels;
 				this.structureBlacklist = structureBlacklist;
