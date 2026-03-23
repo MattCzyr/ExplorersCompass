@@ -29,6 +29,7 @@ public class ExplorersCompassRegistry {
 			registry.register(Identifier.fromNamespaceAndPath(ExplorersCompass.MODID, "display_coords"), ExplorersCompass.DISPLAY_COORDS);
 			registry.register(Identifier.fromNamespaceAndPath(ExplorersCompass.MODID, "is_group"), ExplorersCompass.IS_GROUP);
 			registry.register(Identifier.fromNamespaceAndPath(ExplorersCompass.MODID, "prev_pos"), ExplorersCompass.PREV_POS);
+			registry.register(Identifier.fromNamespaceAndPath(ExplorersCompass.MODID, "damage"), ExplorersCompass.DAMAGE);
 		});
 	}
 

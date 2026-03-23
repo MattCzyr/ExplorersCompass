@@ -55,6 +55,7 @@ public class ExplorersCompass {
 	public static final DataComponentType<Boolean> DISPLAY_COORDS = DataComponentType.<Boolean>builder().persistent(Codec.BOOL).networkSynchronized(ByteBufCodecs.BOOL).build();
 	public static final DataComponentType<Boolean> IS_GROUP = DataComponentType.<Boolean>builder().persistent(Codec.BOOL).networkSynchronized(ByteBufCodecs.BOOL).build();
 	public static final DataComponentType<List<BlockPos>> PREV_POS = DataComponentType.<List<BlockPos>>builder().persistent(BlockPos.CODEC.listOf().xmap(ArrayList::new, list -> list)).networkSynchronized(ByteBufCodecs.collection(ArrayList::new, BlockPos.STREAM_CODEC)).build();
+	public static final DataComponentType<Integer> DAMAGE = DataComponentType.<Integer>builder().persistent(Codec.INT).networkSynchronized(ByteBufCodecs.VAR_INT).build();
 	
 	public static boolean synced;
 	public static boolean canTeleport;
