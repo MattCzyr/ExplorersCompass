@@ -24,7 +24,7 @@ public class ExplorersCompassOverlay implements GuiLayer {
 
 	@Override
 	public void render(GuiGraphics guiGraphics, DeltaTracker deltaTracker) {
-		if (mc.player != null && mc.level != null && !mc.options.hideGui && !mc.getDebugOverlay().showDebugScreen() && (mc.screen == null || (ConfigHandler.CLIENT.displayWithChatOpen.get() && mc.screen instanceof ChatScreen))) {
+		if (mc.player != null && mc.level != null && !mc.options.hideGui && !mc.debugEntries.isOverlayVisible() && (mc.screen == null || (ConfigHandler.CLIENT.displayWithChatOpen.get() && mc.screen instanceof ChatScreen))) {
 			final Player player = mc.player;
 			final ItemStack stack = ItemUtils.getHeldItem(player, ExplorersCompass.explorersCompass);
 			if (stack != null && stack.getItem() instanceof ExplorersCompassItem) {
