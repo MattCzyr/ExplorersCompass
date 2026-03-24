@@ -3,7 +3,7 @@ issueTrackerURL="https://github.com/MattCzyr/ExplorersCompass/issues"
 
 [[mods]]
     modId="explorerscompass"
-    version="1.21.11-3.2.0-neoforge"
+    version="1.21.11-3.3.0-neoforge"
     displayName="Explorer's Compass"
     displayURL="https://github.com/MattCzyr/ExplorersCompass"
     authors="ChaosTheDude"
