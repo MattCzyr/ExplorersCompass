@@ -140,10 +140,6 @@ public class StructureUtils {
 				dimensions.add(level.dimension().identifier());
 			}
 		}
-		// Fix empty dimensions for stronghold
-		if (structure == StructureType.STRONGHOLD && dimensions.isEmpty()) {
-			dimensions.add(Identifier.parse("minecraft:overworld"));
-		}
 		return dimensions;
 	}
 
