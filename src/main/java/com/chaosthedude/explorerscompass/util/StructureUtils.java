@@ -105,7 +105,7 @@ public class StructureUtils {
 	
 	public static boolean structureIsHidden(ServerLevel level, Structure structure) {
 		final Registry<Structure> structureRegistry = getStructureRegistry(level);
-		return structureRegistry.wrapAsHolder(structure).tags().anyMatch(tag -> tag.location().getPath().equals("c:hidden_from_locator_selection"));
+		return structureRegistry.wrapAsHolder(structure).tags().anyMatch(tag -> tag.location().toString().equals("c:hidden_from_locator_selection"));
 	}
 
 	public static List<Identifier> getGeneratingDimensions(ServerLevel serverLevel, Structure structure) {
