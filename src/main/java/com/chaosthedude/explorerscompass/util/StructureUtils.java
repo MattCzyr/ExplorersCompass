@@ -126,7 +126,7 @@ public class StructureUtils {
 		if (getStructureRegistry(level).isPresent()) {
 			final Registry<Structure> structureRegistry = getStructureRegistry(level).get();
 			final Holder<Structure> structureHolder = structureRegistry.wrapAsHolder(structure);
-			return structureHolder.tags().anyMatch(tag -> tag.location().getPath().equals("c:hidden_from_locator_selection"));
+			return structureHolder.tags().anyMatch(tag -> tag.location().toString().equals("c:hidden_from_locator_selection"));
 		}
 		return false;
 	}
