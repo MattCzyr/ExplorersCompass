@@ -1,3 +1,19 @@
+## Version 3.3.0
+#### NeoForge 1.21.11
+- Added config option to add durability to the compass and a recipe to repair a broken compass
+- Fixed compass HUD info not rendering when any debug elements are set to always-on
+- Fixed structures with c:hidden_from_locator_selection tag not being hidden
+- Added Ukranian translations
+- Added Turkish translations
+
+## Version 2.5.0
+#### Fabric 1.21.11
+- Added config option to add durability to the compass and a recipe to repair a broken compass
+- Fixed compass HUD info not rendering when any debug elements are set to always-on
+- Fixed structures with c:hidden_from_locator_selection tag not being hidden
+- Added Ukranian translations
+- Added Turkish translations
+
 ## Version 3.2.0
 #### NeoForge 1.21.11
 - Added feature to search for the next instance of an already located structure
