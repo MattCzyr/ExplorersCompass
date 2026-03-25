@@ -54,7 +54,7 @@ public abstract class StructureSearchWorker<T extends StructurePlacement> implem
 		currentPos = startPos;
 		samples = 0;
 
-		finished = !level.getServer().getWorldData().worldGenOptions().generateStructures();
+		finished = /*!level.getServer().getWorldData().worldGenOptions().generateStructures()*/ false;
 	}
 
 	public void start() {
@@ -93,7 +93,7 @@ public abstract class StructureSearchWorker<T extends StructurePlacement> implem
 					return Pair.of(placement.getLocatePos(chunkPos), structure);
 				}
 
-				ChunkAccess chunkAccess = level.getChunk(chunkPos.x, chunkPos.z, ChunkStatus.STRUCTURE_STARTS);
+				ChunkAccess chunkAccess = level.getChunk(chunkPos.x(), chunkPos.z(), ChunkStatus.STRUCTURE_STARTS);
 				StructureStart structureStart = level.structureManager().getStartForStructure(SectionPos.bottomOf(chunkAccess), structure, chunkAccess);
 				if (structureStart != null && structureStart.isValid()) {
 					return Pair.of(placement.getLocatePos(structureStart.getChunkPos()), structure);

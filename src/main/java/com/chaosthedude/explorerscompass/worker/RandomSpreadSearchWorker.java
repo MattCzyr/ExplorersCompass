@@ -33,7 +33,7 @@ public class RandomSpreadSearchWorker extends StructureSearchWorker<RandomSpread
 		z = 0;
 		length = 0;
 
-		finished = !level.getServer().getWorldData().worldGenOptions().generateStructures();
+		finished = /*!level.getServer().getWorldData().worldGenOptions().generateStructures()*/ false;
 	}
 
 	@Override
@@ -53,7 +53,7 @@ public class RandomSpreadSearchWorker extends StructureSearchWorker<RandomSpread
 				int sampleZ = startSectionPosZ + (spacing * z);
 				
 				ChunkPos chunkPos = placement.getPotentialStructureChunk(level.getSeed(), sampleX, sampleZ);
-				currentPos = new BlockPos(SectionPos.sectionToBlockCoord(chunkPos.x, 8), 0, SectionPos.sectionToBlockCoord(chunkPos.z, 8));
+				currentPos = new BlockPos(SectionPos.sectionToBlockCoord(chunkPos.x(), 8), 0, SectionPos.sectionToBlockCoord(chunkPos.z(), 8));
 				
 				Pair<BlockPos, Structure> pair = getStructureGeneratingAt(chunkPos);
 				samples++;
