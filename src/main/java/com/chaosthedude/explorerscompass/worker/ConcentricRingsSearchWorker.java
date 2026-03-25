@@ -30,7 +30,7 @@ public class ConcentricRingsSearchWorker extends StructureSearchWorker<Concentri
 		chunkIndex = 0;
 		potentialChunks = level.getChunkSource().getGeneratorState().getRingPositionsFor(placement);
 
-		finished = !level.getServer().getWorldData().worldGenOptions().generateStructures() || potentialChunks == null || potentialChunks.isEmpty();
+		finished = /*!level.getServer().getWorldData().worldGenOptions().generateStructures() ||*/ potentialChunks == null || potentialChunks.isEmpty();
 	}
 
 	@Override
@@ -44,7 +44,7 @@ public class ConcentricRingsSearchWorker extends StructureSearchWorker<Concentri
 		super.doWork();
 		if (hasWork()) {
 			ChunkPos chunkPos = potentialChunks.get(chunkIndex);
-			currentPos = new BlockPos(SectionPos.sectionToBlockCoord(chunkPos.x, 8), 0, SectionPos.sectionToBlockCoord(chunkPos.z, 8));
+			currentPos = new BlockPos(SectionPos.sectionToBlockCoord(chunkPos.x(), 8), 0, SectionPos.sectionToBlockCoord(chunkPos.z(), 8));
 			double distance = startPos.distSqr(currentPos);
 			
 			if (closest == null || distance < minDistance) {
@@ -93,7 +93,7 @@ public class ConcentricRingsSearchWorker extends StructureSearchWorker<Concentri
 			double minDistance = Double.MAX_VALUE;
 			MutableBlockPos sampleBlockPos = new MutableBlockPos();
 			for (ChunkPos chunkPos : list) {
-				sampleBlockPos.set(SectionPos.sectionToBlockCoord(chunkPos.x, 8), 32, SectionPos.sectionToBlockCoord(chunkPos.z, 8));
+				sampleBlockPos.set(SectionPos.sectionToBlockCoord(chunkPos.x(), 8), 32, SectionPos.sectionToBlockCoord(chunkPos.z(), 8));
 				double distance = sampleBlockPos.distSqr(startPos);
 				if (closestPair == null || distance < minDistance) {
 					Pair<BlockPos, Structure> pair = getStructureGeneratingAt(chunkPos);

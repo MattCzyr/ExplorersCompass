@@ -47,7 +47,7 @@ public class GenericSearchWorker extends StructureSearchWorker<StructurePlacemen
 			}
 			
 			ChunkPos chunkPos = new ChunkPos(chunkX, chunkZ);
-			currentPos = new BlockPos(SectionPos.sectionToBlockCoord(chunkPos.x, 8), 0, SectionPos.sectionToBlockCoord(chunkPos.z, 8));
+			currentPos = new BlockPos(SectionPos.sectionToBlockCoord(chunkPos.x(), 8), 0, SectionPos.sectionToBlockCoord(chunkPos.z(), 8));
 
 			Pair<BlockPos, Structure> pair = getStructureGeneratingAt(chunkPos);
 			if (pair != null && !shouldIgnore(pair.getFirst())) {

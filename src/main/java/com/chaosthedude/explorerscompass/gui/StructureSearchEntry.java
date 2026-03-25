@@ -4,7 +4,7 @@ import com.chaosthedude.explorerscompass.ExplorersCompass;
 import com.chaosthedude.explorerscompass.util.StructureUtils;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
@@ -52,7 +52,7 @@ public class StructureSearchEntry extends ObjectSelectionList.Entry<StructureSea
 	}
 
 	@Override
-	public void renderContent(GuiGraphics guiGraphics, int mouseX, int mouseY, boolean isHovering, float partialTick) {
+	public void extractContent(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, boolean isHovering, float partialTick) {
 		if (xpLevels > 0) {
 			int spriteSize = (int) (getHeight() * 0.4F);
 			int spriteBorder = (getHeight() - spriteSize) / 2;
@@ -63,10 +63,10 @@ public class StructureSearchEntry extends ObjectSelectionList.Entry<StructureSea
 
 		int nameColor = isEnabled() ? 0xffffffff : 0xff808080;
 		int infoColor = isEnabled() ? 0xff808080 : 0xff555555;
-		guiGraphics.drawString(mc.font, Component.literal(StructureUtils.getStructureName(structureId)), getX() + 5, getY() + (getHeight() / 2) - ((mc.font.lineHeight + 2) * 2), nameColor);
-		guiGraphics.drawString(mc.font, Component.translatable(("string.explorerscompass.source")).append(Component.literal(": " + StructureUtils.getStructureSource(structureId))), getX() + 5, getY() + (getHeight() / 2) - ((mc.font.lineHeight + 2) * 1), infoColor);
-		guiGraphics.drawString(mc.font, Component.translatable(("string.explorerscompass.group")).append(Component.literal(": ")).append(Component.translatable(StructureUtils.getStructureName(ExplorersCompass.structureIdsToGroupIds.get(structureId)))), getX() + 5, getY() + (getHeight() / 2) + ((mc.font.lineHeight + 2) * 0), infoColor);
-		guiGraphics.drawString(mc.font, Component.translatable(("string.explorerscompass.dimension")).append(Component.literal(": " + StructureUtils.dimensionIdsToString(ExplorersCompass.dimensionsForAllowedStructures.get(structureId)))), getX() + 5, getY() + (getHeight() / 2) + ((mc.font.lineHeight + 2) * 1), infoColor);
+		guiGraphics.text(mc.font, Component.literal(StructureUtils.getStructureName(structureId)), getX() + 5, getY() + (getHeight() / 2) - ((mc.font.lineHeight + 2) * 2), nameColor);
+		guiGraphics.text(mc.font, Component.translatable(("string.explorerscompass.source")).append(Component.literal(": " + StructureUtils.getStructureSource(structureId))), getX() + 5, getY() + (getHeight() / 2) - ((mc.font.lineHeight + 2) * 1), infoColor);
+		guiGraphics.text(mc.font, Component.translatable(("string.explorerscompass.group")).append(Component.literal(": ")).append(Component.translatable(StructureUtils.getStructureName(ExplorersCompass.structureIdsToGroupIds.get(structureId)))), getX() + 5, getY() + (getHeight() / 2) + ((mc.font.lineHeight + 2) * 0), infoColor);
+		guiGraphics.text(mc.font, Component.translatable(("string.explorerscompass.dimension")).append(Component.literal(": " + StructureUtils.dimensionIdsToString(ExplorersCompass.dimensionsForAllowedStructures.get(structureId)))), getX() + 5, getY() + (getHeight() / 2) + ((mc.font.lineHeight + 2) * 1), infoColor);
 	}
 
 	@Override
