@@ -209,12 +209,12 @@ public class ExplorersCompassScreen extends Screen {
 			minecraft.setScreen(null);
 		}));
 		
-		searchBox = addRenderableWidget(new TransparentEditBox(font, width / 2 - 82, 10, 140, 20, Component.translatable("string.explorerscompass.search")));
-		searchBox.setHint(Component.translatable("string.explorerscompass.search"));
+		searchBox = addRenderableWidget(new TransparentEditBox(font, 130, 10, 140, 20, Component.translatable("string.explorerscompass.search").withColor(0xff808080)));
 		
 		if (selectionList == null) {
-			selectionList = addRenderableWidget(new StructureSearchList(this, minecraft, player, foundStructureId, width + 110, height - 50, 40, 50));
+			selectionList = new StructureSearchList(this, minecraft, player, foundStructureId, width + 110, height - 50, 40, 50);
 		}
+		addRenderableWidget(selectionList);
 	}
 
 }
