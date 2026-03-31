@@ -14,10 +14,11 @@ public class StructureSearchList extends ObjectSelectionList<StructureSearchEntr
 	private final ExplorersCompassScreen parentScreen;
 	private Player player;
 
-	public StructureSearchList(ExplorersCompassScreen parentScreen, Minecraft mc, Player player, Identifier structureIdToSelect, int width, int height, int y, int itemHeight) {
+	public StructureSearchList(ExplorersCompassScreen parentScreen, Minecraft mc, Player player, Identifier structureIdToSelect, int x, int y, int width, int height, int itemHeight) {
 		super(mc, width, height, y, itemHeight);
 		this.parentScreen = parentScreen;
 		this.player = player;
+        setX(x);
 		refreshList(structureIdToSelect);
 	}
 
@@ -28,7 +29,7 @@ public class StructureSearchList extends ObjectSelectionList<StructureSearchEntr
 
 	@Override
 	public int getRowWidth() {
-		return 270;
+		return getWidth();
 	}
 
 	@Override
