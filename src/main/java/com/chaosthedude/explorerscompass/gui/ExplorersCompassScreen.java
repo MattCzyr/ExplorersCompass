@@ -63,11 +63,6 @@ public class ExplorersCompassScreen extends Screen {
 	}
 
 	@Override
-	public boolean mouseScrolled(double par1, double par2, double par3, double par4) {
-		return selectionList.mouseScrolled(par1, par2, par3, par4);
-	}
-
-	@Override
 	protected void init() {
 		setupWidgets();
 	}
@@ -82,8 +77,7 @@ public class ExplorersCompassScreen extends Screen {
 			removeWidget(selectionList);
 			allowedStructures = new ArrayList<Identifier>(ExplorersCompass.allowedStructures);
 			structuresMatchingSearch = new ArrayList<Identifier>(allowedStructures);
-			selectionList = new StructureSearchList(this, minecraft, player, foundStructureId, width + 110, height - 50, 40, 50);
-			addRenderableWidget(selectionList);
+			selectionList = addRenderableWidget(new StructureSearchList(this, minecraft, player, foundStructureId, 130, 40, width - 140, height - 50, 50));
 			
 			teleportButton.visible = ExplorersCompass.canTeleport;
 			searchForNextButton.visible = ExplorersCompass.maxNextSearches > 0;
@@ -210,11 +204,8 @@ public class ExplorersCompassScreen extends Screen {
 		}));
 		
 		searchBox = addRenderableWidget(new TransparentEditBox(font, 130, 10, 140, 20, Component.translatable("string.explorerscompass.search").withColor(0xff808080)));
-		
-		if (selectionList == null) {
-			selectionList = new StructureSearchList(this, minecraft, player, foundStructureId, width + 110, height - 50, 40, 50);
-		}
-		addRenderableWidget(selectionList);
+
+        selectionList = addRenderableWidget(new StructureSearchList(this, minecraft, player, foundStructureId, 130, 40, width - 140, height - 50, 50));
 	}
 
 }
