@@ -16,7 +16,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-public record SearchPacket(ResourceLocation groupKey, List<ResourceLocation> structureKeys, BlockPos pos) implements CustomPacketPayload {
+public record SearchPacket(ResourceLocation groupKey, List<ResourceLocation> structureKeys, BlockPos pos, boolean isGroup) implements CustomPacketPayload {
 	
 	public static final Type<SearchPacket> TYPE = new Type<SearchPacket>(ResourceLocation.fromNamespaceAndPath(ExplorersCompass.MODID, "search"));
 	
@@ -30,7 +30,8 @@ public record SearchPacket(ResourceLocation groupKey, List<ResourceLocation> str
 			structureKeys.add(buf.readResourceLocation());
 		}
 		final BlockPos pos = buf.readBlockPos();
-		return new SearchPacket(groupKey, structureKeys, pos);
+		final boolean isGroup = buf.readBoolean();
+		return new SearchPacket(groupKey, structureKeys, pos, isGroup);
 	}
 
 	public void write(FriendlyByteBuf buf) {
@@ -40,6 +41,7 @@ public record SearchPacket(ResourceLocation groupKey, List<ResourceLocation> str
 			buf.writeResourceLocation(key);
 		}
 		buf.writeBlockPos(pos);
+		buf.writeBoolean(isGroup);
 	}
 
 	public static void handle(SearchPacket packet, IPayloadContext context) {
@@ -48,7 +50,7 @@ public record SearchPacket(ResourceLocation groupKey, List<ResourceLocation> str
 				final ItemStack stack = ItemUtils.getHeldItem(context.player(), ExplorersCompass.explorersCompass);
 				if (!stack.isEmpty()) {
 					final ExplorersCompassItem explorersCompass = (ExplorersCompassItem) stack.getItem();
-					explorersCompass.searchForStructure((ServerLevel) context.player().level(), context.player(), packet.groupKey, packet.structureKeys, packet.pos, stack);
+					explorersCompass.searchForStructure((ServerLevel) context.player().level(), context.player(), packet.groupKey, packet.structureKeys, packet.pos, stack, packet.isGroup);
 				}
 			});
 		}

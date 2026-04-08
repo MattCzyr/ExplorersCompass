@@ -31,7 +31,7 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureSet;
 import net.minecraft.world.level.levelgen.structure.StructureSet.StructureSelectionEntry;
-import net.minecraft.world.level.levelgen.structure.StructureType;
+
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.fml.ModContainer;
@@ -107,7 +107,7 @@ public class StructureUtils {
 		final Registry<Structure> structureRegistry = getStructureRegistry(level);
 		if (structureRegistry.getKey(structure) != null && structureRegistry.getHolder(structureRegistry.getKey(structure)).isPresent()) {
 			final Holder<Structure> structureHolder = structureRegistry.getHolder(structureRegistry.getKey(structure)).get();
-			return structureHolder.tags().anyMatch(tag -> tag.location().getPath().equals("c:hidden_from_locator_selection"));
+			return structureHolder.tags().anyMatch(tag -> tag.location().toString().equals("c:hidden_from_locator_selection"));
 		}
 		return false;
 	}
@@ -121,20 +121,59 @@ public class StructureUtils {
 				dimensions.add(level.dimension().location());
 			}
 		}
-		// Fix empty dimensions for stronghold
-		if (structure == StructureType.STRONGHOLD && dimensions.isEmpty()) {
-			dimensions.add(ResourceLocation.parse("minecraft:overworld"));
-		}
 		return dimensions;
 	}
 
-	public static ListMultimap<ResourceLocation, ResourceLocation> getGeneratingDimensionsForAllowedStructures(ServerLevel serverLevel) {
+	public static ListMultimap<ResourceLocation, ResourceLocation> getGeneratingDimensionsForAllowedStructures(ServerLevel serverLevel, List<ResourceLocation> allowedStructures) {
 		ListMultimap<ResourceLocation, ResourceLocation> dimensionsForAllowedStructures = ArrayListMultimap.create();
-		for (ResourceLocation structureKey : getAllowedStructureKeys(serverLevel)) {
+		for (ResourceLocation structureKey : allowedStructures) {
 			Structure structure = getStructureForKey(serverLevel, structureKey);
 			dimensionsForAllowedStructures.putAll(structureKey, getGeneratingDimensionKeys(serverLevel, structure));
 		}
 		return dimensionsForAllowedStructures;
+	}
+
+	public static int getXpLevelsForStructure(ServerLevel serverLevel, ResourceLocation structureKey) {
+		int xpLevels = ConfigHandler.GENERAL.defaultXpLevels.get();
+		final Map<String, Integer> xpLevelOverrides = parseXpLevelOverridesConfig();
+		for (String structureRegex : xpLevelOverrides.keySet()) {
+			if (structureKey.toString().matches(convertToRegex(structureRegex))) {
+				xpLevels = xpLevelOverrides.get(structureRegex);
+				if (xpLevels > 3) {
+					xpLevels = 3;
+				}
+				break;
+			}
+		}
+		return xpLevels;
+	}
+
+	public static Map<String, Integer> parseXpLevelOverridesConfig() {
+		final List<String> xpLevelOverrides = ConfigHandler.GENERAL.xpLevelOverrides.get();
+		Map<String, Integer> parsedOverrides = new HashMap<String, Integer>();
+		for (String override : xpLevelOverrides) {
+			String[] split = override.split(",");
+			if (split.length != 2) {
+				continue;
+			}
+			String structureRegex = split[0];
+			String xpLevelsStr = split[1];
+			try {
+				int xpLevels = Integer.valueOf(xpLevelsStr);
+				parsedOverrides.put(structureRegex, xpLevels);
+			} catch (NumberFormatException e) {
+				continue;
+			}
+		}
+		return parsedOverrides;
+	}
+
+	public static Map<ResourceLocation, Integer> getXpLevelsForAllowedStructures(ServerLevel serverLevel, List<ResourceLocation> allowedStructures) {
+		final Map<ResourceLocation, Integer> xpLevels = new HashMap<ResourceLocation, Integer>();
+		for (ResourceLocation structureKey : allowedStructures) {
+			xpLevels.put(structureKey, getXpLevelsForStructure(serverLevel, structureKey));
+		}
+		return xpLevels;
 	}
 
 	public static int getHorizontalDistanceToLocation(Player player, int x, int z) {

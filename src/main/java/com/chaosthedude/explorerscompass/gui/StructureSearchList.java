@@ -2,33 +2,39 @@ package com.chaosthedude.explorerscompass.gui;
 
 import java.util.Objects;
 
+import com.chaosthedude.explorerscompass.util.RenderUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.player.Player;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
+import org.jetbrains.annotations.Nullable;
 
 @OnlyIn(Dist.CLIENT)
 public class StructureSearchList extends ObjectSelectionList<StructureSearchEntry> {
 
 	private final ExplorersCompassScreen parentScreen;
+	private Player player;
 
-	public StructureSearchList(ExplorersCompassScreen parentScreen, Minecraft mc, int width, int height, int y, int itemHeight) {
+	public StructureSearchList(ExplorersCompassScreen parentScreen, Minecraft mc, Player player, ResourceLocation structureKeyToSelect, int x, int y, int width, int height, int itemHeight) {
 		super(mc, width, height, y, itemHeight);
 		this.parentScreen = parentScreen;
-		refreshList();
+		this.player = player;
+        setX(x);
+		refreshList(structureKeyToSelect);
 	}
 
 	@Override
 	protected int getScrollbarPosition() {
-		return getRowLeft() + getRowWidth() - 2;
+		return getX() + getWidth();
 	}
 
 	@Override
 	public int getRowWidth() {
-		return super.getRowWidth() + 50;
+		return getWidth();
 	}
 
 	@Override
@@ -38,61 +44,68 @@ public class StructureSearchList extends ObjectSelectionList<StructureSearchEntr
 
 	@Override
 	public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
-		guiGraphics.fill(getRowLeft() - 4, getY(), getRowLeft() + getRowWidth() + 4, getY() + getHeight() + 4, 255 / 2 << 24);
-		
-		enableScissor(guiGraphics);
-		for (int j = 0; j < getItemCount(); ++j) {
-			int rowTop = getRowTop(j);
-			int rowBottom = getRowBottom(j);
-			if (rowBottom >= getY() && rowTop <= getBottom()) {
-				int j1 = itemHeight - 4;
-				StructureSearchEntry entry = getEntry(j);
-				if (/*renderSelection*/ true && isSelectedItem(j)) {
-					final int insideLeft = getX() + width / 2 - getRowWidth() / 2 + 2;
-					guiGraphics.fill(insideLeft - 4, rowTop - 4, insideLeft + getRowWidth() + 4, rowTop + itemHeight, 255 / 2 << 24);
-				}
-				entry.render(guiGraphics, j, rowTop, getRowLeft(), getRowWidth(), j1, mouseX, mouseY, isMouseOver((double) mouseX, (double) mouseY) && Objects.equals(getEntryAtPosition((double) mouseX, (double) mouseY), entry), partialTicks);
-			}
-		}
-		guiGraphics.disableScissor();
-
-		if (getMaxScroll() > 0) {
-			int left = getScrollbarPosition();
-			int right = left + 6;
-			int height = (int) ((float) ((getBottom() - getY()) * (getBottom() - getY())) / (float) getMaxPosition());
-			height = Mth.clamp(height, 32, getBottom() - getY() - 8);
-			int top = (int) getScrollAmount() * (getBottom() - getY() - height) / getMaxScroll() + getY();
-			if (top < getY()) {
-				top = getY();
-			}
-			
-			guiGraphics.fill(left, getY(), right, getBottom(), (int) (2.35F * 255.0F) / 2 << 24);
-			guiGraphics.fill(left, top, right, top + height, (int) (1.9F * 255.0F) / 2 << 24);
-		}
-	}
-	
-	@Override
-	protected void enableScissor(GuiGraphics guiGraphics) {
-		guiGraphics.enableScissor(getX(), getY(), getRight(), getBottom());
+        enableScissor(guiGraphics);
+        // Render backgrounds
+        for (int i = 0; i < getItemCount(); ++i) {
+            if (getRowBottom(i) >= getY() && getRowTop(i) <= getBottom()) {
+                StructureSearchEntry entry = getEntry(i);
+                int fillColor = RenderUtils.getBackgroundColor(entry.isEnabled(), entry == getSelected());
+                guiGraphics.fill(getRowLeft(), getRowTop(i), getRight(), getRowBottom(i), fillColor);
+            }
+        }
+        // Render entries
+        for (int i = 0; i < getItemCount(); ++i) {
+            int top = getRowTop(i);
+            int bottom = getRowBottom(i);
+            if (bottom >= getY() && top <= getBottom()) {
+                StructureSearchEntry entry = getEntry(i);
+                boolean isHovering = isMouseOver(mouseX, mouseY) && Objects.equals(getEntryAtPosition(mouseX, mouseY), entry);
+                entry.render(guiGraphics, i, top, getRowLeft(), getRowWidth(), itemHeight, mouseX, mouseY, isHovering, partialTicks);
+            }
+        }
+        guiGraphics.disableScissor();
+        // Render scrollbar
+        if (getMaxScroll() > 0) {
+            int left = getScrollbarPosition();
+            int right = left + 6;
+            int height = (int) ((float) ((getBottom() - getY()) * (getBottom() - getY())) / (float) getMaxPosition());
+            height = Mth.clamp(height, 32, getBottom() - getY() - 8);
+            int top = (int) getScrollAmount() * (getBottom() - getY() - height) / getMaxScroll() + getY();
+            if (top < getY()) {
+                top = getY();
+            }
+            guiGraphics.fill(left, getY(), right, getBottom(), RenderUtils.getBackgroundColor(false, false));
+            guiGraphics.fill(left, top, right, top + height, RenderUtils.getBackgroundColor(true, true));
+        }
 	}
 
-	@Override
-	protected int getRowBottom(int index) {
-		return getRowTop(index) + itemHeight;
+    @Override
+    public void setSelected(StructureSearchEntry entry) {
+        if (entry == null || entry.isEnabled()) {
+            super.setSelected(entry);
+        }
+    }
+
+    public void refreshList() {
+		refreshList(null);
 	}
 
-	public void refreshList() {
+	public void refreshList(ResourceLocation structureKeyToSelect) {
 		clearEntries();
+		setSelected(null);
 		for (ResourceLocation key : parentScreen.sortStructures()) {
-			addEntry(new StructureSearchEntry(this, key));
+			StructureSearchEntry entry = new StructureSearchEntry(this, key, player);
+			addEntry(entry);
+			if (key.equals(structureKeyToSelect)) {
+				setSelected(entry);
+			}
 		}
-		selectStructure(null);
 		setScrollAmount(0);
 	}
 
-	public void selectStructure(StructureSearchEntry entry) {
-		setSelected(entry);
-		parentScreen.selectStructure(entry);
+	public void refreshList(boolean maintainSelection) {
+		ResourceLocation select = maintainSelection && hasSelection() ? getSelected().getStructureKey() : null;
+		refreshList(select);
 	}
 
 	public boolean hasSelection() {

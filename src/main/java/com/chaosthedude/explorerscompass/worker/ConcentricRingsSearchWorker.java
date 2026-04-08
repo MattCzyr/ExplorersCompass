@@ -8,6 +8,7 @@ import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.BlockPos.MutableBlockPos;
 import net.minecraft.core.SectionPos;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -22,8 +23,8 @@ public class ConcentricRingsSearchWorker extends StructureSearchWorker<Concentri
 	private double minDistance;
 	private Pair<BlockPos, Structure> closest;
 
-	public ConcentricRingsSearchWorker(ServerLevel level, Player player, ItemStack stack, BlockPos startPos, ConcentricRingsStructurePlacement placement, List<Structure> structureSet, String managerId) {
-		super(level, player, stack, startPos, placement, structureSet, managerId);
+	public ConcentricRingsSearchWorker(ServerLevel level, Player player, ItemStack stack, BlockPos startPos, List<BlockPos> prevPos, ConcentricRingsStructurePlacement placement, List<Structure> structureSet, ResourceLocation structureOrGroupId, boolean isGroup, String managerId) {
+		super(level, player, stack, startPos, prevPos, placement, structureSet, structureOrGroupId, isGroup, managerId);
 
 		minDistance = Double.MAX_VALUE;
 		chunkIndex = 0;
@@ -35,7 +36,7 @@ public class ConcentricRingsSearchWorker extends StructureSearchWorker<Concentri
 	@Override
 	public boolean hasWork() {
 		// Samples for this placement are not necessarily in order of closest to furthest, so disregard radius
-		return !finished && samples < ConfigHandler.GENERAL.maxSamples.get() && chunkIndex < potentialChunks.size();
+		return !finished && prevPos.size() <= ConfigHandler.GENERAL.maxNextSearches.get() && samples < ConfigHandler.GENERAL.maxSamples.get() && chunkIndex < potentialChunks.size();
 	}
 
 	@Override
@@ -48,7 +49,7 @@ public class ConcentricRingsSearchWorker extends StructureSearchWorker<Concentri
 			
 			if (closest == null || distance < minDistance) {
 				Pair<BlockPos, Structure> pair = getStructureGeneratingAt(chunkPos);
-				if (pair != null) {
+				if (pair != null && !shouldIgnore(pair.getFirst())) {
 					minDistance = distance;
 					closest = pair;
 				}
@@ -63,6 +64,7 @@ public class ConcentricRingsSearchWorker extends StructureSearchWorker<Concentri
 		}
 		
 		if (closest != null) {
+			prevPos.add(closest.getFirst());
 			succeed(closest.getFirst(), closest.getSecond());
 		} else if (!finished) {
 			fail();

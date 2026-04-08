@@ -27,6 +27,9 @@ public class ExplorersCompassRegistry {
 			registry.register(ResourceLocation.fromNamespaceAndPath(ExplorersCompass.MODID, "search_radius"), ExplorersCompass.SEARCH_RADIUS_COMPONENT);
 			registry.register(ResourceLocation.fromNamespaceAndPath(ExplorersCompass.MODID, "samples"), ExplorersCompass.SAMPLES_COMPONENT);
 			registry.register(ResourceLocation.fromNamespaceAndPath(ExplorersCompass.MODID, "display_coords"), ExplorersCompass.DISPLAY_COORDS_COMPONENT);
+			registry.register(ResourceLocation.fromNamespaceAndPath(ExplorersCompass.MODID, "is_group"), ExplorersCompass.IS_GROUP_COMPONENT);
+			registry.register(ResourceLocation.fromNamespaceAndPath(ExplorersCompass.MODID, "prev_pos"), ExplorersCompass.PREV_POS_COMPONENT);
+			registry.register(ResourceLocation.fromNamespaceAndPath(ExplorersCompass.MODID, "damage"), ExplorersCompass.DAMAGE_COMPONENT);
 		});
 	}
 

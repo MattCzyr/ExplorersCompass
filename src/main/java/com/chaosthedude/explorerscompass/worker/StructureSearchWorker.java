@@ -9,6 +9,7 @@ import com.chaosthedude.explorerscompass.util.StructureUtils;
 import com.mojang.datafixers.util.Pair;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.core.SectionPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
@@ -32,22 +33,28 @@ public abstract class StructureSearchWorker<T extends StructurePlacement> implem
 	protected BlockPos currentPos;
 	protected T placement;
 	protected List<Structure> structureSet;
+	protected ResourceLocation structureOrGroupId;
+	protected boolean isGroup;
 	protected int samples;
 	protected boolean finished;
 	protected int lastRadiusThreshold;
+	protected List<BlockPos> prevPos;
 
-	public StructureSearchWorker(ServerLevel level, Player player, ItemStack stack, BlockPos startPos, T placement, List<Structure> structureSet, String managerId) {
+	public StructureSearchWorker(ServerLevel level, Player player, ItemStack stack, BlockPos startPos, List<BlockPos> prevPos, T placement, List<Structure> structureSet, ResourceLocation structureOrGroupId, boolean isGroup, String managerId) {
 		this.level = level;
 		this.player = player;
 		this.stack = stack;
 		this.startPos = startPos;
+		this.prevPos = prevPos != null ? prevPos : new java.util.ArrayList<>();
 		this.structureSet = structureSet;
+		this.structureOrGroupId = structureOrGroupId;
+		this.isGroup = isGroup;
 		this.placement = placement;
 		this.managerId = managerId;
-		
+
 		currentPos = startPos;
 		samples = 0;
-		
+
 		finished = !level.getServer().getWorldData().worldGenOptions().generateStructures();
 	}
 
@@ -64,7 +71,7 @@ public abstract class StructureSearchWorker<T extends StructurePlacement> implem
 
 	@Override
 	public boolean hasWork() {
-		return !finished && getRadius() < ConfigHandler.GENERAL.maxRadius.get() && samples < ConfigHandler.GENERAL.maxSamples.get();
+		return !finished && prevPos.size() <= ConfigHandler.GENERAL.maxNextSearches.get() && getRadius() < ConfigHandler.GENERAL.maxRadius.get() && samples < ConfigHandler.GENERAL.maxSamples.get();
 	}
 
 	@Override
@@ -101,17 +108,21 @@ public abstract class StructureSearchWorker<T extends StructurePlacement> implem
 	protected void succeed(BlockPos pos, Structure structure) {
 		ExplorersCompass.LOGGER.info("SearchWorkerManager " + managerId + ": " + getName() + " succeeded with " + (shouldLogRadius() ? getRadius() + " radius, " : "") + samples + " samples");
 		if (!stack.isEmpty() && stack.getItem() == ExplorersCompass.explorersCompass) {
-			((ExplorersCompassItem) stack.getItem()).succeed(stack, StructureUtils.getKeyForStructure(level, structure), pos.getX(), pos.getZ(), samples, ConfigHandler.GENERAL.displayCoordinates.get());
+			((ExplorersCompassItem) stack.getItem()).succeed(stack, StructureUtils.getKeyForStructure(level, structure), isGroup, pos.getX(), pos.getZ(), prevPos, samples, ConfigHandler.GENERAL.displayCoordinates.get());
 		} else {
 			ExplorersCompass.LOGGER.error("SearchWorkerManager " + managerId + ": " + getName() + " found invalid compass after successful search");
 		}
 		finished = true;
 	}
 
+	public boolean shouldIgnore(BlockPos pos) {
+		return prevPos.contains(pos);
+	}
+
 	protected void fail() {
 		ExplorersCompass.LOGGER.info("SearchWorkerManager " + managerId + ": " + getName() + " failed with " + (shouldLogRadius() ? getRadius() + " radius, " : "") + samples + " samples");
 		if (!stack.isEmpty() && stack.getItem() == ExplorersCompass.explorersCompass) {
-			((ExplorersCompassItem) stack.getItem()).fail(stack, roundRadius(getRadius(), 250), samples);
+			((ExplorersCompassItem) stack.getItem()).fail(stack, structureOrGroupId, roundRadius(getRadius(), 250), samples);
 		} else {
 			ExplorersCompass.LOGGER.error("SearchWorkerManager " + managerId + ": " + getName() + " found invalid compass after failed search");
 		}

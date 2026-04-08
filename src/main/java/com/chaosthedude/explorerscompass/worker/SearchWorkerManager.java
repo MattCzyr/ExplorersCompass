@@ -11,6 +11,7 @@ import com.chaosthedude.explorerscompass.util.StructureUtils;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -29,11 +30,11 @@ public class SearchWorkerManager {
 		workers = new ArrayList<StructureSearchWorker<?>>();
 	}
 	
-	public void createWorkers(ServerLevel level, Player player, ItemStack stack, List<Structure> structures, BlockPos startPos) {
+	public void createWorkers(ServerLevel level, Player player, ItemStack stack, List<Structure> structures, ResourceLocation structureOrGroupId, boolean isGroup, BlockPos startPos, List<BlockPos> prevPos) {
 		workers.clear();
-		
+
 		Map<StructurePlacement, List<Structure>> placementToStructuresMap = new Object2ObjectArrayMap<>();
-		
+
 		for (Structure structure : structures) {
 			for (StructurePlacement structureplacement : level.getChunkSource().getGeneratorState().getPlacementsForStructure(StructureUtils.getHolderForStructure(level, structure))) {
 				placementToStructuresMap.computeIfAbsent(structureplacement, (holderSet) -> {
@@ -44,12 +45,13 @@ public class SearchWorkerManager {
 
 		for (Map.Entry<StructurePlacement, List<Structure>> entry : placementToStructuresMap.entrySet()) {
 			StructurePlacement placement = entry.getKey();
+			List<Structure> placementStructures = entry.getValue();
 			if (placement instanceof ConcentricRingsStructurePlacement) {
-				workers.add(new ConcentricRingsSearchWorker(level, player, stack, startPos, (ConcentricRingsStructurePlacement) placement, entry.getValue(), id));
+				workers.add(new ConcentricRingsSearchWorker(level, player, stack, startPos, prevPos, (ConcentricRingsStructurePlacement) placement, placementStructures, structureOrGroupId, isGroup, id));
 			} else if (placement instanceof RandomSpreadStructurePlacement) {
-				workers.add(new RandomSpreadSearchWorker(level, player, stack, startPos, (RandomSpreadStructurePlacement) placement, entry.getValue(), id));
+				workers.add(new RandomSpreadSearchWorker(level, player, stack, startPos, prevPos, (RandomSpreadStructurePlacement) placement, placementStructures, structureOrGroupId, isGroup, id));
 			} else {
-				workers.add(new GenericSearchWorker(level, player, stack, startPos, placement, entry.getValue(), id));
+				workers.add(new GenericSearchWorker(level, player, stack, startPos, prevPos, placement, placementStructures, structureOrGroupId, isGroup, id));
 			}
 		}
 	}

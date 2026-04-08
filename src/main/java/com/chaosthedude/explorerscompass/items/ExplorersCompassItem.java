@@ -2,6 +2,7 @@ package com.chaosthedude.explorerscompass.items;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import com.chaosthedude.explorerscompass.ExplorersCompass;
 import com.chaosthedude.explorerscompass.config.ConfigHandler;
@@ -12,11 +13,13 @@ import com.chaosthedude.explorerscompass.util.ItemUtils;
 import com.chaosthedude.explorerscompass.util.PlayerUtils;
 import com.chaosthedude.explorerscompass.util.StructureUtils;
 import com.chaosthedude.explorerscompass.worker.SearchWorkerManager;
+import com.google.common.collect.ListMultimap;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
@@ -30,7 +33,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 public class ExplorersCompassItem extends Item {
 
 	public static final String NAME = "explorerscompass";
-	
+
 	private SearchWorkerManager workerManager;
 
 	public ExplorersCompassItem() {
@@ -41,6 +44,10 @@ public class ExplorersCompassItem extends Item {
 	@Override
 	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
 		if (!player.isCrouching()) {
+			if (isBroken(player.getItemInHand(hand))) {
+				return new InteractionResultHolder<ItemStack>(InteractionResult.PASS, player.getItemInHand(hand));
+			}
+
 			if (level.isClientSide()) {
 				final ItemStack stack = ItemUtils.getHeldItem(player, ExplorersCompass.explorersCompass);
 				GuiWrapper.openGUI(level, player, stack);
@@ -48,16 +55,49 @@ public class ExplorersCompassItem extends Item {
 				final ServerLevel serverLevel = (ServerLevel) level;
 				final ServerPlayer serverPlayer = (ServerPlayer) player;
 				final boolean canTeleport = ConfigHandler.GENERAL.allowTeleport.get() && PlayerUtils.canTeleport(player.getServer(), player);
-				PacketDistributor.sendToPlayer(serverPlayer, new SyncPacket(canTeleport, StructureUtils.getAllowedStructureKeys(serverLevel), StructureUtils.getGeneratingDimensionsForAllowedStructures(serverLevel), StructureUtils.getStructureKeysToTypeKeys(serverLevel), StructureUtils.getTypeKeysToStructureKeys(serverLevel)));
+				final int maxNextSearches = ConfigHandler.GENERAL.maxNextSearches.get();
+				final boolean hasInfiniteXp = player.hasInfiniteMaterials();
+				final List<ResourceLocation> allowedStructureKeys = StructureUtils.getAllowedStructureKeys(serverLevel);
+				final Map<ResourceLocation, Integer> xpLevels = StructureUtils.getXpLevelsForAllowedStructures(serverLevel, allowedStructureKeys);
+				final ListMultimap<ResourceLocation, ResourceLocation> generatingDimensions = StructureUtils.getGeneratingDimensionsForAllowedStructures(serverLevel, allowedStructureKeys);
+				PacketDistributor.sendToPlayer(serverPlayer, new SyncPacket(canTeleport, maxNextSearches, hasInfiniteXp, allowedStructureKeys, xpLevels, generatingDimensions, StructureUtils.getStructureKeysToTypeKeys(serverLevel), StructureUtils.getTypeKeysToStructureKeys(serverLevel)));
 			}
 		} else {
 			workerManager.stop();
 			workerManager.clear();
-			setState(player.getItemInHand(hand), null, CompassState.INACTIVE, player);
+			setInactive(player.getItemInHand(hand), player);
 		}
 		return new InteractionResultHolder<ItemStack>(InteractionResult.PASS, player.getItemInHand(hand));
 	}
-	
+
+	@Override
+	public boolean isBarVisible(ItemStack stack) {
+		int max = ConfigHandler.GENERAL.compassDurability.get();
+		if (max > 0) {
+			int damage = stack.getOrDefault(ExplorersCompass.DAMAGE_COMPONENT, 0);
+			return damage > 0;
+		}
+		return false;
+	}
+
+	@Override
+	public int getBarWidth(ItemStack stack) {
+		int max = ConfigHandler.GENERAL.compassDurability.get();
+		if (max > 0) {
+			int damage = stack.getOrDefault(ExplorersCompass.DAMAGE_COMPONENT, 0);
+			return Math.clamp(Math.round(13.0f * (1.0f - (float) damage / max)), 0, 13);
+		}
+		return 13;
+	}
+
+	@Override
+	public int getBarColor(ItemStack stack) {
+		int max = ConfigHandler.GENERAL.compassDurability.get();
+		int damage = stack.getOrDefault(ExplorersCompass.DAMAGE_COMPONENT, 0);
+		float f = max > 0 ? (float) damage / max : 0.0f;
+		return Mth.hsvToRgb(Math.max(0.0F, (1.0F - f) / 3.0F), 1.0F, 1.0F);
+	}
+
 	@Override
  	public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged) {
  		if (getState(oldStack) == getState(newStack)) {
@@ -66,35 +106,90 @@ public class ExplorersCompassItem extends Item {
  		return super.shouldCauseReequipAnimation(oldStack, newStack, slotChanged);
  	}
 
-	public void searchForStructure(Level level, Player player, ResourceLocation categoryKey, List<ResourceLocation> structureKeys, BlockPos pos, ItemStack stack) {
-		setSearching(stack, categoryKey, player);
-		setSearchRadius(stack, 0, player);
-		if (level instanceof ServerLevel) {
-			ServerLevel serverLevel = (ServerLevel) level;
-			List<Structure> structures = new ArrayList<Structure>();
-			for (ResourceLocation key : structureKeys) {
-				structures.add(StructureUtils.getStructureForKey(serverLevel, key));
-			}
-			workerManager.stop();
-			workerManager.createWorkers(serverLevel, player, stack, structures, pos);
-			boolean started = workerManager.start();
-			if (!started) {
-				setNotFound(stack, 0, 0);
+	public void searchForStructure(Level level, Player player, ResourceLocation groupOrStructureKey, List<ResourceLocation> structureKeys, BlockPos pos, ItemStack stack, boolean isGroup) {
+		if (!isBroken(stack)) {
+			setSearching(stack, groupOrStructureKey, isGroup, player);
+			setSearchRadius(stack, 0, player);
+			if (level instanceof ServerLevel) {
+				ServerLevel serverLevel = (ServerLevel) level;
+				List<Structure> structures = new ArrayList<Structure>();
+				for (ResourceLocation key : structureKeys) {
+					structures.add(StructureUtils.getStructureForKey(serverLevel, key));
+				}
+				List<BlockPos> prevPos = new ArrayList<BlockPos>();
+				workerManager.stop();
+				workerManager.createWorkers(serverLevel, player, stack, structures, groupOrStructureKey, isGroup, pos, prevPos);
+				boolean started = workerManager.start();
+				if (!started) {
+					setNotFound(stack, 0, 0);
+				}
+
+				int xpLevelsToConsume = StructureUtils.getXpLevelsForStructure(serverLevel, groupOrStructureKey);
+				if (!player.hasInfiniteMaterials() && xpLevelsToConsume > 0) {
+					player.giveExperienceLevels(-xpLevelsToConsume);
+				}
 			}
 		}
 	}
-	
-	public void succeed(ItemStack stack, ResourceLocation structureKey, int x, int z, int samples, boolean displayCoordinates) {
-		setFound(stack, structureKey, x, z, samples);
+
+	public void searchForNextStructure(ServerLevel level, Player player, BlockPos pos, ItemStack stack) {
+		if (!isBroken(stack)) {
+			ResourceLocation structureKey = getStructureKey(stack);
+			List<BlockPos> storedPrevPos = getPrevPos(stack);
+			List<BlockPos> prevPos = storedPrevPos != null ? new ArrayList<>(storedPrevPos) : null;
+			boolean isGroup = getIsGroup(stack);
+			if (stack.has(ExplorersCompass.STRUCTURE_ID_COMPONENT) && prevPos != null) {
+				setSearchRadius(stack, 0, player);
+
+				List<ResourceLocation> structureKeys;
+				if (isGroup) {
+					// The compass stores the ID of the specific structure found, so re-determine the group key
+					Structure structure = StructureUtils.getStructureForKey(level, structureKey);
+					ResourceLocation groupKey = StructureUtils.getTypeForStructure(level, structure);
+					setSearching(stack, groupKey, isGroup, player);
+					structureKeys = new ArrayList<>(StructureUtils.getTypeKeysToStructureKeys(level).get(groupKey));
+				} else {
+					setSearching(stack, structureKey, isGroup, player);
+					structureKeys = List.of(structureKey);
+				}
+
+				List<Structure> structures = new ArrayList<Structure>();
+				for (ResourceLocation key : structureKeys) {
+					structures.add(StructureUtils.getStructureForKey(level, key));
+				}
+				workerManager.stop();
+				workerManager.createWorkers(level, player, stack, structures, structureKey, isGroup, pos, prevPos);
+				boolean started = workerManager.start();
+				if (!started) {
+					setNotFound(stack, 0, 0);
+				}
+
+                int xpLevelsToConsume = StructureUtils.getXpLevelsForStructure(level, structureKey);
+                if (!player.hasInfiniteMaterials() && xpLevelsToConsume > 0) {
+                    player.giveExperienceLevels(-xpLevelsToConsume);
+                }
+			}
+		}
+	}
+
+	public void succeed(ItemStack stack, ResourceLocation structureKey, boolean isGroup, int x, int z, List<BlockPos> prevPos, int samples, boolean displayCoordinates) {
+		setFound(stack, structureKey, isGroup, x, z, samples);
 		setDisplayCoordinates(stack, displayCoordinates);
+		if (prevPos != null) {
+			stack.set(ExplorersCompass.PREV_POS_COMPONENT, prevPos);
+		}
+		damageCompass(stack);
 		workerManager.clear();
 	}
-	
-	public void fail(ItemStack stack, int radius, int samples) {
+
+	public void fail(ItemStack stack, ResourceLocation structureKey, int radius, int samples) {
 		workerManager.pop();
 		boolean started = workerManager.start();
 		if (!started) {
 			setNotFound(stack, radius, samples);
+			if (ItemUtils.isCompass(stack)) {
+				stack.set(ExplorersCompass.STRUCTURE_ID_COMPONENT, structureKey.toString());
+			}
 		}
 	}
 
@@ -106,17 +201,39 @@ public class ExplorersCompassItem extends Item {
 		return false;
 	}
 
-	public void setSearching(ItemStack stack, ResourceLocation structureKey, Player player) {
+	public boolean isBroken(ItemStack stack) {
+		int max = ConfigHandler.GENERAL.compassDurability.get();
+		if (max > 0) {
+			return getDamage(stack) >= max;
+		}
+		return false;
+	}
+
+	public int getDamage(ItemStack stack) {
+		return stack.getOrDefault(ExplorersCompass.DAMAGE_COMPONENT, 0);
+	}
+
+	private void damageCompass(ItemStack stack) {
+		int max = ConfigHandler.GENERAL.compassDurability.get();
+		if (max > 0) {
+			int damage = getDamage(stack) + 1;
+			stack.set(ExplorersCompass.DAMAGE_COMPONENT, damage);
+		}
+	}
+
+	public void setSearching(ItemStack stack, ResourceLocation structureKey, boolean isGroup, Player player) {
 		if (ItemUtils.isCompass(stack)) {
 			stack.set(ExplorersCompass.STRUCTURE_ID_COMPONENT, structureKey.toString());
+			stack.set(ExplorersCompass.IS_GROUP_COMPONENT, isGroup);
 			stack.set(ExplorersCompass.COMPASS_STATE_COMPONENT, CompassState.SEARCHING.getID());
 		}
 	}
 
-	public void setFound(ItemStack stack, ResourceLocation structureKey, int x, int z, int samples) {
+	public void setFound(ItemStack stack, ResourceLocation structureKey, boolean isGroup, int x, int z, int samples) {
 		if (ItemUtils.isCompass(stack)) {
 			stack.set(ExplorersCompass.COMPASS_STATE_COMPONENT, CompassState.FOUND.getID());
 			stack.set(ExplorersCompass.STRUCTURE_ID_COMPONENT, structureKey.toString());
+			stack.set(ExplorersCompass.IS_GROUP_COMPONENT, isGroup);
 			stack.set(ExplorersCompass.FOUND_X_COMPONENT, x);
 			stack.set(ExplorersCompass.FOUND_Z_COMPONENT, z);
 			stack.set(ExplorersCompass.SAMPLES_COMPONENT, samples);
@@ -134,6 +251,8 @@ public class ExplorersCompassItem extends Item {
 	public void setInactive(ItemStack stack, Player player) {
 		if (ItemUtils.isCompass(stack)) {
 			stack.set(ExplorersCompass.COMPASS_STATE_COMPONENT, CompassState.INACTIVE.getID());
+			stack.remove(ExplorersCompass.STRUCTURE_ID_COMPONENT);
+			stack.remove(ExplorersCompass.PREV_POS_COMPONENT);
 		}
 	}
 
@@ -172,7 +291,7 @@ public class ExplorersCompassItem extends Item {
 			stack.set(ExplorersCompass.SAMPLES_COMPONENT, samples);
 		}
 	}
-	
+
 	public void setDisplayCoordinates(ItemStack stack, boolean displayPosition) {
 		if (ItemUtils.isCompass(stack)) {
 			stack.set(ExplorersCompass.DISPLAY_COORDS_COMPONENT, displayPosition);
@@ -184,6 +303,20 @@ public class ExplorersCompassItem extends Item {
 			return CompassState.fromID(stack.get(ExplorersCompass.COMPASS_STATE_COMPONENT));
 		}
 
+		return null;
+	}
+
+	public boolean getIsGroup(ItemStack stack) {
+		if (ItemUtils.isCompass(stack) && stack.has(ExplorersCompass.IS_GROUP_COMPONENT)) {
+			return stack.get(ExplorersCompass.IS_GROUP_COMPONENT);
+		}
+		return false;
+	}
+
+	public List<BlockPos> getPrevPos(ItemStack stack) {
+		if (ItemUtils.isCompass(stack) && stack.has(ExplorersCompass.PREV_POS_COMPONENT)) {
+			return stack.get(ExplorersCompass.PREV_POS_COMPONENT);
+		}
 		return null;
 	}
 
@@ -230,7 +363,7 @@ public class ExplorersCompassItem extends Item {
 	public int getDistanceToBiome(Player player, ItemStack stack) {
 		return StructureUtils.getHorizontalDistanceToLocation(player, getFoundStructureX(stack), getFoundStructureZ(stack));
 	}
-	
+
 	public boolean shouldDisplayCoordinates(ItemStack stack) {
 		if (ItemUtils.isCompass(stack) && stack.has(ExplorersCompass.DISPLAY_COORDS_COMPONENT)) {
 			return stack.get(ExplorersCompass.DISPLAY_COORDS_COMPONENT);
