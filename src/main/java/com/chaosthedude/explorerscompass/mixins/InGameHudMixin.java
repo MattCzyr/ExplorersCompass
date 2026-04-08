@@ -41,7 +41,7 @@ public class InGameHudMixin {
 			final ItemStack stack = ItemUtils.getHeldItem(player, ExplorersCompass.EXPLORERS_COMPASS_ITEM);
 			if (stack != null && stack.getItem() instanceof ExplorersCompassItem) {
 				final ExplorersCompassItem compass = (ExplorersCompassItem) stack.getItem();
-				if (compass.getState(stack) == CompassState.SEARCHING) {
+				if (compass.getCompassState(stack) == CompassState.SEARCHING) {
 					RenderUtils.drawConfiguredStringOnHUD(context, I18n.translate("string.explorerscompass.status"), client.textRenderer, 5, 5, 0xFFFFFF, 0);
 					RenderUtils.drawConfiguredStringOnHUD(context, I18n.translate("string.explorerscompass.searching"), client.textRenderer, 5, 5, 0xAAAAAA, 1);
 
@@ -50,7 +50,7 @@ public class InGameHudMixin {
 					
 					RenderUtils.drawConfiguredStringOnHUD(context, I18n.translate("string.explorerscompass.radius"), client.textRenderer, 5, 5, 0xFFFFFF, 6);
  					RenderUtils.drawConfiguredStringOnHUD(context, String.valueOf(compass.getSearchRadius(stack)), client.textRenderer, 5, 5, 0xAAAAAA, 7);
-				} else if (compass.getState(stack) == CompassState.FOUND) {
+				} else if (compass.getCompassState(stack) == CompassState.FOUND) {
 					RenderUtils.drawConfiguredStringOnHUD(context, I18n.translate("string.explorerscompass.status"), client.textRenderer, 5, 5, 0xFFFFFF, 0);
 					RenderUtils.drawConfiguredStringOnHUD(context, I18n.translate("string.explorerscompass.found"), client.textRenderer, 5, 5, 0xAAAAAA, 1);
 
@@ -64,7 +64,7 @@ public class InGameHudMixin {
 						RenderUtils.drawConfiguredStringOnHUD(context, I18n.translate("string.explorerscompass.distance"), client.textRenderer, 5, 5, 0xFFFFFF, 9);
 						RenderUtils.drawConfiguredStringOnHUD(context, String.valueOf(StructureUtils.getHorizontalDistanceToLocation(player, compass.getFoundStructureX(stack), compass.getFoundStructureZ(stack))), client.textRenderer, 5, 5, 0xAAAAAA, 10);
 					}
-				} else if (compass.getState(stack) == CompassState.NOT_FOUND) {
+				} else if (compass.getCompassState(stack) == CompassState.NOT_FOUND) {
 					RenderUtils.drawConfiguredStringOnHUD(context, I18n.translate("string.explorerscompass.status"), client.textRenderer, 5, 5, 0xFFFFFF, 0);
 					RenderUtils.drawConfiguredStringOnHUD(context, I18n.translate("string.explorerscompass.notFound"), client.textRenderer, 5, 5, 0xAAAAAA, 1);
 

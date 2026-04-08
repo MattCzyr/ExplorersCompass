@@ -38,7 +38,7 @@ public record TeleportPacket() implements CustomPayload {
 			if (!stack.isEmpty()) {
 				final ExplorersCompassItem explorersCompass = (ExplorersCompassItem) stack.getItem();
 				if (ExplorersCompassConfig.allowTeleport && PlayerUtils.canTeleport(context.player())) {
-					if (explorersCompass.getState(stack) == CompassState.FOUND) {
+					if (explorersCompass.getCompassState(stack) == CompassState.FOUND) {
 						final int x = explorersCompass.getFoundStructureX(stack);
 						final int z = explorersCompass.getFoundStructureZ(stack);
 						final int y = findValidTeleportHeight(context.player().getEntityWorld(), x, z);

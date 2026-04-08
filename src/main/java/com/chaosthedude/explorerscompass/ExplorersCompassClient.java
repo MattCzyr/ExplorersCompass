@@ -74,7 +74,7 @@ public class ExplorersCompassClient implements ClientModInitializer {
 				if (stack.getItem() == ExplorersCompass.EXPLORERS_COMPASS_ITEM) {
 					ExplorersCompassItem compassItem = (ExplorersCompassItem) stack.getItem();
 					BlockPos pos;
-					if (compassItem.getState(stack) == CompassState.FOUND) {
+					if (compassItem.getCompassState(stack) == CompassState.FOUND) {
 						pos = new BlockPos(compassItem.getFoundStructureX(stack), 0, compassItem.getFoundStructureZ(stack));
 					} else {
 						pos = world.getSpawnPos();

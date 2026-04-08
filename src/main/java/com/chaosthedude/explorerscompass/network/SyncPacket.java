@@ -15,19 +15,21 @@ import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.util.Identifier;
 
-public record SyncPacket(boolean canTeleport, List<Identifier> allowedStructureIDs, ListMultimap<Identifier, Identifier> allowedStructureIDsToDimensionIDs, Map<Identifier, Identifier> structureIDsToGroupIDs, ListMultimap<Identifier, Identifier> groupIDsToStructureIDs) implements CustomPayload {
+public record SyncPacket(boolean canTeleport, int maxNextSearches, boolean infiniteXp, List<Identifier> allowedStructureIDs, Map<Identifier, Integer> xpLevelsForAllowedStructures, ListMultimap<Identifier, Identifier> allowedStructureIDsToDimensionIDs, Map<Identifier, Identifier> structureIDsToGroupIDs) implements CustomPayload {
 
 	public static final CustomPayload.Id<SyncPacket> PACKET_ID = new CustomPayload.Id<>(Identifier.of(ExplorersCompass.MODID, "sync"));
-	
+
 	public static final PacketCodec<RegistryByteBuf, SyncPacket> PACKET_CODEC = PacketCodec.of(SyncPacket::write, SyncPacket::read);
-	
+
 	public static SyncPacket read(RegistryByteBuf buf) {
 		final boolean canTeleport = buf.readBoolean();
+		final int maxNextSearches = buf.readInt();
+		final boolean infiniteXp = buf.readBoolean();
 		final List<Identifier> allowedStructureIDs = new ArrayList<Identifier>();
+		final Map<Identifier, Integer> xpLevelsForAllowedStructures = new HashMap<Identifier, Integer>();
 		final ListMultimap<Identifier, Identifier> allowedStructureIDsToDimensionIDs = ArrayListMultimap.create();
-		Map<Identifier, Identifier> structureIDsToGroupIDs = new HashMap<Identifier, Identifier>();
-		ListMultimap<Identifier, Identifier> groupIDsToStructureIDs = ArrayListMultimap.create();
-		
+		final Map<Identifier, Identifier> structureIDsToGroupIDs = new HashMap<Identifier, Identifier>();
+
 		final int numStructures = buf.readInt();
 		for (int i = 0; i < numStructures; i++) {
 			Identifier structureID = buf.readIdentifier();
@@ -37,28 +39,23 @@ public record SyncPacket(boolean canTeleport, List<Identifier> allowedStructureI
 				dimensionIDs.add(buf.readIdentifier());
 			}
 			Identifier groupID = buf.readIdentifier();
-			
+			int xpLevel = buf.readInt();
+
 			if (structureID != null) {
 				allowedStructureIDs.add(structureID);
 				allowedStructureIDsToDimensionIDs.putAll(structureID, dimensionIDs);
 				structureIDsToGroupIDs.put(structureID, groupID);
+				xpLevelsForAllowedStructures.put(structureID, xpLevel);
 			}
 		}
-		
-		int numGroups = buf.readInt();
-		for (int i = 0; i < numGroups; i++) {
-			Identifier groupID = buf.readIdentifier();
-			int numGroupsToAdd = buf.readInt();
-			for (int j = 0; j < numGroupsToAdd; j++) {
-				Identifier structureID = buf.readIdentifier();
-				groupIDsToStructureIDs.put(groupID, structureID);
-			}
-		}
-		return new SyncPacket(canTeleport, allowedStructureIDs, allowedStructureIDsToDimensionIDs, structureIDsToGroupIDs, groupIDsToStructureIDs);
+
+		return new SyncPacket(canTeleport, maxNextSearches, infiniteXp, allowedStructureIDs, xpLevelsForAllowedStructures, allowedStructureIDsToDimensionIDs, structureIDsToGroupIDs);
 	}
 
 	public void write(RegistryByteBuf buf) {
 		buf.writeBoolean(canTeleport);
+		buf.writeInt(maxNextSearches);
+		buf.writeBoolean(infiniteXp);
 		buf.writeInt(allowedStructureIDs.size());
 		for (Identifier structureID : allowedStructureIDs) {
 			buf.writeIdentifier(structureID);
@@ -67,21 +64,11 @@ public record SyncPacket(boolean canTeleport, List<Identifier> allowedStructureI
 			for (Identifier dimensionID : dimensionIDs) {
 				buf.writeIdentifier(dimensionID);
 			}
-			Identifier groupID = structureIDsToGroupIDs.get(structureID);
-			buf.writeIdentifier(groupID);
-		}
-		
-		buf.writeInt(groupIDsToStructureIDs.keySet().size());
-		for (Identifier groupID : groupIDsToStructureIDs.keySet()) {
-			buf.writeIdentifier(groupID);
-			List<Identifier> structureIDs = groupIDsToStructureIDs.get(groupID);
-			buf.writeInt(structureIDs.size());
-			for (Identifier structureID : structureIDs) {
-				buf.writeIdentifier(structureID);
-			}
+			buf.writeIdentifier(structureIDsToGroupIDs.get(structureID));
+			buf.writeInt(xpLevelsForAllowedStructures.getOrDefault(structureID, 0));
 		}
 	}
-	
+
 	@Override
 	public Id<? extends CustomPayload> getId() {
 		return PACKET_ID;
@@ -89,11 +76,14 @@ public record SyncPacket(boolean canTeleport, List<Identifier> allowedStructureI
 
 	public static void apply(SyncPacket packet, ClientPlayNetworking.Context context) {
 		context.client().execute(() -> {
+			ExplorersCompass.synced = true;
 			ExplorersCompass.canTeleport = packet.canTeleport;
+			ExplorersCompass.maxNextSearches = packet.maxNextSearches;
+			ExplorersCompass.infiniteXp = packet.infiniteXp;
 			ExplorersCompass.allowedStructureIDs = packet.allowedStructureIDs;
+			ExplorersCompass.xpLevelsForAllowedStructures = packet.xpLevelsForAllowedStructures;
 			ExplorersCompass.allowedStructureIDsToDimensionIDs = packet.allowedStructureIDsToDimensionIDs;
 			ExplorersCompass.structureIDsToGroupIDs = packet.structureIDsToGroupIDs;
-			ExplorersCompass.groupIDsToStructureIDs = packet.groupIDsToStructureIDs;
 		});
 	}
 

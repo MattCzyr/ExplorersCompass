@@ -6,12 +6,12 @@
     ]
   },
   "criteria": {
-    "has_cracked_stone_bricks": {
+    "has_compass": {
       "trigger": "minecraft:inventory_changed",
       "conditions": {
         "items": [
           {
-            "item": "minecraft:cracked_stone_bricks"
+            "items": ["minecraft:compass"]
           }
         ]
       }
@@ -25,7 +25,7 @@
   },
   "requirements": [
     [
-      "has_cracked_stone_bricks",
+      "has_compass",
       "has_recipe"
     ]
   ]

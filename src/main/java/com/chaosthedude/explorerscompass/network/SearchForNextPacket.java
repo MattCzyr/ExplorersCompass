@@ -12,21 +12,17 @@ import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 
-public record SearchPacket(Identifier structureOrGroupID, boolean isGroup) implements CustomPayload {
+public record SearchForNextPacket() implements CustomPayload {
 
-	public static final CustomPayload.Id<SearchPacket> PACKET_ID = new CustomPayload.Id<>(Identifier.of(ExplorersCompass.MODID, "search"));
+	public static final CustomPayload.Id<SearchForNextPacket> PACKET_ID = new CustomPayload.Id<>(Identifier.of(ExplorersCompass.MODID, "continue_search"));
 
-	public static final PacketCodec<RegistryByteBuf, SearchPacket> PACKET_CODEC = PacketCodec.of(SearchPacket::write, SearchPacket::read);
+	public static final PacketCodec<RegistryByteBuf, SearchForNextPacket> PACKET_CODEC = PacketCodec.of(SearchForNextPacket::write, SearchForNextPacket::read);
 
-	public static SearchPacket read(RegistryByteBuf buf) {
-		final Identifier structureOrGroupID = buf.readIdentifier();
-		final boolean isGroup = buf.readBoolean();
-		return new SearchPacket(structureOrGroupID, isGroup);
+	public static SearchForNextPacket read(RegistryByteBuf buf) {
+		return new SearchForNextPacket();
 	}
 
 	public void write(RegistryByteBuf buf) {
-		buf.writeIdentifier(structureOrGroupID);
-		buf.writeBoolean(isGroup);
 	}
 
 	@Override
@@ -34,12 +30,12 @@ public record SearchPacket(Identifier structureOrGroupID, boolean isGroup) imple
 		return PACKET_ID;
 	}
 
-	public static void apply(SearchPacket packet, ServerPlayNetworking.Context context) {
+	public static void apply(SearchForNextPacket packet, ServerPlayNetworking.Context context) {
 		context.player().getServer().execute(() -> {
 			final ItemStack stack = ItemUtils.getHeldItem(context.player(), ExplorersCompass.EXPLORERS_COMPASS_ITEM);
 			if (!stack.isEmpty()) {
 				final ExplorersCompassItem explorersCompass = (ExplorersCompassItem) stack.getItem();
-				explorersCompass.searchForStructure((ServerWorld) context.player().getEntityWorld(), context.player(), context.player().getBlockPos(), packet.structureOrGroupID, packet.isGroup, stack);
+				explorersCompass.searchForNextStructure((ServerWorld) context.player().getEntityWorld(), context.player(), context.player().getBlockPos(), stack);
 			}
 		});
 	}

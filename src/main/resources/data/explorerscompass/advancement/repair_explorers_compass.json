@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "explorerscompass:repair_explorers_compass"
+    ]
+  },
+  "criteria": {
+    "has_explorers_compass": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": ["explorerscompass:explorerscompass"]
+          }
+        ]
+      }
+    },
+    "has_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "explorerscompass:repair_explorers_compass"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_explorers_compass",
+      "has_recipe"
+    ]
+  ]
+}

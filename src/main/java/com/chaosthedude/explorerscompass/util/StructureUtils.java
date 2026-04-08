@@ -54,6 +54,21 @@ public class StructureUtils {
 		return structureIDsToGroupIDs;
 	}
 	
+	public static List<Identifier> getStructuresForGroup(ServerWorld world, Identifier groupId) {
+		List<Identifier> structureIds = new ArrayList<Identifier>();
+		Registry<StructureSet> registry = getStructureSetRegistry(world);
+		StructureSet set = registry.get(groupId);
+		if (set != null) {
+			for (WeightedEntry entry : set.structures()) {
+				Identifier structureId = getIDForStructure(world, entry.structure().value());
+				if (structureId != null) {
+					structureIds.add(structureId);
+				}
+			}
+		}
+		return structureIds;
+	}
+
 	public static Identifier getGroupForStructure(ServerWorld world, Structure structure) {
 		Registry<StructureSet> registry = getStructureSetRegistry(world);
 		for (StructureSet set : registry) {
@@ -107,7 +122,7 @@ public class StructureUtils {
 		final Registry<Structure> structureRegistry = getStructureRegistry(world);
 		if (structureRegistry.getKey(structure).isPresent() && structureRegistry.getEntry(structureRegistry.getKey(structure).get()).isPresent()) {
 			final RegistryEntry<Structure> structureHolder = structureRegistry.getEntry(structureRegistry.getKey(structure).get()).get();
-			return structureHolder.streamTags().anyMatch(tag -> tag.id().getPath().equals("c:hidden_from_locator_selection"));
+			return structureHolder.streamTags().anyMatch(tag -> tag.id().toString().equals("c:hidden_from_locator_selection"));
 		}
 		return false;
 	}
@@ -121,10 +136,6 @@ public class StructureUtils {
 				dimensions.add(world.getRegistryKey().getValue());
 			}
 		}
-		// Fix empty dimensions for stronghold
-		if (structure == StructureType.STRONGHOLD && dimensions.isEmpty()) {
-			dimensions.add(Identifier.of("minecraft:overworld"));
-		}
 		return dimensions;
 	}
 
@@ -135,6 +146,27 @@ public class StructureUtils {
 			dimensionsForAllowedStructures.putAll(id, getGeneratingDimensionIDs(serverWorld, structure));
 		}
 		return dimensionsForAllowedStructures;
+	}
+
+	public static int getXpLevelsForStructure(ServerWorld world, Identifier structureKey) {
+		int xpLevels = ExplorersCompassConfig.defaultXpLevel;
+		for (String structureRegex : ExplorersCompassConfig.perStructureXpLevels.keySet()) {
+			if (structureKey.toString().matches(convertToRegex(structureRegex))) {
+				xpLevels = ExplorersCompassConfig.perStructureXpLevels.get(structureRegex);
+				if (xpLevels > 3) {
+					xpLevels = 3;
+				}
+			}
+		}
+		return xpLevels;
+	}
+
+	public static Map<Identifier, Integer> getXpLevelsForAllowedStructures(ServerWorld world) {
+		Map<Identifier, Integer> xpLevels = new HashMap<Identifier, Integer>();
+		for (Identifier id : getAllowedStructureIDs(world)) {
+			xpLevels.put(id, getXpLevelsForStructure(world, id));
+		}
+		return xpLevels;
 	}
 
 	public static int getHorizontalDistanceToLocation(PlayerEntity player, int x, int z) {

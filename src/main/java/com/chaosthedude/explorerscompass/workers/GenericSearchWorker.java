@@ -10,6 +10,7 @@ import com.mojang.datafixers.util.Pair;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.ChunkSectionPos;
@@ -25,8 +26,8 @@ public class GenericSearchWorker extends StructureSearchWorker<StructurePlacemen
 	public double nextLength;
 	public Direction direction;
 
-	public GenericSearchWorker(ServerWorld level, PlayerEntity player, ItemStack stack, BlockPos startPos, StructurePlacement placement, List<Structure> structureSet, String managerId) {
-		super(level, player, stack, startPos, placement, structureSet, managerId);
+	public GenericSearchWorker(ServerWorld level, PlayerEntity player, ItemStack stack, BlockPos startPos, List<BlockPos> prevPos, StructurePlacement placement, List<Structure> structureSet, Identifier structureOrGroupId, boolean isGroup, String managerId) {
+		super(level, player, stack, startPos, prevPos, placement, structureSet, structureOrGroupId, isGroup, managerId);
 		chunkX = startPos.getX() >> 4;
 		chunkZ = startPos.getZ() >> 4;
 		nextLength = 1;
@@ -51,7 +52,8 @@ public class GenericSearchWorker extends StructureSearchWorker<StructurePlacemen
 			currentPos = new BlockPos(ChunkSectionPos.getOffsetPos(chunkPos.x, 8), 0, ChunkSectionPos.getOffsetPos(chunkPos.z, 8));
 
 			Pair<BlockPos, Structure> pair = getStructureGeneratingAt(chunkPos);
-			if (pair != null) {
+			if (pair != null && !shouldIgnore(pair.getFirst())) {
+				prevPos.add(pair.getFirst());
 				succeed(pair.getFirst(), pair.getSecond());
 			}
 
