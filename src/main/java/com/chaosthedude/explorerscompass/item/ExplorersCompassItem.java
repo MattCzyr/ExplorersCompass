@@ -170,7 +170,7 @@ public class ExplorersCompassItem extends Item {
         }
 	}
 
-	public void succeed(ItemStack stack, Identifier structureID, boolean isGroup, int x, int z, List<BlockPos> prevPos, int samples, boolean displayCoordinates) {
+	public void succeed(Player player, ItemStack stack, Identifier structureID, boolean isGroup, int x, int z, List<BlockPos> prevPos, int samples, boolean displayCoordinates) {
 		clearSearchData(stack);
 		setCompassState(stack, CompassState.FOUND);
 		stack.set(ExplorersCompass.STRUCTURE_ID, structureID.toString());
@@ -180,7 +180,7 @@ public class ExplorersCompassItem extends Item {
 		stack.set(ExplorersCompass.PREV_POS, prevPos);
 		stack.set(ExplorersCompass.SAMPLES, samples);
 		stack.set(ExplorersCompass.DISPLAY_COORDS, displayCoordinates);
-        damageCompass(stack);
+        damageCompass(player, stack);
 		workerManager.clear();
 	}
 
@@ -220,9 +220,9 @@ public class ExplorersCompassItem extends Item {
 		return stack.getOrDefault(ExplorersCompass.DAMAGE, 0);
 	}
 
-    private void damageCompass(ItemStack stack) {
+    private void damageCompass(Player player, ItemStack stack) {
         int max = ExplorersCompassConfig.compassDurability;
-        if (max > 0) {
+        if (!player.hasInfiniteMaterials() && max > 0) {
             int damage = getDamage(stack) + 1;
             stack.set(ExplorersCompass.DAMAGE, damage);
         }
