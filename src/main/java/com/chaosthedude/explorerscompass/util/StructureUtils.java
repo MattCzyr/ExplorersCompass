@@ -34,18 +34,9 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
 import net.minecraft.world.gen.structure.Structure;
-import net.minecraft.world.gen.structure.StructureType;
 
 public class StructureUtils {
-	
-	public static ListMultimap<Identifier, Identifier> getGroupIDsToStructureIDs(ServerWorld world) {
-		ListMultimap<Identifier, Identifier> groupIDsToStructureIDs = ArrayListMultimap.create();
-		for (Structure structure : getStructureRegistry(world)) {
-			groupIDsToStructureIDs.put(getGroupForStructure(world, structure), getIDForStructure(world, structure));
-		}
-		return groupIDsToStructureIDs;
-	}
-	
+
 	public static Map<Identifier, Identifier> getStructureIDsToGroupIDs(ServerWorld world) {
 		Map<Identifier, Identifier> structureIDsToGroupIDs = new HashMap<Identifier, Identifier>();
 		for (Structure structure : getStructureRegistry(world)) {
@@ -53,7 +44,7 @@ public class StructureUtils {
 		}
 		return structureIDsToGroupIDs;
 	}
-	
+
 	public static Identifier getGroupForStructure(ServerWorld world, Structure structure) {
 		Registry<StructureSet> registry = getStructureSetRegistry(world);
 		for (StructureSet set : registry) {
@@ -66,6 +57,21 @@ public class StructureUtils {
 		return new Identifier(ExplorersCompass.MODID, "none");
 	}
 
+	public static List<Identifier> getStructuresForGroup(ServerWorld world, Identifier groupId) {
+		List<Identifier> structureIds = new ArrayList<Identifier>();
+		Registry<StructureSet> registry = getStructureSetRegistry(world);
+		StructureSet set = registry.get(groupId);
+		if (set != null) {
+			for (WeightedEntry entry : set.structures()) {
+				Identifier structureId = getIDForStructure(world, entry.structure().value());
+				if (structureId != null) {
+					structureIds.add(structureId);
+				}
+			}
+		}
+		return structureIds;
+	}
+
 	public static Identifier getIDForStructure(ServerWorld world, Structure structure) {
 		return getStructureRegistry(world).getId(structure);
 	}
@@ -73,7 +79,7 @@ public class StructureUtils {
 	public static Structure getStructureForID(ServerWorld world, Identifier id) {
 		return getStructureRegistry(world).get(id);
 	}
-	
+
 	public static RegistryEntry<Structure> getEntryForStructure(ServerWorld world, Structure structure) {
 		Optional<RegistryKey<Structure>> optional = getStructureRegistry(world).getKey(structure);
 		if (optional.isPresent()) {
@@ -85,14 +91,14 @@ public class StructureUtils {
 	public static List<Identifier> getAllowedStructureIDs(ServerWorld world) {
 		final List<Identifier> structureIDs = new ArrayList<Identifier>();
 		for (Structure structure : getStructureRegistry(world)) {
-			if (structure != null && getIDForStructure(world, structure) != null && !getIDForStructure(world, structure).getNamespace().isEmpty() && !getIDForStructure(world, structure).getPath().isEmpty() && !structureIsBlacklisted(world, structure)) {
+			if (structure != null && getIDForStructure(world, structure) != null && !getIDForStructure(world, structure).getNamespace().isEmpty() && !getIDForStructure(world, structure).getPath().isEmpty() && !structureIsBlacklisted(world, structure) && !structureIsHidden(world, structure)) {
 				structureIDs.add(getIDForStructure(world, structure));
 			}
 		}
 
 		return structureIDs;
 	}
-	
+
 	public static boolean structureIsBlacklisted(ServerWorld world, Structure structure) {
 		final List<String> structureBlacklist = ExplorersCompassConfig.structureBlacklist;
 		for (String structureKey : structureBlacklist) {
@@ -102,7 +108,15 @@ public class StructureUtils {
 		}
 		return false;
 	}
-	
+
+	public static boolean structureIsHidden(ServerWorld world, Structure structure) {
+		RegistryEntry<Structure> entry = getEntryForStructure(world, structure);
+		if (entry != null) {
+			return entry.streamTags().anyMatch(tag -> tag.id().toString().equals("c:hidden_from_locator_selection"));
+		}
+		return false;
+	}
+
 	public static List<Identifier> getGeneratingDimensionIDs(ServerWorld serverWorld, Structure structure) {
 		final List<Identifier> dimensions = new ArrayList<Identifier>();
 		for (ServerWorld world : serverWorld.getServer().getWorlds()) {
@@ -112,20 +126,38 @@ public class StructureUtils {
 				dimensions.add(world.getRegistryKey().getValue());
 			}
 		}
-		// Fix empty dimensions for stronghold
-		if (structure == StructureType.STRONGHOLD && dimensions.isEmpty()) {
-			dimensions.add(new Identifier("minecraft:overworld"));
-		}
 		return dimensions;
 	}
 
-	public static ListMultimap<Identifier, Identifier> getGeneratingDimensionIDsForAllowedStructures(ServerWorld serverWorld) {
+	public static ListMultimap<Identifier, Identifier> getGeneratingDimensionIDsForAllowedStructures(ServerWorld serverWorld, List<Identifier> allowedStructures) {
 		ListMultimap<Identifier, Identifier> dimensionsForAllowedStructures = ArrayListMultimap.create();
-		for (Identifier id : getAllowedStructureIDs(serverWorld)) {
+		for (Identifier id : allowedStructures) {
 			Structure structure = getStructureForID(serverWorld, id);
 			dimensionsForAllowedStructures.putAll(id, getGeneratingDimensionIDs(serverWorld, structure));
 		}
 		return dimensionsForAllowedStructures;
+	}
+
+	public static int getXpLevelsForStructure(ServerWorld world, Identifier structureKey) {
+		int xpLevels = ExplorersCompassConfig.defaultXpLevel;
+		for (String structureRegex : ExplorersCompassConfig.perStructureXpLevels.keySet()) {
+			if (structureKey.toString().matches(convertToRegex(structureRegex))) {
+				xpLevels = ExplorersCompassConfig.perStructureXpLevels.get(structureRegex);
+				if (xpLevels > 3) {
+					xpLevels = 3;
+				}
+				break;
+			}
+		}
+		return xpLevels;
+	}
+
+	public static Map<Identifier, Integer> getXpLevelsForAllowedStructures(ServerWorld world, List<Identifier> allowedStructures) {
+		final Map<Identifier, Integer> xpLevels = new HashMap<Identifier, Integer>();
+		for (Identifier structureKey : allowedStructures) {
+			xpLevels.put(structureKey, getXpLevelsForStructure(world, structureKey));
+		}
+		return xpLevels;
 	}
 
 	public static int getHorizontalDistanceToLocation(PlayerEntity player, int x, int z) {
@@ -196,11 +228,11 @@ public class StructureUtils {
 		}
 		return name;
 	}
-	
+
 	private static Registry<Structure> getStructureRegistry(ServerWorld world) {
 		return world.getRegistryManager().get(RegistryKeys.STRUCTURE);
 	}
-	
+
 	private static Registry<StructureSet> getStructureSetRegistry(ServerWorld world) {
 		return world.getRegistryManager().get(RegistryKeys.STRUCTURE_SET);
 	}

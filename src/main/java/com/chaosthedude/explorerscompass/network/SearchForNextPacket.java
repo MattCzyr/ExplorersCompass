@@ -14,26 +14,21 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 
-public class SearchPacket extends PacketByteBuf {
+public class SearchForNextPacket extends PacketByteBuf {
 
-	public static final Identifier ID = new Identifier(ExplorersCompass.MODID, "search");
+	public static final Identifier ID = new Identifier(ExplorersCompass.MODID, "continue_search");
 
-	public SearchPacket(Identifier structureOrGroupId, boolean isGroup) {
+	public SearchForNextPacket() {
 		super(Unpooled.buffer());
-		writeIdentifier(structureOrGroupId);
-		writeBoolean(isGroup);
 	}
 
 	public static void apply(MinecraftServer server, ServerPlayerEntity player, ServerPlayNetworkHandler handler, PacketByteBuf buf, PacketSender responseSender) {
-		final Identifier structureOrGroupId = buf.readIdentifier();
-		final boolean isGroup = buf.readBoolean();
-
 		server.execute(() -> {
 			final ItemStack stack = ItemUtils.getHeldItem(player, ExplorersCompass.EXPLORERS_COMPASS_ITEM);
 			if (!stack.isEmpty()) {
 				final ExplorersCompassItem explorersCompass = (ExplorersCompassItem) stack.getItem();
 				final ServerWorld world = (ServerWorld) player.getEntityWorld();
-				explorersCompass.searchForStructure(world, player, player.getBlockPos(), structureOrGroupId, isGroup, stack);
+				explorersCompass.searchForNextStructure(world, player, player.getBlockPos(), stack);
 			}
 		});
 	}

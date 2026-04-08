@@ -20,9 +20,11 @@ public class SyncPacket extends PacketByteBuf {
 
 	public static final Identifier ID = new Identifier(ExplorersCompass.MODID, "sync");
 
-	public SyncPacket(boolean canTeleport, List<Identifier> allowedStructureIDs, ListMultimap<Identifier, Identifier> allowedStructureIDsToDimensionIDs, Map<Identifier, Identifier> structureIDsToGroupIDs, ListMultimap<Identifier, Identifier> groupIDsToStructureIDs) {
+	public SyncPacket(boolean canTeleport, int maxNextSearches, boolean infiniteXp, List<Identifier> allowedStructureIDs, Map<Identifier, Integer> xpLevelsForAllowedStructures, ListMultimap<Identifier, Identifier> allowedStructureIDsToDimensionIDs, Map<Identifier, Identifier> structureIDsToGroupIDs) {
 		super(Unpooled.buffer());
 		writeBoolean(canTeleport);
+		writeInt(maxNextSearches);
+		writeBoolean(infiniteXp);
 		writeInt(allowedStructureIDs.size());
 		for (Identifier structureID : allowedStructureIDs) {
 			writeIdentifier(structureID);
@@ -33,26 +35,20 @@ public class SyncPacket extends PacketByteBuf {
 			}
 			Identifier groupID = structureIDsToGroupIDs.get(structureID);
 			writeIdentifier(groupID);
-		}
-		
-		writeInt(groupIDsToStructureIDs.keySet().size());
-		for (Identifier groupID : groupIDsToStructureIDs.keySet()) {
-			writeIdentifier(groupID);
-			List<Identifier> structureIDs = groupIDsToStructureIDs.get(groupID);
-			writeInt(structureIDs.size());
-			for (Identifier structureID : structureIDs) {
-				writeIdentifier(structureID);
-			}
+			int xpLevels = xpLevelsForAllowedStructures.getOrDefault(structureID, 0);
+			writeInt(xpLevels);
 		}
 	}
 
 	public static void apply(MinecraftClient client, ClientPlayNetworkHandler handler, PacketByteBuf buf, PacketSender responseSender) {
 		final boolean canTeleport = buf.readBoolean();
+		final int maxNextSearches = buf.readInt();
+		final boolean infiniteXp = buf.readBoolean();
 		final List<Identifier> allowedStructureIDs = new ArrayList<Identifier>();
+		final Map<Identifier, Integer> xpLevelsForAllowedStructures = new HashMap<Identifier, Integer>();
 		final ListMultimap<Identifier, Identifier> allowedStructureIDsToDimensionIDs = ArrayListMultimap.create();
-		Map<Identifier, Identifier> structureIDsToGroupIDs = new HashMap<Identifier, Identifier>();
-		ListMultimap<Identifier, Identifier> groupIDsToStructureIDs = ArrayListMultimap.create();
-		
+		final Map<Identifier, Identifier> structureIDsToGroupIDs = new HashMap<Identifier, Identifier>();
+
 		final int numStructures = buf.readInt();
 		for (int i = 0; i < numStructures; i++) {
 			Identifier structureID = buf.readIdentifier();
@@ -62,30 +58,25 @@ public class SyncPacket extends PacketByteBuf {
 				dimensionIDs.add(buf.readIdentifier());
 			}
 			Identifier groupID = buf.readIdentifier();
-			
+			int xpLevels = buf.readInt();
+
 			if (structureID != null) {
 				allowedStructureIDs.add(structureID);
 				allowedStructureIDsToDimensionIDs.putAll(structureID, dimensionIDs);
 				structureIDsToGroupIDs.put(structureID, groupID);
+				xpLevelsForAllowedStructures.put(structureID, xpLevels);
 			}
 		}
-		
-		int numGroups = buf.readInt();
-		for (int i = 0; i < numGroups; i++) {
-			Identifier groupID = buf.readIdentifier();
-			int numGroupsToAdd = buf.readInt();
-			for (int j = 0; j < numGroupsToAdd; j++) {
-				Identifier structureID = buf.readIdentifier();
-				groupIDsToStructureIDs.put(groupID, structureID);
-			}
-		}
-		
+
 		client.execute(() -> {
+			ExplorersCompass.synced = true;
 			ExplorersCompass.canTeleport = canTeleport;
+			ExplorersCompass.maxNextSearches = maxNextSearches;
+			ExplorersCompass.infiniteXp = infiniteXp;
 			ExplorersCompass.allowedStructureIDs = allowedStructureIDs;
+			ExplorersCompass.xpLevelsForAllowedStructures = xpLevelsForAllowedStructures;
 			ExplorersCompass.allowedStructureIDsToDimensionIDs = allowedStructureIDsToDimensionIDs;
 			ExplorersCompass.structureIDsToGroupIDs = structureIDsToGroupIDs;
-			ExplorersCompass.groupIDsToStructureIDs = groupIDsToStructureIDs;
 		});
 	}
 

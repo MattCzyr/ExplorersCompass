@@ -2,33 +2,39 @@ package com.chaosthedude.explorerscompass.gui;
 
 import java.util.Objects;
 
+import com.chaosthedude.explorerscompass.util.RenderUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.widget.AlwaysSelectedEntryListWidget;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
+import org.jetbrains.annotations.Nullable;
 
 @Environment(EnvType.CLIENT)
 public class StructureSearchList extends AlwaysSelectedEntryListWidget<StructureSearchEntry> {
 
 	private final ExplorersCompassScreen parentScreen;
+	private final PlayerEntity player;
 
-	public StructureSearchList(ExplorersCompassScreen parentScreen, MinecraftClient client, int width, int height, int top, int bottom, int slotHeight) {
-		super(client, width, height, top, bottom, slotHeight);
+	public StructureSearchList(ExplorersCompassScreen parentScreen, MinecraftClient client, PlayerEntity player, Identifier structureIdToSelect, int x, int y, int width, int height, int slotHeight) {
+		super(client, width, height, y, y + height, slotHeight);
 		this.parentScreen = parentScreen;
-		refreshList();
+		this.player = player;
+        setLeftPos(x);
+		refreshList(structureIdToSelect);
 	}
 
 	@Override
 	protected int getScrollbarPositionX() {
-		return super.getScrollbarPositionX() + 20;
+		return left + width;
 	}
 
 	@Override
 	public int getRowWidth() {
-		return super.getRowWidth() + 50;
+		return width;
 	}
 
 	@Override
@@ -38,60 +44,67 @@ public class StructureSearchList extends AlwaysSelectedEntryListWidget<Structure
 
 	@Override
 	public void render(DrawContext context, int mouseX, int mouseY, float partialTicks) {
-		renderList(context, mouseX, mouseY, partialTicks);
+        enableScissor(context);
+        // Render backgrounds
+        for (int i = 0; i < getEntryCount(); ++i) {
+            if (getRowBottom(i) >= top && getRowTop(i) <= bottom) {
+                StructureSearchEntry entry = getEntry(i);
+                int fillColor = RenderUtils.getBackgroundColor(entry.isEnabled(), entry == getSelectedOrNull());
+                context.fill(getRowLeft(), getRowTop(i), right, getRowBottom(i), fillColor);
+            }
+        }
+        // Render entries
+        for (int i = 0; i < getEntryCount(); ++i) {
+            int entryTop = getRowTop(i);
+            int entryBottom = getRowBottom(i);
+            if (entryBottom >= top && entryTop <= bottom) {
+                StructureSearchEntry entry = getEntry(i);
+                boolean isHovering = isMouseOver(mouseX, mouseY) && Objects.equals(getEntryAtPosition(mouseX, mouseY), entry);
+                entry.render(context, i, entryTop, getRowLeft(), getRowWidth(), itemHeight, mouseX, mouseY, isHovering, partialTicks);
+            }
+        }
+        context.disableScissor();
+        // Render scrollbar
+        if (getMaxScroll() > 0) {
+            int scrollbarLeft = getScrollbarPositionX();
+            int scrollbarRight = scrollbarLeft + 6;
+            int scrollbarHeight = (int) ((float) ((bottom - top) * (bottom - top)) / (float) getMaxPosition());
+            scrollbarHeight = MathHelper.clamp(scrollbarHeight, 32, bottom - top - 8);
+            int scrollbarTop = (int) getScrollAmount() * (bottom - top - scrollbarHeight) / getMaxScroll() + top;
+            if (scrollbarTop < top) {
+                scrollbarTop = top;
+            }
+            context.fill(scrollbarLeft, top, scrollbarRight, bottom, RenderUtils.getBackgroundColor(false, false));
+            context.fill(scrollbarLeft, scrollbarTop, scrollbarRight, scrollbarTop + scrollbarHeight, RenderUtils.getBackgroundColor(true, true));
+        }
 	}
 
-	@Override
-	protected void renderList(DrawContext context, int mouseX, int mouseY, float partialTicks) {
-		int i = getEntryCount();
-		for (int j = 0; j < i; ++j) {
-			int k = getRowTop(j);
-			int l = getRowBottom(j);
-			if (l >= top && k <= bottom) {
-				int j1 = this.itemHeight - 4;
-				StructureSearchEntry e = getEntry(j);
-				int k1 = getRowWidth();
-				if (/*renderSelection*/ true && isSelectedEntry(j)) {
-					final int insideLeft = left + width / 2 - getRowWidth() / 2 + 2;
-					context.fill(insideLeft - 4, k - 4, insideLeft + getRowWidth() + 4, k + itemHeight, 255 / 2 << 24);
-				}
+    @Override
+    public void setSelected(StructureSearchEntry entry) {
+        if (entry == null || entry.isEnabled()) {
+            super.setSelected(entry);
+        }
+    }
 
-				int j2 = getRowLeft();
-				e.render(context, j, k, j2, k1, j1, mouseX, mouseY, isMouseOver((double) mouseX, (double) mouseY) && Objects .equals(getEntryAtPosition((double) mouseX, (double) mouseY), e), partialTicks);
-			}
-		}
-
-		if (getMaxScroll() > 0) {
-			int left = getScrollbarPositionX();
-			int right = left + 6;
-			int height = (int) ((float) ((bottom - top) * (bottom - top)) / (float) getMaxPosition());
-			height = MathHelper.clamp(height, 32, bottom - top - 8);
-			int scrollbarTop = (int) getScrollAmount() * (bottom - top - height) / getMaxScroll() + top;
-			if (scrollbarTop < top) {
-				scrollbarTop = top;
-			}
-			
-			context.fill(left, scrollbarTop, right, bottom, (int) (2.35F * 255.0F) / 2 << 24);
-			context.fill(left, scrollbarTop, right, scrollbarTop + height, (int) (1.9F * 255.0F) / 2 << 24);
-		}
-	}
-
-	protected int getRowBottom(int index) {
-		return getRowTop(index) + itemHeight;
-	}
-
-	public void refreshList() {
+    public void refreshList(Identifier structureIdToSelect) {
 		clearEntries();
 		for (Identifier id : parentScreen.sortStructures()) {
-			addEntry(new StructureSearchEntry(this, id));
+			StructureSearchEntry entry = new StructureSearchEntry(this, id, player);
+			addEntry(entry);
+			if (id.equals(structureIdToSelect)) {
+				setSelected(entry);
+			}
 		}
-		selectStructure(null);
 		setScrollAmount(0);
 	}
 
-	public void selectStructure(StructureSearchEntry entry) {
-		setSelected(entry);
-		parentScreen.selectStructure(entry);
+	public void refreshList(boolean maintainSelection) {
+		Identifier select = maintainSelection && hasSelection() ? getSelectedOrNull().getStructureID() : null;
+		refreshList(select);
+	}
+
+	public void refreshList() {
+		refreshList(null);
 	}
 
 	public boolean hasSelection() {

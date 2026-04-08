@@ -2,13 +2,12 @@ package com.chaosthedude.explorerscompass.workers;
 
 import java.util.List;
 
-import com.chaosthedude.explorerscompass.ExplorersCompass;
-import com.chaosthedude.explorerscompass.config.ExplorersCompassConfig;
 import com.mojang.datafixers.util.Pair;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.ChunkSectionPos;
@@ -24,8 +23,8 @@ public class RandomSpreadSearchWorker extends StructureSearchWorker<RandomSpread
 	private int x;
 	private int z;
 
-	public RandomSpreadSearchWorker(ServerWorld level, PlayerEntity player, ItemStack stack, BlockPos startPos, RandomSpreadStructurePlacement placement, List<Structure> structureSet, String managerId) {
-		super(level, player, stack, startPos, placement, structureSet, managerId);
+	public RandomSpreadSearchWorker(ServerWorld level, PlayerEntity player, ItemStack stack, BlockPos startPos, List<BlockPos> prevPos, RandomSpreadStructurePlacement placement, List<Structure> structureSet, Identifier structureOrGroupId, boolean isGroup, String managerId) {
+		super(level, player, stack, startPos, prevPos, placement, structureSet, structureOrGroupId, isGroup, managerId);
 
 		spacing = placement.getSpacing();
 		startSectionPosX = ChunkSectionPos.getSectionCoord(startPos.getX());
@@ -52,24 +51,27 @@ public class RandomSpreadSearchWorker extends StructureSearchWorker<RandomSpread
 			if (shouldSampleX || shouldSampleZ) {
 				int sampleX = startSectionPosX + (spacing * x);
 				int sampleZ = startSectionPosZ + (spacing * z);
-				
+
 				ChunkPos chunkPos = placement.getStartChunk(level.getSeed(), sampleX, sampleZ);
 				currentPos = new BlockPos(ChunkSectionPos.getOffsetPos(chunkPos.x, 8), 0, ChunkSectionPos.getOffsetPos(chunkPos.z, 8));
-				
+
 				Pair<BlockPos, Structure> pair = getStructureGeneratingAt(chunkPos);
 				samples++;
-				if (pair != null) {
+				if (pair != null && !shouldIgnore(pair.getFirst())) {
+					prevPos.add(pair.getFirst());
 					succeed(pair.getFirst(), pair.getSecond());
 				}
 			}
 
 			z++;
 			if (z > length) {
-				z = -length;
 				x++;
 				if (x > length) {
-					x = -length;
 					length++;
+					x = -length;
+					z = -length;
+				} else {
+					z = -length;
 				}
 			}
 		} else {
@@ -81,19 +83,19 @@ public class RandomSpreadSearchWorker extends StructureSearchWorker<RandomSpread
 		if (hasWork()) {
 			return true;
 		}
-		
+
 		if (!finished) {
 			fail();
 		}
-		
+
 		return false;
 	}
-	
+
 	@Override
 	protected String getName() {
 		return "RandomSpreadSearchWorker";
 	}
-	
+
 	@Override
 	public boolean shouldLogRadius() {
 		return true;
