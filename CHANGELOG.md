@@ -1,11 +1,197 @@
-## Version 1.3.3
+## Version 3.4.0
+#### NeoForge 1.21.1
+- Backported config option to add durability to the compass and a recipe to repair a broken compass
+- Backported feature to search for the next instance of an already located structure
+- Backported config options to make the compass consume XP levels when searching for a structure
+- Backported fix for structures with c:hidden_from_locator_selection tag not being hidden
+- Backported fix for issue with certain structure types where instances west of the search starting position would be missed
+- Backported improvements to structure selection GUI
+- Backported Turkish translations
+- Backported Ukranian translations
+
+## Version 2.6.0
+#### Fabric 1.21.1, 1.20.1
+- Backported config option to add durability to the compass and a recipe to repair a broken compass
+- Backported feature to search for the next instance of an already located structure
+- Backported config options to make the compass consume XP levels when searching for a structure
+- Backported fix for structures with c:hidden_from_locator_selection tag not being hidden
+- Backported fix for issue with certain structure types where instances west of the search starting position would be missed
+- Backported improvements to structure selection GUI
+- Backported Turkish translations
+- Backported Ukranian translations
+- Backported French translations
+- Backported Portuguese translations
+- Backported simplified Chinese translations
+
+## Version 1.4.0
 #### Forge 1.20.1
+- Backported config option to add durability to the compass and a recipe to repair a broken compass
+- Backported feature to search for the next instance of an already located structure
+- Backported config options to make the compass consume XP levels when searching for a structure
+- Backported fix for compass HUD info being rendered twice when certain mods are installed
+- Backported fix for issue with certain structure types where instances west of the search starting position would be missed
+- Backported improvements to structure selection GUI
+- Backported Turkish translations
+- Backported Ukranian translations
+- Backported French translations
+- Backported Portuguese translations
+- Backported simplified Chinese translations
+
+## Version 3.3.0
+#### NeoForge 26.1, 1.21.11
+- Updated to NeoForge 26.1
+- Added config option to add durability to the compass and a recipe to repair a broken compass
+- Fixed compass HUD info not rendering when any debug elements are set to always-on
+- Fixed structures with c:hidden_from_locator_selection tag not being hidden
+- Added Ukranian translations
+- Added Turkish translations
+
+## Version 2.5.0
+#### Fabric 26.1, 1.21.11
+- Updated to Fabric 26.1
+- Added config option to add durability to the compass and a recipe to repair a broken compass
+- Fixed compass HUD info not rendering when any debug elements are set to always-on
+- Fixed structures with c:hidden_from_locator_selection tag not being hidden
+- Added Ukranian translations
+- Added Turkish translations
+
+## Version 3.2.0
+#### NeoForge 1.21.11
+- Added feature to search for the next instance of an already located structure
+- Fixed an issue with certain structure types where instances west of the search starting position would be missed
+- More minor improvements to structure selection GUI
+
+## Version 2.4.0
+#### Fabric 1.21.11
+- Added feature to search for the next instance of an already located structure
+- Fixed an issue with certain structure types where instances west of the search starting position would be missed
+- More minor improvements to structure selection GUI
+
+## Version 3.1.0
+#### NeoForge 1.21.11
+- Added config options to make the compass consume XP levels when searching for a structure
+- Minor improvements to structure selection GUI
+
+## Version 2.3.0
+#### Fabric 1.21.11
+- Added config options to make the compass consume XP levels when searching for a structure
+- Minor improvements to structure selection GUI
+
+## Version 3.0.5
+#### NeoForge 1.21.11, 1.21.10, 1.21.8, 1.21.7, 1.21.6
+- Updated to NeoForge 1.21.11
+- Updated to NeoForge 1.21.10
+- Updated to NeoForge 1.21.8
+- Updated to NeoForge 1.21.7
+- Updated to NeoForge 1.21.6
+- Fixed compass recipe not unlocking when an ingredient is picked up
+
+## Version 2.2.7
+#### Fabric 1.21.11, 1.21.10, 1.21.8, 1.21.7, 1.21.6
+- Updated to Fabric 1.21.11
+- Updated to Fabric 1.21.10
+- Updated to Fabric 1.21.8
+- Updated to Fabric 1.21.7
+- Updated to Fabric 1.21.6
+- Fixed compass recipe not unlocking when an ingredient is picked up
+
+## Version 3.0.4
+#### NeoForge 1.21.5, 1.21.4, 1.21.3
+- Updated to NeoForge 1.21.5
+- Updated to NeoForge 1.21.4
+- Updated to NeoForge 1.21.3
+- Added French translations
+- Fixed compass also performing offhand item action after opening GUI
+
+## Version 2.2.6
+#### Fabric 1.21.5, 1.21.4, 1.21.3
+- Updated to Fabric 1.21.5
+- Updated to Fabric 1.21.4
+- Updated to Fabric 1.21.3
+- Added French translations
+- Fixed compass also performing offhand item action after opening GUI
+
+## Version 1.3.9
+#### Forge 1.21.5, 1.21.4, 1.21.3
+- Updated to Forge 1.21.5
+- Updated to Forge 1.21.4
+- Updated to Forge 1.21.3
+- Added French translations
+- Fixed compass also performing offhand item action after opening GUI
+
+## Version 3.0.3
+#### NeoForge 1.21.1
+- Fixed uncraftable Explorer's Compass recipe
+
+## Version 3.0.2
+#### NeoForge 1.21.1, 1.21
+- Updated to NeoForge 1.21.1
+- Fixed uncraftable Explorer's Compass recipe
+
+## Version 2.2.5
+#### Fabric 1.21.1, 1.21
+- Updated to Fabric 1.21.1
+- Fixed uncraftable Explorer's Compass recipe
+
+## Version 1.3.8
+#### Forge 1.21.1, 1.21
+- Updated to Forge 1.21.1
+- Fixed uncraftable Explorer's Compass recipe
+
+## Version 3.0.1
+#### NeoForge 1.21, 1.20.6, 1.20.5
+- Updated to NeoForge 1.21
+- Updated to NeoForge 1.20.6
+- Updated to NeoForge 1.20.5
+- Hid structures with the c:hidden_from_locator_selection from appearing in the compass GUI
+
+## Version 2.2.4
+#### Fabric 1.21, 1.20.6, 1.20.5
+- Updated to Fabric 1.21
+- Updated to Fabric 1.20.6
+- Updated to Fabric 1.20.5
+- Hid structures with the c:hidden_from_locator_selection from appearing in the compass GUI
+
+## Version 1.3.7
+#### Forge 1.21, 1.20.6
+- Updated to Forge 1.21
+- Updated to Forge 1.20.6
+- Hid structures with the c:hidden_from_locator_selection from appearing in the compass GUI
+
+## Version 3.0.0
+#### Forge 1.20.4, 1.20.2
+- Updated to NeoForge 1.20.4
+- Updated to NeoForge 1.20.2
+
+## Version 1.3.6
+#### Forge 1.20.4, 1.20.2
+- Fixed compass HUD info being rendered twice when certain mods are installed
+
+## Version 1.3.5
+#### Forge 1.20.4, 1.20.2
+- Fixed clients not being allowed to connect to servers that did not have Explorer's Compass installed
+- Added Portuguese translations
+- Added simplified Chinese translations
+
+## Version 1.3.4
+#### Forge 1.20.4, 1.20.3, 1.20.2
+- Updated to Forge 1.20.4
+- Updated to Forge 1.20.3
+- Fixed clients not being allowed to connect to servers that did not have Explorer's Compass installed
+- Fixed some Russian translations
+
+## Version 1.3.3
+#### Forge 1.20.2, 1.20.1
+- Updated to Forge 1.20.2
 - Added the compass to the minecraft:compasses tag
 - Fixed compass spinning when player's yaw goes from positive to negative or vice versa
 - Fixed a server hang and eventual crash that occurred when using the compass to teleport to coordinates with no blocks to stand on
 
 ## Version 2.2.3
-#### Fabric 1.20.1
+#### Fabric 1.20.4, 1.20.3, 1.20.2, 1.20.1
+- Updated to Fabric 1.20.4
+- Updated to Fabric 1.20.3
+- Updated to Fabric 1.20.2
 - Added the compass to the minecraft:compasses tag
 - Fixed compass spinning when player's yaw goes from positive to negative or vice versa
 - Fixed a server hang and eventual crash that occurred when using the compass to teleport to coordinates with no blocks to stand on

@@ -31,21 +31,12 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureSet;
 import net.minecraft.world.level.levelgen.structure.StructureSet.StructureSelectionEntry;
-import net.minecraft.world.level.levelgen.structure.StructureType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModList;
 
 public class StructureUtils {
-
-	public static ListMultimap<ResourceLocation, ResourceLocation> getTypeKeysToStructureKeys(ServerLevel level) {
-		ListMultimap<ResourceLocation, ResourceLocation> typeKeysToStructureKeys = ArrayListMultimap.create();
-		for (Structure structure : getStructureRegistry(level)) {
-			typeKeysToStructureKeys.put(getTypeForStructure(level, structure), getKeyForStructure(level, structure));
-		}
-		return typeKeysToStructureKeys;
-	}
 
 	public static Map<ResourceLocation, ResourceLocation> getStructureKeysToTypeKeys(ServerLevel level) {
 		Map<ResourceLocation, ResourceLocation> structureKeysToStructureKeys = new HashMap<ResourceLocation, ResourceLocation>();
@@ -65,6 +56,21 @@ public class StructureUtils {
 			}
 		}
 		return new ResourceLocation(ExplorersCompass.MODID, "none");
+	}
+
+	public static List<ResourceLocation> getStructuresForGroup(ServerLevel level, ResourceLocation groupKey) {
+		List<ResourceLocation> structureKeys = new ArrayList<ResourceLocation>();
+		Registry<StructureSet> registry = getStructureSetRegistry(level);
+		StructureSet set = registry.get(groupKey);
+		if (set != null) {
+			for (StructureSelectionEntry entry : set.structures()) {
+				ResourceLocation structureKey = getKeyForStructure(level, entry.structure().get());
+				if (structureKey != null) {
+					structureKeys.add(structureKey);
+				}
+			}
+		}
+		return structureKeys;
 	}
 
 	public static ResourceLocation getKeyForStructure(ServerLevel level, Structure structure) {
@@ -112,10 +118,6 @@ public class StructureUtils {
 				dimensions.add(level.dimension().location());
 			}
 		}
-		// Fix empty dimensions for stronghold
-		if (structure == StructureType.STRONGHOLD && dimensions.isEmpty()) {
-			dimensions.add(new ResourceLocation("minecraft:overworld"));
-		}
 		return dimensions;
 	}
 
@@ -128,6 +130,49 @@ public class StructureUtils {
 		return dimensionsForAllowedStructures;
 	}
 
+	public static int getXpLevelsForStructure(ServerLevel serverLevel, ResourceLocation structureKey) {
+		int xpLevels = ConfigHandler.GENERAL.defaultXpLevels.get();
+		final Map<String, Integer> xpLevelOverrides = parseXpLevelOverridesConfig();
+		for (String structureRegex : xpLevelOverrides.keySet()) {
+			if (structureKey.toString().matches(convertToRegex(structureRegex))) {
+				xpLevels = xpLevelOverrides.get(structureRegex);
+				if (xpLevels > 3) {
+					xpLevels = 3;
+				}
+				break;
+			}
+		}
+		return xpLevels;
+	}
+
+	public static Map<String, Integer> parseXpLevelOverridesConfig() {
+		final List<String> xpLevelOverrides = ConfigHandler.GENERAL.perStructureXpLevels.get();
+		Map<String, Integer> parsedOverrides = new HashMap<String, Integer>();
+		for (String override : xpLevelOverrides) {
+			String[] split = override.split(",");
+			if (split.length != 2) {
+				continue;
+			}
+			String structureRegex = split[0];
+			String xpLevelsStr = split[1];
+			try {
+				int xpLevels = Integer.valueOf(xpLevelsStr);
+				parsedOverrides.put(structureRegex, xpLevels);
+			} catch (NumberFormatException e) {
+				continue;
+			}
+		}
+		return parsedOverrides;
+	}
+
+	public static Map<ResourceLocation, Integer> getXpLevelsForAllowedStructures(ServerLevel serverLevel) {
+		final Map<ResourceLocation, Integer> xpLevels = new HashMap<ResourceLocation, Integer>();
+		for (ResourceLocation structureKey : getAllowedStructureKeys(serverLevel)) {
+			xpLevels.put(structureKey, getXpLevelsForStructure(serverLevel, structureKey));
+		}
+		return xpLevels;
+	}
+
 	public static int getHorizontalDistanceToLocation(Player player, int x, int z) {
 		return getHorizontalDistanceToLocation(player.blockPosition(), x, z);
 	}
@@ -138,6 +183,9 @@ public class StructureUtils {
 
 	@OnlyIn(Dist.CLIENT)
 	public static String getPrettyStructureName(ResourceLocation key) {
+		if (key == null) {
+			return "";
+		}
 		String name = key.toString();
 		if (ConfigHandler.CLIENT.translateStructureNames.get()) {
 			name = I18n.get(Util.makeDescriptionId("structure", key));
