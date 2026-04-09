@@ -1,3 +1,46 @@
+## Version 2.5.1
+#### Fabric 26.1, 1.21.11
+- Fixed crash that occurred when opening the compass GUI
+
+## Version 3.4.0
+#### NeoForge 1.21.1
+- Backported config option to add durability to the compass and a recipe to repair a broken compass
+- Backported feature to search for the next instance of an already located structure
+- Backported config options to make the compass consume XP levels when searching for a structure
+- Backported fix for structures with c:hidden_from_locator_selection tag not being hidden
+- Backported fix for issue with certain structure types where instances west of the search starting position would be missed
+- Backported improvements to structure selection GUI
+- Backported Turkish translations
+- Backported Ukranian translations
+
+## Version 2.6.0
+#### Fabric 1.21.1, 1.20.1
+- Backported config option to add durability to the compass and a recipe to repair a broken compass
+- Backported feature to search for the next instance of an already located structure
+- Backported config options to make the compass consume XP levels when searching for a structure
+- Backported fix for structures with c:hidden_from_locator_selection tag not being hidden
+- Backported fix for issue with certain structure types where instances west of the search starting position would be missed
+- Backported improvements to structure selection GUI
+- Backported Turkish translations
+- Backported Ukranian translations
+- Backported French translations
+- Backported Portuguese translations
+- Backported simplified Chinese translations
+
+## Version 1.4.0
+#### Forge 1.20.1
+- Backported config option to add durability to the compass and a recipe to repair a broken compass
+- Backported feature to search for the next instance of an already located structure
+- Backported config options to make the compass consume XP levels when searching for a structure
+- Backported fix for compass HUD info being rendered twice when certain mods are installed
+- Backported fix for issue with certain structure types where instances west of the search starting position would be missed
+- Backported improvements to structure selection GUI
+- Backported Turkish translations
+- Backported Ukranian translations
+- Backported French translations
+- Backported Portuguese translations
+- Backported simplified Chinese translations
+
 ## Version 3.3.0
 #### NeoForge 26.1, 1.21.11
 - Updated to NeoForge 26.1
@@ -39,7 +82,8 @@
 - Minor improvements to structure selection GUI
 
 ## Version 3.0.5
-#### NeoForge 1.21.10, 1.21.8, 1.21.7, 1.21.6
+#### NeoForge 1.21.11, 1.21.10, 1.21.8, 1.21.7, 1.21.6
+- Updated to NeoForge 1.21.11
 - Updated to NeoForge 1.21.10
 - Updated to NeoForge 1.21.8
 - Updated to NeoForge 1.21.7
@@ -47,7 +91,8 @@
 - Fixed compass recipe not unlocking when an ingredient is picked up
 
 ## Version 2.2.7
-#### Fabric 1.21.10, 1.21.8, 1.21.7, 1.21.6
+#### Fabric 1.21.11, 1.21.10, 1.21.8, 1.21.7, 1.21.6
+- Updated to Fabric 1.21.11
 - Updated to Fabric 1.21.10
 - Updated to Fabric 1.21.8
 - Updated to Fabric 1.21.7
