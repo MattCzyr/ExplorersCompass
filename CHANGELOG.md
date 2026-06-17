@@ -1,5 +1,6 @@
 ## Version 2.5.1
-#### Fabric 26.1, 1.21.11
+#### Fabric 26.2, 26.1, 1.21.11
+- Updated to Fabric 26.2
 - Fixed crash that occurred when opening the compass GUI
 
 ## Version 3.4.0
@@ -42,7 +43,8 @@
 - Backported simplified Chinese translations
 
 ## Version 3.3.0
-#### NeoForge 26.1, 1.21.11
+#### NeoForge 26.2, 26.1, 1.21.11
+- Updated to NeoForge 26.2
 - Updated to NeoForge 26.1
 - Added config option to add durability to the compass and a recipe to repair a broken compass
 - Fixed compass HUD info not rendering when any debug elements are set to always-on
