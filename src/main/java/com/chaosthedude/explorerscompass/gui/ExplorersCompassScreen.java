@@ -127,23 +127,23 @@ public class ExplorersCompassScreen extends Screen {
 
 	public void searchForStructure(Identifier structureID) {
 		ClientPlayNetworking.send(new SearchPacket(structureID, false));
-		minecraft.setScreen(null);
+		minecraft.gui.setScreen(null);
 	}
 	
 	public void searchForGroup(Identifier groupId) {
 		ClientPlayNetworking.send(new SearchPacket(groupId, true));
-		minecraft.setScreen(null);
+		minecraft.gui.setScreen(null);
 	}
 
 	public void searchForNext() {
 		minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
 		ClientPlayNetworking.send(new SearchForNextPacket());
-		minecraft.setScreen(null);
+		minecraft.gui.setScreen(null);
 	}
 
 	public void teleport() {
 		ClientPlayNetworking.send(new TeleportPacket());
-		minecraft.setScreen(null);
+		minecraft.gui.setScreen(null);
 	}
 
 	public void processSearchTerm() {
@@ -206,7 +206,7 @@ public class ExplorersCompassScreen extends Screen {
 		teleportButton.active = false;
 		
 		cancelButton = addRenderableWidget(new TransparentButton(10, height - 30, 110, 20, Component.translatable("gui.cancel"), (onPress) -> {
-			minecraft.setScreen(null);
+			minecraft.gui.setScreen(null);
 		}));
 		
 		searchBox = addRenderableWidget(new TransparentEditBox(font, 130, 10, 140, 20, Component.translatable("string.explorerscompass.search").withColor(0xff808080)));
