@@ -103,6 +103,14 @@ public class ExplorersCompassItem extends Item {
         return Mth.hsvToRgb(Math.max(0.0F, (1.0F - f) / 3.0F), 1.0F, 1.0F);
     }
 
+	@Override
+	public boolean allowComponentsUpdateAnimation(Player player, InteractionHand hand, ItemStack oldStack, ItemStack newStack) {
+		if (getCompassState(oldStack) == getCompassState(newStack)) {
+			return false;
+		}
+		return super.allowComponentsUpdateAnimation(player, hand, oldStack, newStack);
+	}
+
 	public void searchForStructure(ServerLevel level, Player player, BlockPos pos, Identifier structureOrGroupId, boolean isGroup, ItemStack stack) {
         if (!isBroken(stack)) {
             search(stack, structureOrGroupId, isGroup);

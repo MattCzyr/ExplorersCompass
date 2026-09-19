@@ -94,7 +94,7 @@ public abstract class StructureSearchWorker<T extends StructurePlacement> implem
 				}
 
 				ChunkAccess chunkAccess = level.getChunk(chunkPos.x(), chunkPos.z(), ChunkStatus.STRUCTURE_STARTS);
-				StructureStart structureStart = level.structureManager().getStartForStructure(SectionPos.bottomOf(chunkAccess), structure, chunkAccess);
+				StructureStart structureStart = level.structureManager().getStartForStructure(structure, chunkAccess);
 				if (structureStart != null && structureStart.isValid()) {
 					return Pair.of(placement.getLocatePos(structureStart.getChunkPos()), structure);
 				}

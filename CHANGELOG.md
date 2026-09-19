@@ -1,3 +1,15 @@
+## Version 3.3.1
+#### NeoForge 26.3
+- Updated to NeoForge 26.3
+- Added Korean translations
+- Updated Japanese translations
+
+## Version 2.5.2
+#### Fabric 26.3
+- Updated to Fabric 26.3
+- Added Korean translations
+- Updated Japanese translations
+
 ## Version 2.5.1
 #### Fabric 26.2, 26.1, 1.21.11
 - Updated to Fabric 26.2
