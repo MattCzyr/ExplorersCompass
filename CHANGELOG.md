@@ -1,3 +1,7 @@
+## Version 3.3.2
+#### NeoForge 26.3
+- Fixed crash on startup with NeoForge 26.3.0.37-beta and later
+
 ## Version 3.3.1
 #### NeoForge 26.3
 - Updated to NeoForge 26.3
